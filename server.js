@@ -69,6 +69,19 @@ app.get(['/api/health', '/health'], async (req, res) => {
   });
 });
 
+// Health check & Migration triggers
+app.all(['/api/migrate', '/api/v1/migrate'], async (req, res) => {
+  try {
+    console.log('⚡ Manual migration requested via /api/migrate');
+    await migrateUp(false);
+    await seed(false);
+    res.json({ success: true, message: 'Migrations and demo seed completed successfully.' });
+  } catch (err) {
+    console.error('Migration endpoint error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // API Routes
 app.use('/api/v1', apiRoutes);
 app.use('/api', apiRoutes); // Alias for convenience

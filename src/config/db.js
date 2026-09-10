@@ -60,6 +60,16 @@ const query = async (text, params = []) => {
       pgAvailable = false;
       return mockDbStore.execute(text, params);
     }
+    // If table does not exist yet (code 42P01), serve from mockDbStore while auto-migrating
+    if (err.code === '42P01' || err.message?.includes('does not exist')) {
+      console.warn(`⚠️ Table missing in PostgreSQL (${err.message}). Serving from resilient store and triggering auto-migration...`);
+      try {
+        const { migrateUp } = require('../migrations/run_migrations');
+        const { seed } = require('../migrations/seed');
+        migrateUp(false).then(() => seed(false)).catch(mErr => console.warn('Background migration note:', mErr.message));
+      } catch (e) {}
+      return mockDbStore.execute(text, params);
+    }
     throw err;
   }
 };

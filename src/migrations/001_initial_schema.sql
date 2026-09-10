@@ -1,13 +1,21 @@
 -- 001_initial_schema.sql
 -- Create extensions, types, tables, indexes, triggers
 
--- Extensions
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-
--- Attempt to enable PostGIS if available on the system
+-- Extensions (safe execution with error suppression)
 DO $$
 BEGIN
+  BEGIN
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+  EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'uuid-ossp extension skipped or not permitted: %', SQLERRM;
+  END;
+
+  BEGIN
+    CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+  EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'pgcrypto extension skipped or not permitted: %', SQLERRM;
+  END;
+
   IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'postgis') THEN
     BEGIN
       CREATE EXTENSION postgis;
@@ -16,6 +24,8 @@ BEGIN
         RAISE NOTICE 'PostGIS extension not available in PostgreSQL installation. Spatial features will fall back to lat/lng columns.';
       WHEN insufficient_privilege THEN
         RAISE NOTICE 'Insufficient privileges to create PostGIS extension. Proceeding with spatial fallback.';
+      WHEN OTHERS THEN
+        RAISE NOTICE 'PostGIS creation skipped: %', SQLERRM;
     END;
   END IF;
 END $$;
