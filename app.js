@@ -307,9 +307,12 @@ window.App = {
   _listingRowHTML(listing) {
     const gradeColor = { A: 'chip-success', B: 'chip-warning', C: 'chip-error' }[listing.grade] || 'chip-surface';
     const statusColor = listing.status === 'active' ? 'var(--primary)' : listing.status === 'sold' ? 'var(--grade-b-text)' : 'var(--error)';
+    const photo = listing.photoUrl || (window.cropPhotos && window.cropPhotos[listing.crop]) || 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=200&auto=format&fit=crop&q=80';
     return `
     <div class="card card-body" style="display:flex;gap:12px;align-items:flex-start;cursor:pointer;" onclick="App.viewProduct('${listing.id}')">
-      <div style="width:52px;height:52px;border-radius:12px;background:var(--surface-container);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;">${listing.emoji}</div>
+      <div style="width:58px;height:58px;border-radius:12px;overflow:hidden;background:var(--surface-container);flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,0.08);">
+        <img src="${photo}" alt="${listing.crop}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=200&auto=format&fit=crop&q=80'" />
+      </div>
       <div style="flex:1;min-width:0;">
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <span class="text-label-lg text-on-surface">${listing.cropHi} / ${listing.crop}</span>
@@ -813,6 +816,8 @@ window.App = {
       // AI recommendation
       const ai = await AIService.getPriceRecommendation(listing.crop, listing.grade, listing.quantity, listing.location);
 
+      const photo = listing.photoUrl || (window.cropPhotos && window.cropPhotos[listing.crop]) || 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=600&auto=format&fit=crop&q=80';
+
       content.innerHTML = `
       <header class="app-bar" style="position:sticky;">
         <button onclick="App.goBack()" class="app-bar-icon"><span class="material-symbols-outlined">arrow_back</span></button>
@@ -820,8 +825,10 @@ window.App = {
       </header>
       
       <!-- Hero -->
-      <div style="background:linear-gradient(135deg,${gradeColor},#fff);border-bottom:1px solid ${gradeBorder}40;padding:32px 16px;text-align:center;">
-        <div style="font-size:80px;margin-bottom:8px;">${listing.emoji}</div>
+      <div style="background:linear-gradient(135deg,${gradeColor},#fff);border-bottom:1px solid ${gradeBorder}40;padding:24px 16px;text-align:center;">
+        <div style="width:100%;max-width:360px;height:200px;border-radius:18px;overflow:hidden;margin:0 auto 12px;box-shadow:0 8px 24px rgba(0,0,0,0.12);">
+          <img src="${photo}" alt="${listing.crop}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=600&auto=format&fit=crop&q=80'" />
+        </div>
         <h2 style="font-size:24px;font-weight:800;color:var(--on-surface);">${listing.cropHi}</h2>
         <p style="font-size:15px;color:var(--on-surface-variant);">${listing.variety} · ${listing.crop}</p>
         <div style="display:flex;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap;">

@@ -20,7 +20,7 @@ async function getAppliedMigrations(client) {
   return res.rows.map(r => r.name);
 }
 
-async function migrateUp() {
+async function migrateUp(closePool = true) {
   const client = await pool.connect();
   try {
     console.log('🚀 Checking PostgreSQL connection...');
@@ -61,7 +61,9 @@ async function migrateUp() {
     console.log('🎉 All migrations completed successfully.');
   } finally {
     client.release();
-    await pool.end();
+    if (closePool) {
+      await pool.end();
+    }
   }
 }
 
@@ -123,28 +125,36 @@ async function migrateStatus() {
   }
 }
 
-const command = process.argv[2] || 'up';
+if (require.main === module) {
+  const command = process.argv[2] || 'up';
 
-switch (command) {
-  case 'up':
-    migrateUp().catch(err => {
-      console.error('Fatal migration error:', err);
+  switch (command) {
+    case 'up':
+      migrateUp(true).catch(err => {
+        console.error('Fatal migration error:', err);
+        process.exit(1);
+      });
+      break;
+    case 'down':
+      migrateDown().catch(err => {
+        console.error('Fatal rollback error:', err);
+        process.exit(1);
+      });
+      break;
+    case 'status':
+      migrateStatus().catch(err => {
+        console.error('Fatal status error:', err);
+        process.exit(1);
+      });
+      break;
+    default:
+      console.error(`Unknown command "${command}". Available commands: up, down, status.`);
       process.exit(1);
-    });
-    break;
-  case 'down':
-    migrateDown().catch(err => {
-      console.error('Fatal rollback error:', err);
-      process.exit(1);
-    });
-    break;
-  case 'status':
-    migrateStatus().catch(err => {
-      console.error('Fatal status error:', err);
-      process.exit(1);
-    });
-    break;
-  default:
-    console.error(`Unknown command "${command}". Available commands: up, down, status.`);
-    process.exit(1);
+  }
 }
+
+module.exports = {
+  migrateUp,
+  migrateDown,
+  migrateStatus,
+};

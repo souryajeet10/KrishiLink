@@ -5,11 +5,34 @@ const cors = require('cors');
 const morgan = require('morgan');
 
 const { pool, checkConnection } = require('./src/config/db');
+const { migrateUp } = require('./src/migrations/run_migrations');
+const { seed } = require('./src/migrations/seed');
 const apiRoutes = require('./src/routes/index');
 const { notFoundHandler, errorHandler } = require('./src/middlewares/errorHandler');
 
 const app = express();
 const PORT = process.env.PORT || 5173;
+
+async function autoMigrateDatabase() {
+  try {
+    const dbStatus = await checkConnection();
+    if (dbStatus.connected && !dbStatus.mode?.includes('Mock')) {
+      console.log('🔄 Ensuring PostgreSQL tables & migrations are applied...');
+      await migrateUp(false);
+      try {
+        const res = await pool.query('SELECT COUNT(*) FROM produce_listings;');
+        if (parseInt(res.rows[0].count, 10) === 0) {
+          console.log('🌱 Populating demo listings, farmer & buyer profiles...');
+          await seed(false);
+        }
+      } catch (seedCheckErr) {
+        console.warn('ℹ️ Seeding check notice:', seedCheckErr.message);
+      }
+    }
+  } catch (err) {
+    console.warn('ℹ️ Auto-migration notice:', err.message);
+  }
+}
 
 // Middleware
 app.use(cors());
@@ -76,6 +99,8 @@ if (require.main === module) {
     console.log(`  ➜ App:         http://localhost:${PORT}/app.html`);
     console.log(`  ➜ API Health:  http://localhost:${PORT}/api/health`);
     console.log(`  ➜ API Base:    http://localhost:${PORT}/api/v1/\n`);
+
+    autoMigrateDatabase();
   });
 }
 

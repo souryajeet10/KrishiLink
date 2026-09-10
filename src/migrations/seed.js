@@ -1,6 +1,6 @@
 const { pool } = require('../config/db');
 
-async function seed() {
+async function seed(closePool = true) {
   const client = await pool.connect();
   try {
     console.log('🌱 Starting database seeding...');
@@ -51,12 +51,12 @@ async function seed() {
     await client.query(`
       INSERT INTO produce_listings (id, farmer_id, crop, crop_hi, emoji, variety, quantity, unit, grade, asking_price, market_ref_price, ai_suggested_price, description, location_address, latitude, longitude, images, status)
       VALUES
-        ('aaaaaaaa-0001-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', 'Tomato', 'टमाटर', '🍅', 'Hybrid Red', 500, 'kg', 'A', 2400, 2250, 2350, 'Fresh hybrid tomatoes, Grade A quality, harvested 2 days ago. Suitable for export and local markets.', 'Chiloda, Gandhinagar, Gujarat', 23.2156, 72.6369, ARRAY['🍅'], 'active'),
-        ('aaaaaaaa-0002-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111', 'Potato', 'आलू', '🥔', 'Kufri Jyoti', 800, 'kg', 'A', 1200, 1100, 1150, 'High starch content Kufri Jyoti potatoes. Clean, well-graded, minimal damage.', 'Chiloda, Gandhinagar, Gujarat', 23.2156, 72.6369, ARRAY['🥔'], 'active'),
-        ('aaaaaaaa-0003-0000-0000-000000000003', '22222222-2222-2222-2222-222222222222', 'Wheat', 'गेहूं', '🌾', 'HD 3086', 2000, 'kg', 'A', 2150, 2100, 2120, 'Premium quality wheat, properly dried and cleaned. Ready for milling.', 'Sonipat, Haryana', 28.9931, 77.0151, ARRAY['🌾'], 'active'),
-        ('aaaaaaaa-0004-0000-0000-000000000004', '22222222-2222-2222-2222-222222222222', 'Onion', 'प्याज', '🧅', 'Nasik Red', 1200, 'kg', 'B', 1800, 1950, 1900, 'Nasik red onions, medium size, good shelf life. B grade due to slight size variation.', 'Sonipat, Haryana', 28.9931, 77.0151, ARRAY['🧅'], 'active'),
-        ('aaaaaaaa-0005-0000-0000-000000000005', '11111111-1111-1111-1111-111111111111', 'Maize', 'मक्का', '🌽', 'Pioneer 3396', 1500, 'kg', 'A', 1900, 1850, 1880, 'Hybrid maize suitable for poultry feed and starch industry. Moisture < 14%.', 'Chiloda, Gandhinagar, Gujarat', 23.2156, 72.6369, ARRAY['🌽'], 'active'),
-        ('aaaaaaaa-0006-0000-0000-000000000006', '22222222-2222-2222-2222-222222222222', 'Rice', 'चावल', '🌾', 'Basmati 1121', 600, 'kg', 'A', 5500, 5200, 5350, 'Premium Basmati 1121 paddy, long grain variety. Suitable for export quality processing.', 'Sonipat, Haryana', 28.9931, 77.0151, ARRAY['🌾'], 'sold');
+        ('aaaaaaaa-0001-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', 'Tomato', 'टमाटर', '🍅', 'Hybrid Red', 500, 'kg', 'A', 2400, 2250, 2350, 'Fresh hybrid tomatoes, Grade A quality, harvested 2 days ago. Suitable for export and local markets.', 'Chiloda, Gandhinagar, Gujarat', 23.2156, 72.6369, ARRAY['https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600&auto=format&fit=crop&q=80'], 'active'),
+        ('aaaaaaaa-0002-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111', 'Potato', 'आलू', '🥔', 'Kufri Jyoti', 800, 'kg', 'A', 1200, 1100, 1150, 'High starch content Kufri Jyoti potatoes. Clean, well-graded, minimal damage.', 'Chiloda, Gandhinagar, Gujarat', 23.2156, 72.6369, ARRAY['https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=600&auto=format&fit=crop&q=80'], 'active'),
+        ('aaaaaaaa-0003-0000-0000-000000000003', '22222222-2222-2222-2222-222222222222', 'Wheat', 'गेहूं', '🌾', 'HD 3086', 2000, 'kg', 'A', 2150, 2100, 2120, 'Premium quality wheat, properly dried and cleaned. Ready for milling.', 'Sonipat, Haryana', 28.9931, 77.0151, ARRAY['https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&auto=format&fit=crop&q=80'], 'active'),
+        ('aaaaaaaa-0004-0000-0000-000000000004', '22222222-2222-2222-2222-222222222222', 'Onion', 'प्याज', '🧅', 'Nasik Red', 1200, 'kg', 'B', 1800, 1950, 1900, 'Nasik red onions, medium size, good shelf life. B grade due to slight size variation.', 'Sonipat, Haryana', 28.9931, 77.0151, ARRAY['https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=600&auto=format&fit=crop&q=80'], 'active'),
+        ('aaaaaaaa-0005-0000-0000-000000000005', '11111111-1111-1111-1111-111111111111', 'Maize', 'मक्का', '🌽', 'Pioneer 3396', 1500, 'kg', 'A', 1900, 1850, 1880, 'Hybrid maize suitable for poultry feed and starch industry. Moisture < 14%.', 'Chiloda, Gandhinagar, Gujarat', 23.2156, 72.6369, ARRAY['https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=600&auto=format&fit=crop&q=80'], 'active'),
+        ('aaaaaaaa-0006-0000-0000-000000000006', '22222222-2222-2222-2222-222222222222', 'Rice', 'चावल', '🌾', 'Basmati 1121', 600, 'kg', 'A', 5500, 5200, 5350, 'Premium Basmati 1121 paddy, long grain variety. Suitable for export quality processing.', 'Sonipat, Haryana', 28.9931, 77.0151, ARRAY['https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&auto=format&fit=crop&q=80'], 'sold');
     `);
 
     // 7. Insert Offers
@@ -134,12 +134,17 @@ async function seed() {
     console.error('❌ Seeding failed:', err);
     throw err;
   } finally {
-    client.release();
-    await pool.end();
+    if (closePool) {
+      await pool.end();
+    }
   }
 }
 
-seed().catch(err => {
-  console.error('Fatal seed error:', err);
-  process.exit(1);
-});
+if (require.main === module) {
+  seed(true).catch(err => {
+    console.error('Fatal seed error:', err);
+    process.exit(1);
+  });
+}
+
+module.exports = { seed };

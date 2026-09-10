@@ -462,6 +462,7 @@ const ListingService = {
       Garlic: 'https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?w=400&auto=format&fit=crop&q=80',
       Ginger: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400&auto=format&fit=crop&q=80',
     };
+    if (typeof window !== 'undefined') window.cropPhotos = cropPhotos;
 
     const resolvedPhoto = l.photo_url || 
       (Array.isArray(l.images) && l.images[0] && l.images[0].startsWith('http') ? l.images[0] : null) || 
