@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "https://krishilink-backend.onrender.com/api/$1"
+    },
+    {
+      "src": "/(styles\\.css|app\\.js|data\\.js|logo\\.svg|index\\.html)",
+      "dest": "/$1",
+      "headers": {
+        "cache-control": "public, max-age=3600, must-revalidate"
+      }
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/app.html",
+      "headers": {
+        "cache-control": "no-cache, no-store, must-revalidate"
+      }
+    }
+  ]
+}

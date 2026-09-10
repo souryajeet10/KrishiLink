@@ -1,0 +1,38 @@
+{
+  "name": "krishilink",
+  "version": "1.0.0",
+  "description": "KrishiLink – AI Agri-Market Intelligence Platform Backend & App",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "migrate": "node src/migrations/run_migrations.js up",
+    "migrate:down": "node src/migrations/run_migrations.js down",
+    "migrate:status": "node src/migrations/run_migrations.js status",
+    "seed": "node src/migrations/seed.js",
+    "test": "node test_api.js && node test_e2e_flow.js",
+    "test:api": "node test_api.js",
+    "test:e2e": "node test_e2e_flow.js"
+  },
+  "keywords": [
+    "krishilink",
+    "agriculture",
+    "marketplace",
+    "enam",
+    "postgis",
+    "postgresql",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-validator": "^7.2.1",
+    "firebase-admin": "^14.3.0",
+    "ioredis": "^6.0.0",
+    "morgan": "^1.10.0",
+    "pg": "^8.13.3"
+  }
+}

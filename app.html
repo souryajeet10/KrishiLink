@@ -1,0 +1,2251 @@
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>KrishiLink – AI Agri-Market Intelligence Platform</title>
+  <meta name="description"
+    content="KrishiLink – AI-powered agricultural marketplace for Indian farmers. List produce, get AI price recommendations, compare mandi rates, connect with verified buyers." />
+  <meta name="theme-color" content="#166534" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="styles.css?v=2.5" />
+</head>
+
+<body>
+  <div id="app">
+
+    <!-- ====================================================
+       SCREEN 1: SPLASH
+       ==================================================== -->
+    <div id="screen-splash" class="screen active">
+      <div class="splash-bg" style="justify-content:space-between; padding: 48px 32px 48px;">
+        <!-- Language Pill at Top Right -->
+        <div style="z-index:1; width:100%; display:flex; justify-content:flex-end;">
+          <button onclick="App.openLang()"
+            style="background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer;backdrop-filter:blur(8px);">
+            <span class="material-symbols-outlined" style="font-size:18px;">translate</span>
+            <span id="splash-lang-label">हिंदी</span>
+          </button>
+        </div>
+        <div style="z-index:1; width:100%; display:flex; flex-direction:column; align-items:center; gap:24px;">
+          <!-- KrishiLink Logo from Stitch Project 5909760347431272316 -->
+          <div
+            style="background:rgba(255,255,255,0.12);border-radius:20px;padding:16px 24px;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" fill="none" style="width:200px;height:48px;">
+              <rect width="40" height="40" y="4" rx="10" fill="#15803D" />
+              <path d="M14 28C14 20 20 14 26 14C26 22 20 28 14 28Z" fill="#86EFAC" />
+              <path d="M26 14C26 22 22 30 14 34" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+              <circle cx="28" cy="16" r="3" fill="#FACC15" />
+              <path d="M20 28L28 36" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+              <text x="50" y="30" font-family="Plus Jakarta Sans, sans-serif" font-size="22" font-weight="800"
+                fill="#FFFFFF" letter-spacing="-0.5">Krishi<tspan fill="#86EFAC">Link</tspan></text>
+              <text x="51" y="41" font-family="Plus Jakarta Sans, sans-serif" font-size="8.5" font-weight="600"
+                fill="rgba(255,255,255,0.7)" letter-spacing="1.2">AI AGRI-MARKET</text>
+            </svg>
+          </div>
+          <div style="text-align:center;">
+            <h1 style="font-size:24px;font-weight:800;color:#FFFFFF;margin-top:6px;letter-spacing:1.5px;text-transform:uppercase;">KRISHILINK</h1>
+            <p style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.85);margin-top:4px;letter-spacing:0.3px;">AI Agri-Market Intelligence Platform</p>
+            <p style="font-size:12.5px;color:rgba(255,255,255,0.65);margin-top:4px;">Empowering Indian Farmers with AI & Market Intelligence</p>
+          </div>
+          <!-- Feature pills -->
+          <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:8px;">
+            <span
+              style="background:rgba(255,255,255,0.18);color:#fff;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;">🤖
+              Krishi AI सलाह</span>
+            <span
+              style="background:rgba(255,255,255,0.18);color:#fff;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;">🏛️
+              AGMARKNET Live Rates</span>
+            <span
+              style="background:rgba(255,255,255,0.18);color:#fff;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;">🤝
+              Verified Buyers</span>
+          </div>
+        </div>
+        <div class="splash-buttons-wrap" style="z-index:1;width:100%;max-width:400px;margin:40px auto 0;display:flex;flex-direction:column;gap:12px;">
+          <button class="btn btn-primary" style="background:#fff;color:#1b5e20;font-size:17px;width:100%;"
+            onclick="App.navigate('login')">
+            <span class="material-symbols-outlined">login</span>
+            लॉगिन करें / Login
+          </button>
+          <button class="btn btn-outline" style="border-color:rgba(255,255,255,0.7);color:#fff;font-size:16px;width:100%;"
+            onclick="App.navigate('register')">
+            <span class="material-symbols-outlined">person_add</span>
+            नया खाता / Register
+          </button>
+          <p style="text-align:center;color:rgba(255,255,255,0.6);font-size:12px;margin-top:8px;">
+            🔒 Demo accounts: farmer123 | buyer123 | admin123<br />
+            KrishiLink – AI Agri-Market Intelligence Platform
+          </p>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ====================================================
+       SCREEN 2: LOGIN
+       ==================================================== -->
+    <div id="screen-login" class="screen">
+      <div class="auth-desktop-wrapper">
+        <!-- Left / Top Hero Pane -->
+        <div class="auth-hero-pane">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;width:100%;">
+            <button onclick="App.navigate('splash')" class="auth-icon-btn" title="Back">
+              <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <button onclick="App.openLang()" class="auth-icon-btn" title="Change Language">
+              <span class="material-symbols-outlined">translate</span>
+            </button>
+          </div>
+          <!-- KrishiLink Logo -->
+          <div style="margin-bottom:8px;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" fill="none" style="width:160px;height:38px;">
+              <rect width="40" height="40" y="4" rx="10" fill="rgba(255,255,255,0.25)" />
+              <path d="M14 28C14 20 20 14 26 14C26 22 20 28 14 28Z" fill="#86EFAC" />
+              <path d="M26 14C26 22 22 30 14 34" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+              <circle cx="28" cy="16" r="3" fill="#FACC15" />
+              <path d="M20 28L28 36" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+              <text x="50" y="30" font-family="Plus Jakarta Sans, sans-serif" font-size="22" font-weight="800"
+                fill="#FFFFFF" letter-spacing="-0.5">Krishi<tspan fill="#86EFAC">Link</tspan></text>
+              <text x="51" y="41" font-family="Plus Jakarta Sans, sans-serif" font-size="8.5" font-weight="600"
+                fill="rgba(255,255,255,0.7)" letter-spacing="1.2">AI AGRI-MARKET</text>
+            </svg>
+          </div>
+          <h1 style="font-size:26px;font-weight:700;color:#fff;">नमस्ते! 🙏</h1>
+          <p style="color:rgba(255,255,255,0.85);font-size:15px;">अपने KrishiLink खाते में लॉगिन करें</p>
+
+          <!-- Desktop Feature Highlights -->
+          <div class="auth-desktop-features">
+            <div class="auth-feature-row">
+              <span class="material-symbols-outlined" style="color:#86EFAC;font-size:22px;">psychology</span>
+              <div>
+                <strong style="display:block;font-size:13.5px;">Krishi AI Market Intelligence</strong>
+                <span style="font-size:12px;opacity:0.8;">Predictive mandi trends & optimal pricing</span>
+              </div>
+            </div>
+            <div class="auth-feature-row">
+              <span class="material-symbols-outlined" style="color:#86EFAC;font-size:22px;">store</span>
+              <div>
+                <strong style="display:block;font-size:13.5px;">Live AGMARKNET Mandi Rates</strong>
+                <span style="font-size:12px;opacity:0.8;">Real-time price comparisons across India</span>
+              </div>
+            </div>
+            <div class="auth-feature-row">
+              <span class="material-symbols-outlined" style="color:#86EFAC;font-size:22px;">verified_user</span>
+              <div>
+                <strong style="display:block;font-size:13.5px;">Verified Buyers & Escrow</strong>
+                <span style="font-size:12px;opacity:0.8;">Guaranteed payments and transparent trade</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right / Form Card -->
+        <div class="auth-form-pane">
+          <div id="login-error" class="hidden"
+            style="background:var(--error-container);color:var(--on-error-container);padding:12px 16px;border-radius:12px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+            <span class="material-symbols-outlined" style="font-size:18px;">error</span>
+            <span id="login-error-text"></span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div class="input-wrap">
+              <label class="input-label">📱 मोबाइल / ईमेल</label>
+              <div class="input-icon-wrap">
+                <input id="login-phone" class="input" type="text" placeholder="9876543210 या email@example.com" onkeydown="if(event.key==='Enter') App.doLogin()" />
+                <span class="input-icon material-symbols-outlined">phone</span>
+              </div>
+            </div>
+            <div class="input-wrap">
+              <label class="input-label">🔒 पासवर्ड</label>
+              <div class="input-icon-wrap">
+                <input id="login-pass" class="input" type="password" placeholder="पासवर्ड डालें" onkeydown="if(event.key==='Enter') App.doLogin()" />
+                <span class="input-icon material-symbols-outlined" onclick="App.togglePass('login-pass', this)"
+                  style="cursor:pointer;">visibility_off</span>
+              </div>
+            </div>
+            <button class="btn btn-primary" id="login-btn" onclick="App.doLogin()" style="width:100%;height:48px;font-size:16px;justify-content:center;">
+              <span class="material-symbols-outlined">login</span>
+              लॉगिन करें
+            </button>
+          </div>
+
+          <!-- Quick login demo cards -->
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:20px;">
+            <p class="text-label-md text-on-surface-variant" style="text-align:center;font-size:12px;">⚡ Demo Accounts (Click to auto-fill)</p>
+            <div class="demo-accounts-grid">
+              <button onclick="App.fillDemo('9876543210','farmer123')" class="demo-btn-card grade-a">
+                <span style="font-size:24px;">👨‍🌾</span>
+                <div>
+                  <div style="font-weight:700;font-size:13px;">Farmer: Ramesh Patel</div>
+                  <div style="font-size:11px;opacity:0.75;">9876543210 / farmer123 · Gujarat</div>
+                </div>
+              </button>
+              <button onclick="App.fillDemo('9123456789','buyer123')" class="demo-btn-card grade-b">
+                <span style="font-size:24px;">🏪</span>
+                <div>
+                  <div style="font-weight:700;font-size:13px;">Buyer: Anil Kumar Sharma</div>
+                  <div style="font-size:11px;opacity:0.75;">9123456789 / buyer123 · Delhi</div>
+                </div>
+              </button>
+              <button onclick="App.fillDemo('9000000001','admin123')" class="demo-btn-card grade-neutral">
+                <span style="font-size:24px;">⚙️</span>
+                <div>
+                  <div style="font-weight:700;font-size:13px;">Admin: KrishiLink</div>
+                  <div style="font-size:11px;opacity:0.75;">9000000001 / admin123</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div style="text-align:center;margin-top:16px;">
+            <button onclick="App.navigate('register')"
+              style="color:var(--primary);font-size:14.5px;font-weight:600;background:none;border:none;padding:8px;cursor:pointer;">
+              नया खाता बनाएं / Create Account →
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ====================================================
+       SCREEN 3: REGISTER
+       ==================================================== -->
+    <div id="screen-register" class="screen">
+      <div class="auth-desktop-wrapper">
+        <div class="auth-hero-pane">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;width:100%;">
+            <button onclick="App.navigate('login')" class="auth-icon-btn" title="Back">
+              <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <button onclick="App.openLang()" class="auth-icon-btn" title="Change Language">
+              <span class="material-symbols-outlined">translate</span>
+            </button>
+          </div>
+          <!-- KrishiLink Logo -->
+          <div style="margin-bottom:4px;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" fill="none" style="width:140px;height:34px;">
+              <rect width="40" height="40" y="4" rx="10" fill="rgba(255,255,255,0.25)" />
+              <path d="M14 28C14 20 20 14 26 14C26 22 20 28 14 28Z" fill="#86EFAC" />
+              <path d="M26 14C26 22 22 30 14 34" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+              <circle cx="28" cy="16" r="3" fill="#FACC15" />
+              <path d="M20 28L28 36" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+              <text x="50" y="30" font-family="Plus Jakarta Sans, sans-serif" font-size="22" font-weight="800"
+                fill="#FFFFFF" letter-spacing="-0.5">Krishi<tspan fill="#86EFAC">Link</tspan></text>
+              <text x="51" y="41" font-family="Plus Jakarta Sans, sans-serif" font-size="8.5" font-weight="600"
+                fill="rgba(255,255,255,0.7)" letter-spacing="1.2">AI AGRI-MARKET</text>
+            </svg>
+          </div>
+          <h1 style="font-size:26px;font-weight:700;color:#fff;">नया खाता बनाएं</h1>
+          <p style="color:rgba(255,255,255,0.85);font-size:15px;">Create your KrishiLink account</p>
+
+          <div class="auth-desktop-features">
+            <div class="auth-feature-row">
+              <span class="material-symbols-outlined" style="color:#86EFAC;font-size:22px;">verified</span>
+              <div>
+                <strong style="display:block;font-size:13.5px;">Free Registration</strong>
+                <span style="font-size:12px;opacity:0.8;">Join thousands of farmers & buyers nationwide</span>
+              </div>
+            </div>
+            <div class="auth-feature-row">
+              <span class="material-symbols-outlined" style="color:#86EFAC;font-size:22px;">trending_up</span>
+              <div>
+                <strong style="display:block;font-size:13.5px;">Higher Realization</strong>
+                <span style="font-size:12px;opacity:0.8;">Get 15-20% higher returns on farm produce</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="auth-form-pane" style="max-height:85vh;overflow-y:auto;">
+          <!-- Role Selection -->
+          <div style="margin-bottom:16px;">
+            <p class="text-label-lg text-on-surface" style="margin-bottom:12px;">आप कौन हैं? / Select your role:</p>
+            <div style="display:flex;gap:12px;">
+              <button id="reg-role-farmer" onclick="App.setRegRole('farmer')"
+                style="flex:1;padding:16px 8px;border-radius:16px;border:2.5px solid var(--primary);background:rgba(27,94,32,0.08);color:var(--primary);font-size:14px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;">
+                <span style="font-size:32px;">👨‍🌾</span>किसान<br /><span
+                  style="font-size:11px;font-weight:400;">Farmer</span>
+              </button>
+              <button id="reg-role-buyer" onclick="App.setRegRole('buyer')"
+                style="flex:1;padding:16px 8px;border-radius:16px;border:2.5px solid var(--outline-variant);background:var(--surface-container);color:var(--on-surface-variant);font-size:14px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;">
+                <span style="font-size:32px;">🏪</span>खरीदार<br /><span
+                  style="font-size:11px;font-weight:400;">Buyer</span>
+              </button>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="input-wrap">
+              <label class="input-label">पूरा नाम / Full Name *</label>
+              <input id="reg-name" class="input" type="text" placeholder="रमेश पटेल / Ramesh Patel" />
+            </div>
+            <div class="input-wrap">
+              <label class="input-label">📱 मोबाइल नंबर *</label>
+              <input id="reg-phone" class="input" type="tel" placeholder="9876543210" />
+            </div>
+            <div class="input-wrap">
+              <label class="input-label">ईमेल (Optional)</label>
+              <input id="reg-email" class="input" type="email" placeholder="email@example.com" />
+            </div>
+            <div class="input-wrap">
+              <label class="input-label">🔒 पासवर्ड *</label>
+              <input id="reg-pass" class="input" type="password" placeholder="कम से कम 6 अक्षर" />
+            </div>
+            <div id="farmer-fields">
+              <div class="input-wrap" style="margin-bottom:16px;">
+                <label class="input-label">📍 गांव / Village *</label>
+                <input id="reg-village" class="input" type="text" placeholder="गांव का नाम" />
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="input-wrap">
+                  <label class="input-label">जिला / District</label>
+                  <input id="reg-district" class="input" type="text" placeholder="जिला" />
+                </div>
+                <div class="input-wrap">
+                  <label class="input-label">राज्य / State</label>
+                  <select id="reg-state" class="input">
+                    <option value="">राज्य चुनें</option>
+                    <option>Gujarat</option>
+                    <option>Haryana</option>
+                    <option>Punjab</option>
+                    <option>Uttar Pradesh</option>
+                    <option>Maharashtra</option>
+                    <option>Rajasthan</option>
+                    <option>Madhya Pradesh</option>
+                    <option>Karnataka</option>
+                    <option>West Bengal</option>
+                    <option>Bihar</option>
+                    <option>Andhra Pradesh</option>
+                    <option>Tamil Nadu</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div id="buyer-fields" class="hidden">
+              <div class="input-wrap">
+                <label class="input-label">कंपनी / Company Name *</label>
+                <input id="reg-company" class="input" type="text" placeholder="XYZ Traders Pvt Ltd" />
+              </div>
+              <div class="input-wrap" style="margin-top:16px;">
+                <label class="input-label">शहर / City</label>
+                <input id="reg-city" class="input" type="text" placeholder="Delhi, Mumbai..." />
+              </div>
+            </div>
+            <div id="reg-error" class="hidden"
+              style="background:var(--error-container);color:var(--on-error-container);padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;">
+            </div>
+            <button class="btn btn-primary" onclick="App.doRegister()" style="width:100%;height:48px;font-size:16px;justify-content:center;">
+              <span class="material-symbols-outlined">person_add</span>
+              खाता बनाएं / Register
+            </button>
+          </div>
+          <div style="text-align:center;margin-top:16px;">
+            <button onclick="App.navigate('login')"
+              style="color:var(--primary);font-size:14.5px;font-weight:600;background:none;border:none;padding:8px;cursor:pointer;">
+              पहले से खाता है? लॉगिन करें →
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ====================================================
+       SCREEN 4: FARMER DASHBOARD
+       ==================================================== -->
+    <div id="screen-farmer-dashboard" class="screen">
+      <!-- App Bar -->
+      <header class="app-bar"
+        style="position:sticky;flex-direction:column;gap:8px;min-height:auto;padding-top:var(--spacing-sm);">
+        <div style="display:flex;align-items:center;width:100%;gap:8px;">
+          <div style="display:flex;flex-direction:column;flex:1;min-width:0;">
+            <!-- KrishiLink inline logo -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" fill="none"
+              style="width:120px;height:29px;flex-shrink:0;">
+              <rect width="40" height="40" y="4" rx="10" fill="#15803D" />
+              <path d="M14 28C14 20 20 14 26 14C26 22 20 28 14 28Z" fill="#86EFAC" />
+              <path d="M26 14C26 22 22 30 14 34" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+              <circle cx="28" cy="16" r="3" fill="#FACC15" />
+              <path d="M20 28L28 36" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+              <text x="50" y="30" font-family="Plus Jakarta Sans, sans-serif" font-size="22" font-weight="800"
+                fill="#0F172A" letter-spacing="-0.5">Krishi<tspan fill="#16A34A">Link</tspan></text>
+              <text x="51" y="41" font-family="Plus Jakarta Sans, sans-serif" font-size="8.5" font-weight="600"
+                fill="#64748B" letter-spacing="1.2">AI AGRI-MARKET</text>
+            </svg>
+            <h1 id="farmer-greeting" class="app-bar-title" style="font-size:17px;">नमस्ते, रमेश भाई! 👋</h1>
+          </div>
+          <button onclick="App.navigate('notifications')" class="app-bar-icon" style="position:relative;">
+            <span class="material-symbols-outlined">notifications</span>
+            <span id="notif-badge"
+              style="position:absolute;top:4px;right:4px;width:10px;height:10px;background:var(--tertiary-container);border-radius:50%;border:2px solid var(--surface-container-lowest);"></span>
+          </button>
+          <button onclick="App.openLang()" class="app-bar-icon" title="Change Language">
+            <span class="material-symbols-outlined">translate</span>
+          </button>
+          <button onclick="App.navigate('profile')" class="app-bar-icon">
+            <span id="farmer-avatar-bar" style="font-size:22px;">👨‍🌾</span>
+          </button>
+        </div>
+        <!-- Network status -->
+        <div id="network-status-bar"
+          style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;background:rgba(27,94,32,0.08);border-radius:999px;width:100%;transition:all 0.3s ease;">
+          <span id="network-status-content" style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--primary);font-weight:600;">
+            <span id="network-status-dot"
+              style="width:6px;height:6px;border-radius:50%;background:var(--primary);animation:pulse 2s infinite;display:inline-block;"></span>
+            <span id="network-status-text">📶 नेटवर्क ठीक है · LIVE DATA</span>
+          </span>
+          <a href="tel:18001801551"
+            style="font-size:11px;color:var(--tertiary);font-weight:600;display:flex;align-items:center;gap:2px;">
+            <span class="material-symbols-outlined" style="font-size:13px;">call</span>☎ 1800-180-1551
+          </a>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <!-- Voice Banner -->
+        <button onclick="App.showVoiceMsg()"
+          style="width:100%;background:var(--surface-container-low);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px;text-align:left;">
+          <div
+            style="width:44px;height:44px;border-radius:50%;background:var(--secondary-container);display:flex;align-items:center;justify-content:center;animation:pulse 2s infinite;flex-shrink:0;">
+            <span class="material-symbols-outlined"
+              style="font-size:22px;color:var(--on-secondary-container);">mic</span>
+          </div>
+          <div>
+            <div class="text-label-md" style="color:var(--on-surface);">बोलकर पूछें: "टमाटर का भाव बताओ"</div>
+            <div class="text-label-sm text-on-surface-variant">Tap to speak · Voice search active</div>
+          </div>
+          <span class="material-symbols-outlined text-primary"
+            style="margin-left:auto;font-size:20px;">graphic_eq</span>
+        </button>
+
+        <!-- Stats Row -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+          <div class="stat-card">
+            <div class="stat-card-icon icon-blue">
+              <i data-lucide="clipboard-list"></i>
+            </div>
+            <span class="stat-value" id="farmer-stat-listings">0</span>
+            <span class="stat-label">लिस्टिंग<br />Listings</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon icon-amber">
+              <i data-lucide="indian-rupee"></i>
+            </div>
+            <span class="stat-value" id="farmer-stat-offers">0</span>
+            <span class="stat-label">ऑफर<br />Offers</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon icon-green">
+              <i data-lucide="check-circle-2"></i>
+            </div>
+            <span class="stat-value" id="farmer-stat-orders">0</span>
+            <span class="stat-label">ऑर्डर<br />Orders</span>
+          </div>
+        </div>
+
+        <!-- Today's Prices -->
+        <div>
+          <div class="section-header">
+            <h2 class="section-title" style="display:flex;align-items:center;gap:6px;">
+              <i data-lucide="bar-chart-3" class="lucide-header-icon" style="color:var(--primary);width:20px;height:20px;"></i> आज के भाव
+            </h2>
+            <button class="section-link" onclick="App.navigate('mandi-prices')">सभी देखें <span
+                class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span></button>
+          </div>
+          <!-- Crop tabs -->
+          <div class="tabs" id="farmer-crop-tabs">
+            <button class="tab-pill active" data-crop="Tomato" onclick="App.selectCropTab(this,'farmer-price-card')">🍅
+              टमाटर</button>
+            <button class="tab-pill" data-crop="Potato" onclick="App.selectCropTab(this,'farmer-price-card')">🥔
+              आलू</button>
+            <button class="tab-pill" data-crop="Onion" onclick="App.selectCropTab(this,'farmer-price-card')">🧅
+              प्याज</button>
+            <button class="tab-pill" data-crop="Wheat" onclick="App.selectCropTab(this,'farmer-price-card')">🌾
+              गेहूं</button>
+            <button class="tab-pill" data-crop="Maize" onclick="App.selectCropTab(this,'farmer-price-card')">🌽
+              मक्का</button>
+          </div>
+          <div id="farmer-price-card" class="card card-body" style="margin-top:10px;"></div>
+        </div>
+
+        <!-- AI Insights -->
+        <div class="ai-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div class="ai-badge"><span class="material-symbols-outlined"
+                style="font-size:14px;">auto_awesome</span>Krishi<b style="color:var(--primary);">Link</b> AI सलाहकार
+            </div>
+            <span class="demo-badge">SIMULATED</span>
+          </div>
+          <div id="ai-insights-farmer" style="display:flex;flex-direction:column;gap:8px;">
+            <div
+              style="background:rgba(255,255,255,0.6);border-radius:10px;padding:10px 12px;font-size:14px;color:var(--on-surface);display:flex;align-items:center;gap:8px;">
+              <span style="color:#16a34a;display:inline-flex;"><i data-lucide="trending-up" style="width:18px;height:18px;"></i></span>टमाटर का भाव बढ़ रहा है – बेचने का सही समय!
+            </div>
+            <div
+              style="background:rgba(255,255,255,0.6);border-radius:10px;padding:10px 12px;font-size:14px;color:var(--on-surface);display:flex;align-items:center;gap:8px;">
+              <span style="color:#d97706;display:inline-flex;"><i data-lucide="lightbulb" style="width:18px;height:18px;"></i></span>आजादपुर मंडी में सबसे अधिक भाव – ₹2,250/क्विंटल
+            </div>
+          </div>
+        </div>
+
+        <!-- My Listings -->
+        <div>
+          <div class="section-header">
+            <h2 class="section-title" style="display:flex;align-items:center;gap:6px;">
+              <i data-lucide="sprout" class="lucide-header-icon" style="color:var(--primary);width:20px;height:20px;"></i> मेरी लिस्टिंग
+            </h2>
+            <button class="section-link" onclick="App.navigate('add-produce')">+ जोड़ें</button>
+          </div>
+          <div id="farmer-listings" style="display:flex;flex-direction:column;gap:10px;"></div>
+          <div id="farmer-listings-empty" class="hidden"
+            style="text-align:center;padding:32px 16px;color:var(--on-surface-variant);">
+            <div style="margin-bottom:8px;color:var(--primary);display:flex;justify-content:center;"><i data-lucide="sprout" style="width:40px;height:40px;"></i></div>
+            <p class="text-body-md" style="margin-bottom:16px;">अभी कोई लिस्टिंग नहीं<br />No listings yet</p>
+            <button class="btn btn-primary" style="width:auto;padding:0 24px;" onclick="App.navigate('add-produce')">
+              + पहली लिस्टिंग बनाएं
+            </button>
+          </div>
+        </div>
+
+        <!-- Pending Offers -->
+        <div>
+          <div class="section-header">
+            <h2 class="section-title" style="display:flex;align-items:center;gap:6px;">
+              <i data-lucide="tag" class="lucide-header-icon" style="color:#d97706;width:20px;height:20px;"></i> आए हुए ऑफर
+            </h2>
+            <button class="section-link" onclick="App.navigate('orders')">सभी देखें</button>
+          </div>
+          <div id="farmer-offers" style="display:flex;flex-direction:column;gap:10px;"></div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div>
+          <h2 class="section-title" style="margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+            <i data-lucide="zap" class="lucide-header-icon" style="color:#f59e0b;width:18px;height:18px;"></i> Quick Actions
+          </h2>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <button onclick="App.navigate('add-produce')"
+              style="background:var(--primary);color:#fff;border-radius:var(--radius);padding:18px 12px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;font-size:15px;font-weight:700;">
+              <span style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.2);"><i data-lucide="plus-circle" style="width:24px;height:24px;"></i></span>फसल बेचें<br /><span
+                style="font-size:12px;font-weight:400;opacity:0.85;">Sell Produce</span>
+            </button>
+            <button onclick="App.navigate('mandi-prices')"
+              style="background:var(--secondary-container);color:var(--on-secondary-container);border-radius:var(--radius);padding:18px 12px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;font-size:15px;font-weight:700;">
+              <span style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:rgba(21,128,61,0.12);color:var(--primary);"><i data-lucide="bar-chart-3" style="width:24px;height:24px;"></i></span>मंडी भाव<br /><span
+                style="font-size:12px;font-weight:400;opacity:0.85;">Mandi Prices</span>
+            </button>
+            <button onclick="App.navigate('nearby-mandis')"
+              style="background:rgba(27,94,32,0.1);color:var(--primary);border-radius:var(--radius);padding:18px 12px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;font-size:15px;font-weight:700;">
+              <span style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:rgba(21,128,61,0.15);color:var(--primary);"><i data-lucide="map-pin" style="width:24px;height:24px;"></i></span>पास की मंडी<br /><span
+                style="font-size:12px;font-weight:400;opacity:0.85;">Nearby Mandis</span>
+            </button>
+            <button onclick="App.navigate('orders')"
+              style="background:rgba(108,34,0,0.08);color:var(--tertiary);border-radius:var(--radius);padding:18px 12px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;font-size:15px;font-weight:700;">
+              <span style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:rgba(108,34,0,0.12);color:var(--tertiary);"><i data-lucide="package" style="width:24px;height:24px;"></i></span>मेरे ऑर्डर<br /><span
+                style="font-size:12px;font-weight:400;opacity:0.85;">My Orders</span>
+            </button>
+          </div>
+        </div>
+      </main>
+
+      <!-- Bottom Nav -->
+      <nav class="bottom-nav">
+        <button class="bottom-nav-item active" onclick="App.setActiveNav(this);App.navigate('farmer-dashboard')">
+          <div class="nav-indicator"></div>
+          <span class="material-symbols-outlined mat-icon">home</span>
+          <span data-i18n="home">होम</span>
+        </button>
+        <button class="bottom-nav-item" onclick="App.setActiveNav(this);App.navigate('marketplace')">
+          <div class="nav-indicator"></div>
+          <span class="material-symbols-outlined mat-icon">storefront</span>
+          <span data-i18n="market">मार्केट</span>
+        </button>
+        <button class="bottom-nav-item" onclick="App.navigate('add-produce')" style="position:relative;">
+          <div
+            style="width:52px;height:52px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;position:absolute;top:-20px;box-shadow:var(--shadow-md);">
+            <span class="material-symbols-outlined"
+              style="font-size:26px;color:#fff;font-variation-settings:'FILL' 1;">add</span>
+          </div>
+          <span style="margin-top:32px;font-size:10px;font-weight:700;color:var(--primary);" data-i18n="sell">बेचें</span>
+        </button>
+        <button class="bottom-nav-item" onclick="App.setActiveNav(this);App.navigate('orders')">
+          <div class="nav-indicator"></div>
+          <span class="material-symbols-outlined mat-icon">inventory_2</span>
+          <span data-i18n="orders">ऑर्डर</span>
+        </button>
+        <button class="bottom-nav-item" onclick="App.setActiveNav(this);App.navigate('profile')">
+          <div class="nav-indicator"></div>
+          <span class="material-symbols-outlined mat-icon">person</span>
+          <span data-i18n="profile">प्रोफाइल</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- ====================================================
+       SCREEN 5: ADD PRODUCE (SELL CROP WIZARD)
+       ==================================================== -->
+    <div id="screen-add-produce" class="screen">
+      <header class="app-bar">
+        <button onclick="App.goBack()" class="app-bar-icon"><span
+            class="material-symbols-outlined">arrow_back</span></button>
+        <h1 class="app-bar-title">🌱 फसल लिस्ट करें</h1>
+      </header>
+
+      <main class="main-content" style="padding-bottom:40px;">
+        <!-- Step indicator -->
+        <div class="step-bar" style="margin-bottom:12px;">
+          <div class="step-dot active" id="step1-dot" style="flex:1;"></div>
+          <div class="step-dot" id="step2-dot" style="flex:1;"></div>
+          <div class="step-dot" id="step3-dot" style="flex:1;"></div>
+          <span class="text-label-sm text-on-surface-variant" style="margin-left:12px;white-space:nowrap;font-weight:700;" id="step-label">चरण 1/3: फसल विवरण</span>
+        </div>
+
+        <!-- Step 1: Crop Info -->
+        <div id="add-step1" style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card card-body" style="display:flex;flex-direction:column;gap:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <h2 class="text-headline-md" style="font-size:18px;">🌾 फसल की जानकारी</h2>
+              <span class="chip chip-surface" style="font-size:11px;font-weight:600;">चरण 1 / 3</span>
+            </div>
+
+            <div class="input-wrap">
+              <label class="input-label">🌾 फसल का नाम / Crop *</label>
+              <select id="add-crop" class="input" onchange="App.onCropChange()">
+                <option value="">फसल चुनें / Select Crop</option>
+                <option value="Tomato">🍅 टमाटर / Tomato</option>
+                <option value="Potato">🥔 आलू / Potato</option>
+                <option value="Onion">🧅 प्याज / Onion</option>
+                <option value="Wheat">🌾 गेहूं / Wheat</option>
+                <option value="Rice">🌾 चावल / Rice</option>
+                <option value="Maize">🌽 मक्का / Maize</option>
+              </select>
+            </div>
+
+            <div class="input-wrap">
+              <label class="input-label">किस्म / Variety</label>
+              <input id="add-variety" class="input" type="text" placeholder="जैसे: Hybrid Red, Kufri Jyoti..." />
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="input-wrap">
+                <label class="input-label">📦 मात्रा / Quantity *</label>
+                <input id="add-qty" class="input" type="number" placeholder="500" min="1" oninput="App.updateEarningsCalc()" />
+              </div>
+              <div class="input-wrap">
+                <label class="input-label">इकाई / Unit</label>
+                <select id="add-unit" class="input" onchange="App.updateEarningsCalc()">
+                  <option value="kg">किग्रा (kg)</option>
+                  <option value="quintal">क्विंटल (quintal)</option>
+                  <option value="ton">टन (ton)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="input-wrap">
+              <label class="input-label">⭐ गुणवत्ता ग्रेड / Quality Grade *</label>
+              <div style="display:flex;gap:10px;margin-top:4px;">
+                <button type="button" id="grade-A" onclick="App.selectGrade('A')"
+                  style="flex:1;padding:12px 8px;border-radius:12px;border:2.5px solid var(--grade-a-border);background:var(--grade-a-bg);color:var(--grade-a-text);font-weight:700;font-size:13px;cursor:pointer;">🟢
+                  ग्रेड A<br /><span style="font-size:11px;font-weight:400;">उत्तम (Premium)</span></button>
+                <button type="button" id="grade-B" onclick="App.selectGrade('B')"
+                  style="flex:1;padding:12px 8px;border-radius:12px;border:2px solid var(--outline-variant);background:var(--surface-container);color:var(--on-surface-variant);font-weight:700;font-size:13px;cursor:pointer;">🟡
+                  ग्रेड B<br /><span style="font-size:11px;font-weight:400;">मध्यम (Standard)</span></button>
+                <button type="button" id="grade-C" onclick="App.selectGrade('C')"
+                  style="flex:1;padding:12px 8px;border-radius:12px;border:2px solid var(--outline-variant);background:var(--surface-container);color:var(--on-surface-variant);font-weight:700;font-size:13px;cursor:pointer;">🔴
+                  ग्रेड C<br /><span style="font-size:11px;font-weight:400;">सामान्य (Fair)</span></button>
+              </div>
+              <input type="hidden" id="add-grade" value="A" />
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onclick="App.addStep1Next()" style="min-height:50px;font-size:15px;font-weight:700;">
+            अगला: भाव और मंडी दरें / Next <span class="material-symbols-outlined">arrow_forward</span>
+          </button>
+        </div>
+
+        <!-- Step 2: Price & AI Mandi Benchmark -->
+        <div id="add-step2" style="display:none;flex-direction:column;gap:16px;">
+          <!-- AI Market Intelligence & Benchmark Card -->
+          <div id="add-ai-card" class="ai-card" style="position:relative;overflow:hidden;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <div class="ai-badge" style="background:#e8f5e9;border-color:#81c784;color:#1b5e20;">
+                <span class="material-symbols-outlined" style="font-size:16px;">auto_awesome</span>
+                <span>AI Mandi Price Intelligence</span>
+              </div>
+              <span class="chip chip-success" style="font-size:11px;font-weight:700;padding:2px 8px;">
+                ● LIVE APMC RATES
+              </span>
+            </div>
+
+            <!-- Dynamic AI Price Recommendation -->
+            <div id="ai-price-result" style="display:flex;flex-direction:column;gap:8px;">
+              <div class="spinner" style="margin:16px auto;"></div>
+            </div>
+
+            <!-- Live Mandi Benchmark Comparisons Table -->
+            <div id="add-mandi-benchmarks" style="margin-top:10px;"></div>
+          </div>
+
+          <!-- Price & Expected Revenue Calculator Card -->
+          <div class="card card-body" style="display:flex;flex-direction:column;gap:16px;">
+            <h2 class="text-headline-md" style="font-size:18px;">💰 अपेक्षित मूल्य निर्धारण</h2>
+
+            <div class="input-wrap">
+              <label class="input-label">आपका अपेक्षित भाव / Asking Price (₹/kg) *</label>
+              <div class="input-icon-wrap">
+                <input id="add-price" class="input" type="number" placeholder="28" min="1" step="0.5" oninput="App.updateEarningsCalc()" />
+                <span class="input-icon" style="font-weight:800;color:var(--primary);font-size:18px;">₹</span>
+              </div>
+              <!-- Quick Price Adjustment Chips -->
+              <div class="price-nudge-group">
+                <button type="button" class="price-nudge-btn" onclick="App.nudgePrice(-2)">- ₹2</button>
+                <button type="button" class="price-nudge-btn" onclick="App.nudgePrice(-1)">- ₹1</button>
+                <button type="button" class="price-nudge-btn active" id="btn-use-ai-price" onclick="App.applyAISuggestedPrice()">✨ AI भाव सेट करें</button>
+                <button type="button" class="price-nudge-btn" onclick="App.nudgePrice(1)">+ ₹1</button>
+                <button type="button" class="price-nudge-btn" onclick="App.nudgePrice(2)">+ ₹2</button>
+                <button type="button" class="price-nudge-btn" onclick="App.nudgePrice(5)">+ ₹5</button>
+              </div>
+            </div>
+
+            <!-- Live Gross Payout Card -->
+            <div class="earnings-preview-card">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:12.5px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;">
+                  कुल अपेक्षित भुगतान (Gross Payout)
+                </span>
+                <span id="earnings-unit-calc" style="font-size:12px;color:var(--on-surface-variant);">500 kg × ₹28/kg</span>
+              </div>
+              <div class="earnings-preview-amount" id="earnings-total-display">₹14,000</div>
+              <div style="font-size:12px;color:var(--on-surface-variant);display:flex;align-items:center;gap:6px;">
+                <span class="material-symbols-outlined" style="font-size:15px;color:var(--primary);">verified</span>
+                <span>बिना किसी मध्यस्थ कमीशन के सीधे आपके खाते में</span>
+              </div>
+            </div>
+
+            <!-- Location & Farm Gate Info -->
+            <div class="input-wrap">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                <label class="input-label" style="margin:0;">📍 खेत / उठान का स्थान (Pickup Location) *</label>
+                <button type="button" class="btn btn-outline" style="min-height:28px;padding:2px 10px;font-size:11.5px;display:flex;align-items:center;gap:4px;" onclick="App.autoDetectLocation()">
+                  <span class="material-symbols-outlined" style="font-size:14px;">my_location</span> GPS से लें
+                </button>
+              </div>
+              <div class="input-icon-wrap">
+                <input id="add-location" class="input" type="text" placeholder="गांव, जिला, राज्य (उदा: चिलोड़ा, गांधीनगर, गुजरात)" />
+                <span class="input-icon material-symbols-outlined" style="color:var(--primary);">location_on</span>
+              </div>
+            </div>
+
+            <!-- Logistics & Ready Timeline -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="input-wrap">
+                <label class="input-label">उठान तत्परता / Readiness</label>
+                <select id="add-readiness" class="input">
+                  <option value="immediate">तुरंत तैयार (Ready Now)</option>
+                  <option value="2days">2-3 दिन में (2-3 Days)</option>
+                  <option value="7days">1 सप्ताह में (Within 7 Days)</option>
+                </select>
+              </div>
+              <div class="input-wrap">
+                <label class="input-label">परिवहन / Transport</label>
+                <select id="add-transport" class="input">
+                  <option value="farmgate">खेत से उठाएं (Farm Gate)</option>
+                  <option value="mandihub">मंडी तक डिलीवरी (To Mandi)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;">
+            <button type="button" class="btn btn-outline" style="flex:1;min-height:48px;" onclick="App.addStep(1)">
+              <span class="material-symbols-outlined">arrow_back</span> पीछे
+            </button>
+            <button type="button" class="btn btn-primary" style="flex:2;min-height:48px;font-weight:700;" onclick="App.addStep2Next()">
+              अगला: फोटो और पुष्टि / Next <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 3: Photos, Description & Live Confirmation -->
+        <div id="add-step3" style="display:none;flex-direction:column;gap:16px;">
+          <!-- Photo Upload & Presets Card -->
+          <div class="card card-body" style="display:flex;flex-direction:column;gap:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <h2 class="text-headline-md" style="font-size:18px;">📸 फसल की फोटो जोड़ें</h2>
+              <span class="chip chip-surface" style="font-size:11px;font-weight:600;">अच्छी फोटो = 3x तेजी से बिक्री</span>
+            </div>
+
+            <!-- File Upload Input Area -->
+            <div class="photo-upload-zone" onclick="document.getElementById('produce-file-input').click()">
+              <input type="file" id="produce-file-input" accept="image/*" style="display:none;" onchange="App.handleProduceFileUpload(event)" />
+              <div style="width:48px;height:48px;border-radius:50%;background:rgba(27,94,32,0.1);display:flex;align-items:center;justify-content:center;color:var(--primary);">
+                <span class="material-symbols-outlined" style="font-size:26px;">add_a_photo</span>
+              </div>
+              <div style="font-weight:700;font-size:14px;color:var(--on-surface);">फोटो अपलोड करें या कैमरा से लें</div>
+              <div style="font-size:12px;color:var(--on-surface-variant);">JPG, PNG या HEIC (अधिकतम 5MB)</div>
+            </div>
+
+            <!-- Preset Crop Photos for Instant 1-Tap Selection -->
+            <div>
+              <p class="text-label-sm text-on-surface-variant" style="margin-bottom:8px;font-weight:600;">या सीधे सत्यापित फोटो चुनें:</p>
+              <div class="photo-gallery-preview" id="photo-preset-container">
+                <!-- Injected dynamically by App.renderPhotoPresets() -->
+              </div>
+            </div>
+
+            <!-- Selected Photo Preview Display -->
+            <div id="selected-photo-preview" style="display:none;align-items:center;gap:12px;padding:10px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;">
+              <img id="selected-photo-img" src="" alt="Selected Produce" style="width:56px;height:56px;border-radius:8px;object-fit:cover;" />
+              <div style="flex:1;">
+                <div id="selected-photo-name" style="font-size:13px;font-weight:700;color:var(--on-surface);">Verified Crop Photo</div>
+                <div style="font-size:11.5px;color:var(--primary);font-weight:600;">✅ उच्च रिज़ॉल्यूशन फोटो चयनित</div>
+              </div>
+              <button type="button" class="btn btn-outline" style="min-height:30px;padding:2px 8px;font-size:11px;" onclick="App.removeSelectedPhoto()">हटाएं</button>
+            </div>
+          </div>
+
+          <!-- Description & Quality Highlights Card -->
+          <div class="card card-body" style="display:flex;flex-direction:column;gap:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <h2 class="text-headline-md" style="font-size:18px;">📝 विवरण व विशेषताएं</h2>
+              <button type="button" onclick="App.generateAIDesc()" class="ai-badge" style="cursor:pointer;padding:4px 10px;border-radius:999px;">
+                <span class="material-symbols-outlined" style="font-size:15px;">auto_awesome</span> AI से ऑटो-लिखें
+              </button>
+            </div>
+
+            <div class="input-wrap">
+              <label class="input-label">फसल का विवरण / Produce Description</label>
+              <textarea id="add-desc" class="input" style="min-height:90px;padding-top:10px;resize:vertical;font-size:13.5px;line-height:1.6;"
+                placeholder="फसल की चमक, आकार, ग्रेड और उठान के बारे में लिखें..."></textarea>
+            </div>
+
+            <!-- Quality Badges Checklist -->
+            <div>
+              <label class="input-label" style="margin-bottom:6px;">विशेष गुणवत्ता टैग्स / Quality Tags</label>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;background:#f8fafc;padding:6px 12px;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer;">
+                  <input type="checkbox" id="tag-organic" checked style="accent-color:var(--primary);" />
+                  <span>🌱 रसायन मुक्त / Organic</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;background:#f8fafc;padding:6px 12px;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer;">
+                  <input type="checkbox" id="tag-clean" checked style="accent-color:var(--primary);" />
+                  <span>✨ साफ व छंटाई युक्त (Graded)</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;background:#f8fafc;padding:6px 12px;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer;">
+                  <input type="checkbox" id="tag-moisture" style="accent-color:var(--primary);" />
+                  <span>💧 मानक नमी (<12%)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Marketplace Card Preview (How buyers see your listing) -->
+          <div class="card card-body" style="background:#ffffff;border:1.5px solid var(--primary);box-shadow:0 8px 24px rgba(27,94,32,0.1);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+              <h3 class="text-label-lg text-primary" style="margin:0;display:flex;align-items:center;gap:6px;font-weight:800;">
+                <span class="material-symbols-outlined" style="font-size:18px;">preview</span>
+                लाइव प्रीव्यू: खरीदारों को ऐसे दिखेगा
+              </h3>
+              <span class="chip chip-primary" style="font-size:10.5px;font-weight:700;">Verified Farmer</span>
+            </div>
+
+            <!-- Injected Dynamic Summary Content -->
+            <div id="add-summary-content"></div>
+          </div>
+
+          <!-- Error Alert Box -->
+          <div id="add-error" class="hidden"
+            style="background:var(--error-container);color:var(--on-error-container);padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;">
+          </div>
+
+          <!-- Navigation & Final Submit Button -->
+          <div style="display:flex;gap:12px;">
+            <button type="button" class="btn btn-outline" style="flex:1;min-height:48px;" onclick="App.addStep(2)">
+              <span class="material-symbols-outlined">arrow_back</span> पीछे
+            </button>
+            <button type="button" class="btn btn-primary" style="flex:2;min-height:48px;font-weight:800;font-size:15px;" onclick="App.publishListing()">
+              <span class="material-symbols-outlined">publish</span>
+              🌱 फसल लिस्ट करें / Publish
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+
+    <!-- ====================================================
+       SCREEN 6: MARKETPLACE
+       ==================================================== -->
+    <div id="screen-marketplace" class="screen">
+      <header class="app-bar" style="flex-direction:column;gap:10px;min-height:auto;padding-top:12px;">
+        <div style="display:flex;align-items:center;gap:8px;width:100%;">
+          <button onclick="App.goBack()" class="app-bar-icon"><span
+              class="material-symbols-outlined">arrow_back</span></button>
+          <h1 class="app-bar-title" style="flex:1;display:flex;align-items:center;gap:8px;">
+            <i data-lucide="store" style="width:20px;height:20px;color:var(--primary);"></i>
+            <span data-i18n="market">मार्केटप्लेस / Market</span>
+          </h1>
+          <button onclick="App.openLang()" class="header-lang-btn" id="market-lang-btn">
+            🌐 <span id="market-lang-lbl">ENGLISH (ENGLISH)</span> ▾
+          </button>
+          <button onclick="App.navigate('notifications')" class="app-bar-icon"><span
+              class="material-symbols-outlined">notifications</span></button>
+        </div>
+
+        <!-- Top Live Controls (Key Points & 4G Live indicators) -->
+        <div class="market-top-controls" style="width:100%;">
+          <div class="market-live-bar">
+            <span class="market-pill-tag pill-key-points">
+              <i data-lucide="sparkles" style="width:13px;height:13px;color:#d97706;"></i>
+              Key Points
+            </span>
+            <span class="market-pill-tag pill-4g-live">
+              <span class="pill-live-dot"></span>
+              4G LIVE
+            </span>
+          </div>
+        </div>
+
+        <div class="search-bar" style="width:100%;">
+          <i data-lucide="search" style="width:18px;height:18px;color:var(--on-surface-variant);margin-left:4px;"></i>
+          <input id="market-search" type="text" placeholder="फसल खोजें / Search produce..."
+            data-i18n-placeholder="search_placeholder" oninput="App.filterMarket()" />
+          <button onclick="App.showVoiceMsg()"
+            style="background:var(--secondary-container);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i data-lucide="mic" style="width:16px;height:16px;color:var(--on-secondary-container);"></i>
+          </button>
+        </div>
+
+        <!-- Grade Filter Pills Row (All Grades, Grade A+, Grade A, Grade B+) -->
+        <div class="grade-filter-row" style="width:100%;margin-top:2px;">
+          <button class="grade-pill active" data-grade="all" onclick="App.setGradeFilter(this,'all')">ALL GRADES</button>
+          <button class="grade-pill" data-grade="A+" onclick="App.setGradeFilter(this,'A+')">GRADE A+</button>
+          <button class="grade-pill" data-grade="A" onclick="App.setGradeFilter(this,'A')">GRADE A</button>
+          <button class="grade-pill" data-grade="B+" onclick="App.setGradeFilter(this,'B+')">GRADE B+</button>
+        </div>
+
+        <!-- Commodity Filter Tabs -->
+        <div class="filter-row" style="width:100%;">
+          <button class="tab-pill active" data-filter="all" onclick="App.setMarketFilter(this,'all')">🌾 सभी / All</button>
+          <button class="tab-pill" data-filter="Tomato" onclick="App.setMarketFilter(this,'Tomato')">टमाटर / Tomato</button>
+          <button class="tab-pill" data-filter="Potato" onclick="App.setMarketFilter(this,'Potato')">आलू / Potato</button>
+          <button class="tab-pill" data-filter="Onion" onclick="App.setMarketFilter(this,'Onion')">प्याज / Onion</button>
+          <button class="tab-pill" data-filter="Wheat" onclick="App.setMarketFilter(this,'Wheat')">गेहूं / Wheat</button>
+          <button class="tab-pill" data-filter="Maize" onclick="App.setMarketFilter(this,'Maize')">मक्का / Maize</button>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <div id="market-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));gap:14px;"></div>
+        <div id="market-empty" class="hidden" style="text-align:center;padding:60px 16px;">
+          <div style="font-size:48px;margin-bottom:8px;">🔍</div>
+          <p class="text-body-md text-on-surface-variant">कोई परिणाम नहीं मिला<br />No results found</p>
+        </div>
+      </main>
+
+      <!-- Farmer bottom nav -->
+      <nav class="bottom-nav" id="market-nav">
+        <button class="bottom-nav-item" onclick="App.setActiveNav(this);App.navigate('farmer-dashboard')">
+          <span class="material-symbols-outlined mat-icon">home</span><span data-i18n="home">होम</span>
+        </button>
+        <button class="bottom-nav-item active" onclick="App.setActiveNav(this)">
+          <div class="nav-indicator"></div>
+          <span class="material-symbols-outlined mat-icon">storefront</span><span data-i18n="market">मार्केट</span>
+        </button>
+        <button class="bottom-nav-item" onclick="App.navigate('add-produce')" style="position:relative;">
+          <div
+            style="width:52px;height:52px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;position:absolute;top:-20px;box-shadow:var(--shadow-md);">
+            <span class="material-symbols-outlined"
+              style="font-size:26px;color:#fff;font-variation-settings:'FILL' 1;">add</span>
+          </div>
+          <span style="margin-top:32px;font-size:10px;font-weight:700;color:var(--primary);"
+            data-i18n="sell">बेचें</span>
+        </button>
+        <button class="bottom-nav-item" onclick="App.setActiveNav(this);App.navigate('orders')">
+          <span class="material-symbols-outlined mat-icon">inventory_2</span><span data-i18n="orders">ऑर्डर</span>
+        </button>
+        <button class="bottom-nav-item" onclick="App.setActiveNav(this);App.navigate('profile')">
+          <span class="material-symbols-outlined mat-icon">person</span><span data-i18n="profile">प्रोफाइल</span>
+        </button>
+      </nav>
+    </div>
+
+
+    <!-- ====================================================
+       SCREEN 7: PRODUCT DETAILS
+       ==================================================== -->
+    <div id="screen-product-detail" class="screen">
+      <div id="product-detail-content" style="flex:1;overflow-y:auto;padding-bottom:80px;"></div>
+      <div
+        style="position:fixed;bottom:0;left:0;right:0;padding:12px var(--screen-margin) calc(12px + env(safe-area-inset-bottom,0));background:var(--surface-container-lowest);border-top:1px solid var(--outline-variant);z-index:50;display:flex;gap:12px;"
+        id="product-detail-actions"></div>
+    </div>
+
+
+    <!-- ====================================================
+       SCREEN 8: MAKE OFFER
+       ==================================================== -->
+    <div id="screen-make-offer" class="screen">
+      <header class="app-bar">
+        <button onclick="App.goBack()" class="app-bar-icon"><span
+            class="material-symbols-outlined">arrow_back</span></button>
+        <h1 class="app-bar-title">💰 ऑफर करें</h1>
+      </header>
+
+      <main class="main-content" style="padding-bottom:40px;">
+        <div id="offer-listing-preview" class="card card-body"
+          style="background:rgba(27,94,32,0.06);border:1.5px solid rgba(27,94,32,0.15);"></div>
+
+        <div class="card card-body" style="display:flex;flex-direction:column;gap:16px;">
+          <h2 class="text-headline-md">अपना ऑफर दें</h2>
+          <div class="input-wrap">
+            <label class="input-label">💰 ऑफर मूल्य / Offer Price (₹/kg) *</label>
+            <div class="input-icon-wrap">
+              <input id="offer-price" class="input" type="number" placeholder="2200" min="1" />
+              <span class="input-icon" style="font-weight:700;color:var(--primary);font-size:18px;">₹</span>
+            </div>
+            <span class="text-label-sm text-on-surface-variant" style="margin-top:4px;">किसान का अपेक्षित मूल्य: <span
+                id="farmer-asking-ref" style="color:var(--primary);font-weight:700;"></span></span>
+          </div>
+          <div class="input-wrap">
+            <label class="input-label">📦 मात्रा / Quantity (kg) *</label>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <button onclick="App.changeOfferQty(-100)"
+                style="width:44px;height:44px;border-radius:50%;background:var(--surface-container-high);font-size:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">−</button>
+              <input id="offer-qty" class="input" type="number"
+                style="text-align:center;font-size:20px;font-weight:700;" value="500" />
+              <button onclick="App.changeOfferQty(100)"
+                style="width:44px;height:44px;border-radius:50%;background:var(--surface-container-high);font-size:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">+</button>
+            </div>
+          </div>
+          <div class="input-wrap">
+            <label class="input-label">✉️ संदेश / Message (Optional)</label>
+            <textarea id="offer-msg" class="input" style="min-height:80px;padding-top:12px;resize:none;"
+              placeholder="किसान को संदेश लिखें..."></textarea>
+          </div>
+
+          <!-- Total calculation -->
+          <div style="background:var(--surface-container-low);border-radius:12px;padding:14px 16px;">
+            <div
+              style="display:flex;justify-content:space-between;font-size:14px;color:var(--on-surface-variant);margin-bottom:6px;">
+              <span>मूल्य × मात्रा</span>
+              <span id="offer-calc-sub">₹0</span>
+            </div>
+            <div
+              style="display:flex;justify-content:space-between;font-size:18px;font-weight:800;color:var(--primary);">
+              <span>कुल / Total</span>
+              <span id="offer-calc-total">₹0</span>
+            </div>
+          </div>
+
+          <div id="offer-error" class="hidden"
+            style="background:var(--error-container);color:var(--on-error-container);padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;">
+          </div>
+
+          <button class="btn btn-primary" onclick="App.submitOffer()">
+            <span class="material-symbols-outlined">send</span>
+            ऑफर भेजें / Send Offer
+          </button>
+          <p style="text-align:center;font-size:12px;color:var(--on-surface-variant);">ऑफर भेजने के बाद किसान इसे
+            स्वीकार या अस्वीकार कर सकते हैं</p>
+        </div>
+      </main>
+    </div>
+
+
+    <!-- ====================================================
+       SCREEN 9: MANDI PRICES
+       ==================================================== -->
+    <div id="screen-mandi-prices" class="screen">
+      <header class="app-bar mandi-header-bar">
+        <button onclick="App.goBack()" class="app-bar-icon" title="पीछे जाएं / Back">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <div class="mandi-header-title-box">
+          <h1 class="app-bar-title mandi-title-row">
+            <i data-lucide="bar-chart-3" class="mandi-title-icon"></i>
+            <span data-i18n="prices">मंडी भाव</span>
+            <span class="mandi-title-sub">APMC Wholesale Rates</span>
+          </h1>
+          <div class="mandi-header-meta">
+            <span class="mandi-meta-dot"></span>
+            <span>AGMARKNET · data.gov.in Live APMC Feed</span>
+          </div>
+        </div>
+        <div class="mandi-header-actions">
+          <button onclick="App.refreshMandiPrices()" class="app-bar-icon" title="ताज़ा करें / Refresh">
+            <i data-lucide="refresh-cw" style="width:18px;height:18px;"></i>
+          </button>
+          <button onclick="App.openLang()" class="app-bar-icon" title="Change Language">
+            <span class="material-symbols-outlined">translate</span>
+          </button>
+          <span class="mandi-live-badge" id="mandi-header-badge">
+            <span class="mandi-pulse-indicator"></span>
+            <span id="mandi-badge-text">LIVE APMC</span>
+          </span>
+        </div>
+      </header>
+
+      <main class="main-content mandi-main-content">
+        <!-- Crop Filter Chips Toolbar -->
+        <div class="mandi-crop-tabs-wrap">
+          <div class="mandi-crop-tabs" id="mandi-crop-tabs">
+            <button class="mandi-crop-chip active" data-crop="" onclick="App.setMandiFilter(this,'')">
+              <i data-lucide="layout-grid" class="chip-icon"></i>
+              <span>सभी फसलें / All</span>
+            </button>
+            <button class="mandi-crop-chip" data-crop="Tomato" onclick="App.setMandiFilter(this,'Tomato')">
+              <img src="https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=60&auto=format&fit=crop&q=80" alt="Tomato" class="chip-thumb" />
+              <span>टमाटर / Tomato</span>
+            </button>
+            <button class="mandi-crop-chip" data-crop="Potato" onclick="App.setMandiFilter(this,'Potato')">
+              <img src="https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=60&auto=format&fit=crop&q=80" alt="Potato" class="chip-thumb" />
+              <span>आलू / Potato</span>
+            </button>
+            <button class="mandi-crop-chip" data-crop="Onion" onclick="App.setMandiFilter(this,'Onion')">
+              <img src="https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=60&auto=format&fit=crop&q=80" alt="Onion" class="chip-thumb" />
+              <span>प्याज / Onion</span>
+            </button>
+            <button class="mandi-crop-chip" data-crop="Wheat" onclick="App.setMandiFilter(this,'Wheat')">
+              <img src="https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=60&auto=format&fit=crop&q=80" alt="Wheat" class="chip-thumb" />
+              <span>गेहूं / Wheat</span>
+            </button>
+            <button class="mandi-crop-chip" data-crop="Rice" onclick="App.setMandiFilter(this,'Rice')">
+              <img src="https://images.unsplash.com/photo-1586201375761-83865001e31c?w=60&auto=format&fit=crop&q=80" alt="Rice" class="chip-thumb" />
+              <span>चावल / Rice</span>
+            </button>
+            <button class="mandi-crop-chip" data-crop="Maize" onclick="App.setMandiFilter(this,'Maize')">
+              <img src="https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=60&auto=format&fit=crop&q=80" alt="Maize" class="chip-thumb" />
+              <span>मक्का / Maize</span>
+            </button>
+            <button class="mandi-crop-chip" data-crop="Chilli" onclick="App.setMandiFilter(this,'Chilli')">
+              <img src="https://images.unsplash.com/photo-1588252303782-cb80119abd6d?w=60&auto=format&fit=crop&q=80" alt="Chilli" class="chip-thumb" />
+              <span>मिर्च / Chilli</span>
+            </button>
+            <button class="mandi-crop-chip" data-crop="Garlic" onclick="App.setMandiFilter(this,'Garlic')">
+              <img src="https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?w=60&auto=format&fit=crop&q=80" alt="Garlic" class="chip-thumb" />
+              <span>लहसुन / Garlic</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Official Government Feed Banner -->
+        <div class="mandi-gov-banner">
+          <div class="mandi-gov-icon-box">
+            <i data-lucide="shield-check" class="mandi-gov-shield-icon"></i>
+          </div>
+          <div class="mandi-gov-content">
+            <div class="mandi-gov-top-row">
+              <span class="mandi-gov-title">भारत सरकार · AGMARKNET Official Mandi Feed</span>
+              <span class="mandi-gov-verified-pill">
+                <i data-lucide="badge-check" style="width:13px;height:13px;"></i> Verified Govt API
+              </span>
+            </div>
+            <p class="mandi-gov-desc">Official APMC wholesale mandi rates synced via data.gov.in (Directorate of Marketing & Inspection, Ministry of Agriculture). Direct e-NAM transaction gateway integration scheduled for upcoming release.</p>
+            <div class="mandi-gov-tags">
+              <span class="mandi-gov-tag"><i data-lucide="database" style="width:12px;height:12px;"></i> Resource ID: 9ef84268</span>
+              <span class="mandi-gov-tag"><i data-lucide="map-pin" style="width:12px;height:12px;"></i> Nationwide APMC Coverage</span>
+              <span class="mandi-gov-tag mandi-gov-tag-accent"><i data-lucide="cpu" style="width:12px;height:12px;"></i> AI Trend Analytics</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Market Insights Card -->
+        <div id="mandi-ai-insights" class="mandi-ai-card">
+          <div class="mandi-ai-header">
+            <div class="mandi-ai-title-wrap">
+              <div class="mandi-ai-icon-bubble">
+                <i data-lucide="sparkles" style="width:16px;height:16px;color:#b45309;"></i>
+              </div>
+              <div>
+                <h3 class="mandi-ai-title">कृषि AI बाजार विश्लेषण / Market Intelligence</h3>
+                <p class="mandi-ai-subtitle">Real-time modal price advisory & opportunity detection</p>
+              </div>
+            </div>
+            <span class="mandi-ai-sim-badge">
+              <i data-lucide="zap" style="width:12px;height:12px;"></i> AI OPTIMIZED
+            </span>
+          </div>
+          <div id="mandi-ai-content" class="mandi-ai-grid">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Mandi Price Table Card -->
+        <div class="mandi-table-card">
+          <!-- Table Toolbar -->
+          <div class="mandi-table-toolbar">
+            <div class="mandi-toolbar-left">
+              <div class="mandi-table-title-row">
+                <h3 class="mandi-table-heading">बाजार भाव / Market Rates</h3>
+                <span id="mandi-source-badge" class="mandi-source-pill">
+                  <i data-lucide="check-circle-2" style="width:13px;height:13px;"></i> Live: data.gov.in AGMARKNET
+                </span>
+              </div>
+              <span id="mandi-count-badge" class="mandi-count-text">लोड हो रहा है...</span>
+            </div>
+            <div class="mandi-toolbar-right">
+              <div class="mandi-search-input-wrap">
+                <i data-lucide="search" class="mandi-search-icon"></i>
+                <input type="text" id="mandi-search-input" placeholder="फसल या मंडी खोजें / Search..." oninput="App.filterMandiTable()" />
+              </div>
+              <select id="mandi-state-filter" class="mandi-filter-select" onchange="App.filterMandiTable()">
+                <option value="">सभी राज्य (All States)</option>
+              </select>
+              <div class="mandi-unit-pill">
+                <i data-lucide="tag" style="width:12px;height:12px;"></i>
+                <span>₹ / क्विंटल (Qtl)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mandi-table-scroll">
+            <table class="mandi-pro-table" id="mandi-table">
+              <thead>
+                <tr>
+                  <th style="min-width:180px;">फसल / Commodity</th>
+                  <th style="min-width:190px;">मंडी एवं राज्य / APMC & State</th>
+                  <th style="min-width:110px;text-align:right;">न्यूनतम / Min</th>
+                  <th style="min-width:110px;text-align:right;">अधिकतम / Max</th>
+                  <th style="min-width:140px;text-align:center;">मोडल भाव / Modal</th>
+                  <th style="min-width:120px;text-align:center;">रुझान / Trend</th>
+                  <th style="min-width:120px;text-align:center;">कार्यवाही / Action</th>
+                </tr>
+              </thead>
+              <tbody id="mandi-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+
+      <!-- Dynamic Bottom Nav -->
+      <nav class="bottom-nav" id="mandi-bottom-nav"></nav>
+    </div>
+
+
+    <!-- ====================================================
+       SCREEN 10: NEARBY MANDIS
+       ==================================================== -->
+    <div id="screen-nearby-mandis" class="screen">
+      <header class="app-bar">
+        <button onclick="App.goBack()" class="app-bar-icon"><span
+            class="material-symbols-outlined">arrow_back</span></button>
+        <h1 class="app-bar-title">📍 पास की मंडियां</h1>
+      </header>
+
+      <main class="main-content">
+        <!-- Map Placeholder -->
+        <div class="map-placeholder">
+          <div style="position:absolute;inset:0;background:linear-gradient(135deg,#c8e6c9,#a5d6a7,#81c784);"></div>
+          <!-- Map grid -->
+          <div
+            style="position:absolute;inset:0;opacity:0.3;background-image:repeating-linear-gradient(0deg,transparent,transparent 28px,rgba(255,255,255,0.5) 28px,rgba(255,255,255,0.5) 29px),repeating-linear-gradient(90deg,transparent,transparent 28px,rgba(255,255,255,0.5) 28px,rgba(255,255,255,0.5) 29px);">
+          </div>
+          <!-- Pin locations (demo) -->
+          <div class="map-pin" style="top:35%;left:40%;">🏪 Gandhinagar<br />4 km</div>
+          <div class="map-pin" style="top:55%;left:55%;background:var(--secondary);box-shadow:var(--shadow-md);">🏪
+            Ahmedabad<br />12 km</div>
+          <div class="map-pin" style="top:25%;left:65%;background:rgba(27,94,32,0.8);">🏪 Mehsana<br />28 km</div>
+          <!-- My location -->
+          <div
+            style="position:absolute;bottom:30%;left:43%;width:16px;height:16px;background:var(--tertiary-container);border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 6px rgba(108,34,0,0.2);">
+          </div>
+          <div
+            style="position:absolute;z-index:2;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,0.9);border-radius:12px;padding:10px 16px;text-align:center;">
+            <span style="font-size:13px;font-weight:700;color:var(--on-surface);">📍 आपकी लोकेशन<br /><span
+                style="font-weight:400;color:var(--on-surface-variant);font-size:11px;">Chiloda,
+                Gandhinagar</span></span>
+          </div>
+          <div
+            style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.6);color:#fff;border-radius:8px;padding:4px 8px;font-size:10px;">
+            ⚠️ Demo Map (GPS disabled in MVP)</div>
+        </div>
+
+        <!-- Mandi list -->
+        <div style="display:flex;flex-direction:column;gap:12px;" id="mandi-list"></div>
+      </main>
+    </div>
+
+
+    <!-- ====================================================
+       SCREEN 11: ORDERS
+       ==================================================== -->
+    <div id="screen-orders" class="screen">
+      <header class="app-bar" style="flex-direction:column;gap:8px;min-height:auto;padding-top:12px;">
+        <div style="display:flex;align-items:center;gap:8px;width:100%;">
+          <button onclick="App.goBack()" class="app-bar-icon"><span
+              class="material-symbols-outlined">arrow_back</span></button>
+          <h1 class="app-bar-title" data-i18n="order_offers">📦 ऑर्डर & ऑफर</h1>
+          <button onclick="App.openLang()" class="app-bar-icon" style="margin-left:auto;" title="Change Language"><span
+              class="material-symbols-outlined">translate</span></button>
+        </div>
+        <div class="tabs">
+          <button class="tab-pill active" id="ord-tab-offers" onclick="App.switchOrderTab('offers')"
+            data-i18n="offers_tab">💰 ऑफर</button>
+          <button class="tab-pill" id="ord-tab-orders" onclick="App.switchOrderTab('orders')" data-i18n="orders_tab">📦
+            ऑर्डर</button>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <div id="orders-offers-view" style="display:flex;flex-direction:column;gap:12px;"></div>
+        <div id="orders-orders-view" class="hidden" style="display:flex;flex-direction:column;gap:12px;"></div>
+      </main>
+
+      <!-- Orders Bottom Nav -->
+      <nav class="bottom-nav" id="orders-bottom-nav"></nav>
+    </div>
+
+
+    <!-- ====================================================
+       SCREEN 12: NOTIFICATIONS
+       ==================================================== -->
+    <div id="screen-notifications" class="screen">
+      <header class="app-bar">
+        <button onclick="App.goBack()" class="app-bar-icon"><span
+            class="material-symbols-outlined">arrow_back</span></button>
+        <h1 class="app-bar-title">🔔 सूचनाएं</h1>
+        <button onclick="App.markAllNotifRead()" class="section-link" style="margin-left:auto;font-size:13px;">सभी
+          पढ़ें</button>
+      </header>
+      <main class="main-content">
+        <div id="notif-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+      </main>
+    </div>
+
+
+    <!-- ====================================================
+       SCREEN 13: PROFILE
+       ==================================================== -->
+    <div id="screen-profile" class="screen">
+      <main class="main-content profile-main-wrapper">
+
+        <!-- Unified Profile Hero Card -->
+        <div class="profile-hero-card">
+          <div class="profile-hero-top-nav">
+            <button onclick="App.goBack()" class="profile-icon-btn" title="Back">
+              <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <span class="profile-hero-nav-title" data-i18n="profile">प्रोफाइल / Profile</span>
+            <button onclick="App.openLang()" class="profile-lang-pill-btn" title="Change Language">
+              <span class="material-symbols-outlined" style="font-size:18px;">translate</span>
+              <span id="profile-lang-badge">हिंदी</span>
+            </button>
+          </div>
+
+          <div class="profile-hero-body">
+            <div class="profile-identity-group">
+              <div class="profile-avatar-container">
+                <div id="profile-avatar" class="profile-avatar-circle">👨‍🌾</div>
+                <div class="profile-verified-badge-icon" title="e-NAM KYC Verified">
+                  <span class="material-symbols-outlined" style="font-size:15px;color:#fff;">verified</span>
+                </div>
+              </div>
+
+              <div class="profile-user-details">
+                <div class="profile-name-row">
+                  <h1 id="profile-name" class="profile-user-name"></h1>
+                  <span id="profile-verified" class="chip chip-primary profile-verified-chip">✅ सत्यापित / Verified</span>
+                </div>
+                <p id="profile-role-tag" class="profile-role-text"></p>
+                <div class="profile-badge-row">
+                  <span class="profile-sub-pill">🌱 KrishiLink Member</span>
+                  <span class="profile-sub-pill">🏛️ e-NAM APMC Connected</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Integrated Stats Ribbon in Hero -->
+            <div class="profile-hero-stats">
+              <div class="profile-stat-box">
+                <div class="profile-stat-icon-wrap" style="background:rgba(134,239,172,0.22);color:#86efac;">
+                  <span class="material-symbols-outlined" style="font-size:22px;">inventory_2</span>
+                </div>
+                <div>
+                  <span class="profile-stat-num" id="profile-stat1">0</span>
+                  <span class="profile-stat-txt" id="profile-stat1-label">Listings</span>
+                </div>
+              </div>
+
+              <div class="profile-stat-box">
+                <div class="profile-stat-icon-wrap" style="background:rgba(250,204,21,0.22);color:#facc15;">
+                  <span class="material-symbols-outlined" style="font-size:22px;">payments</span>
+                </div>
+                <div>
+                  <span class="profile-stat-num" id="profile-stat2">0</span>
+                  <span class="profile-stat-txt" id="profile-stat2-label">Sales</span>
+                </div>
+              </div>
+
+              <div class="profile-stat-box">
+                <div class="profile-stat-icon-wrap" style="background:rgba(255,255,255,0.2);color:#ffd166;">
+                  <span class="material-symbols-outlined" style="font-size:22px;">star</span>
+                </div>
+                <div>
+                  <span class="profile-stat-num" id="profile-rating">⭐ 4.7</span>
+                  <span class="profile-stat-txt">Rating</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2-Column Responsive Desktop Grid -->
+        <div class="profile-grid-container">
+          <!-- Left Column: Farm & Personal Details, Helpline -->
+          <div class="profile-col-left">
+            <div class="card profile-info-card">
+              <div class="profile-card-header">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <span class="profile-section-icon">📋</span>
+                  <div>
+                    <h2 class="profile-card-title">व्यक्तिगत एवं फ़ार्म विवरण</h2>
+                    <span class="profile-card-subtitle">Personal & Farm Details</span>
+                  </div>
+                </div>
+              </div>
+              <div id="profile-info-list" class="profile-info-items-list"></div>
+            </div>
+
+            <!-- Kisan Helpline Card -->
+            <div class="card profile-helpline-card">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div class="profile-helpline-icon">☎️</div>
+                <div style="flex:1;">
+                  <h3 style="font-size:15px;font-weight:700;color:var(--on-surface);">किसान कॉल सेंटर / Helpline</h3>
+                  <p style="font-size:12px;color:var(--on-surface-variant);margin-top:2px;">निःशुल्क कृषि सहायता (Toll-Free 24x7)</p>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid rgba(0,0,0,0.06);">
+                <span style="font-size:16px;font-weight:800;color:var(--primary);letter-spacing:0.5px;">1800-180-1551</span>
+                <a href="tel:18001801551" class="btn btn-primary" style="padding:7px 16px;font-size:13px;border-radius:999px;gap:6px;text-decoration:none;">
+                  <span class="material-symbols-outlined" style="font-size:16px;">call</span> कॉल करें
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Shortcuts Hub & Preferences -->
+          <div class="profile-col-right">
+            <!-- Services & Shortcuts Grid -->
+            <div class="card profile-hub-card">
+              <div class="profile-card-header">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <span class="profile-section-icon">⚡</span>
+                  <div>
+                    <h2 class="profile-card-title">त्वरित सुविधाएं व सेवाएं</h2>
+                    <span class="profile-card-subtitle">Platform Services & Shortcuts</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="profile-shortcuts-grid">
+                <div class="profile-shortcut-tile" onclick="App.navigate('mandi-prices')">
+                  <div class="shortcut-icon-badge" style="background:#e8f5e9;color:#2e7d32;">
+                    <span class="material-symbols-outlined">monitoring</span>
+                  </div>
+                  <div class="shortcut-text-wrap">
+                    <div class="shortcut-title" data-i18n="view_mandi_prices">मंडी भाव देखें</div>
+                    <div class="shortcut-desc">AGMARKNET Live Rates & Trends</div>
+                  </div>
+                  <span class="material-symbols-outlined shortcut-arrow">chevron_right</span>
+                </div>
+
+                <div class="profile-shortcut-tile" onclick="App.navigate('nearby-mandis')">
+                  <div class="shortcut-icon-badge" style="background:#e3f2fd;color:#1565c0;">
+                    <span class="material-symbols-outlined">location_on</span>
+                  </div>
+                  <div class="shortcut-text-wrap">
+                    <div class="shortcut-title" data-i18n="nearby_mandi">पास की मंडी</div>
+                    <div class="shortcut-desc">50 किमी दायरे की मंडियां खोजें</div>
+                  </div>
+                  <span class="material-symbols-outlined shortcut-arrow">chevron_right</span>
+                </div>
+
+                <div class="profile-shortcut-tile" onclick="App.navigate('orders')">
+                  <div class="shortcut-icon-badge" style="background:#fff3e0;color:#e65100;">
+                    <span class="material-symbols-outlined">receipt_long</span>
+                  </div>
+                  <div class="shortcut-text-wrap">
+                    <div class="shortcut-title" data-i18n="orders">मेरे ऑर्डर व सौदे</div>
+                    <div class="shortcut-desc">Track active orders and offers</div>
+                  </div>
+                  <span class="material-symbols-outlined shortcut-arrow">chevron_right</span>
+                </div>
+
+                <div class="profile-shortcut-tile" onclick="App.navigate('notifications')">
+                  <div class="shortcut-icon-badge" style="background:#f3e5f5;color:#7b1fa2;">
+                    <span class="material-symbols-outlined">notifications_active</span>
+                  </div>
+                  <div class="shortcut-text-wrap">
+                    <div class="shortcut-title" data-i18n="notifs">अलर्ट एवं सूचनाएं</div>
+                    <div class="shortcut-desc">Price alerts & deal notifications</div>
+                  </div>
+                  <span class="material-symbols-outlined shortcut-arrow">chevron_right</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Settings & Logout Card -->
+            <div class="card profile-settings-card">
+              <div class="profile-card-header">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <span class="profile-section-icon">⚙️</span>
+                  <div>
+                    <h2 class="profile-card-title">प्राथमिकताएं एवं सेटिंग्स</h2>
+                    <span class="profile-card-subtitle">Preferences & Account Management</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="profile-settings-list">
+                <div class="profile-setting-row" onclick="App.openLang()">
+                  <div style="display:flex;align-items:center;gap:14px;">
+                    <div class="setting-row-icon" style="background:rgba(22,101,52,0.1);color:var(--primary);">🌐</div>
+                    <div>
+                      <div style="font-size:14.5px;font-weight:700;color:var(--on-surface);" data-i18n="change_lang">भाषा बदलें / Change Language</div>
+                      <div style="font-size:12px;color:var(--on-surface-variant);">अपनी पसंदीदा क्षेत्रीय भाषा चुनें</div>
+                    </div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span id="current-lang-label" class="chip chip-surface" style="font-size:12px;font-weight:700;color:var(--primary);background:rgba(22,101,52,0.1);padding:4px 12px;border-radius:999px;">हिंदी</span>
+                    <span class="material-symbols-outlined" style="font-size:18px;color:var(--on-surface-variant);">chevron_right</span>
+                  </div>
+                </div>
+
+                <div class="profile-setting-row logout-row" onclick="App.logout()">
+                  <div style="display:flex;align-items:center;gap:14px;">
+                    <div class="setting-row-icon" style="background:rgba(186,26,26,0.1);color:var(--error);">🚪</div>
+                    <div>
+                      <div style="font-size:14.5px;font-weight:700;color:var(--error);" data-i18n="logout">लॉगआउट करें / Logout</div>
+                      <div style="font-size:12px;color:var(--on-surface-variant);">सुरक्षित रूप से इस सत्र से बाहर आएं</div>
+                    </div>
+                  </div>
+                  <span class="material-symbols-outlined" style="font-size:20px;color:var(--error);">logout</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="profile-footer-brand">
+              <span>KrishiLink v1.0.0</span>
+              <span>•</span>
+              <span>AGMARKNET Integrated</span>
+              <span>•</span>
+              <span>Made with ❤️ for Indian Farmers</span>
+            </div>
+          </div>
+        </div>
+
+      </main>
+
+      <!-- Profile Bottom Nav -->
+      <nav class="bottom-nav" id="profile-bottom-nav"></nav>
+    </div>
+
+
+    <!-- ====================================================
+       SCREEN 14: BUYER DASHBOARD
+       ==================================================== -->
+    <div id="screen-buyer-dashboard" class="screen">
+      <header class="app-bar" style="flex-direction:column;gap:8px;min-height:auto;padding-top:12px;">
+        <div style="display:flex;align-items:center;gap:8px;width:100%;">
+          <div style="flex:1;">
+            <!-- KrishiLink logo -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" fill="none"
+              style="width:110px;height:26px;flex-shrink:0;">
+              <rect width="40" height="40" y="4" rx="10" fill="#15803D" />
+              <path d="M14 28C14 20 20 14 26 14C26 22 20 28 14 28Z" fill="#86EFAC" />
+              <path d="M26 14C26 22 22 30 14 34" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+              <circle cx="28" cy="16" r="3" fill="#FACC15" />
+              <path d="M20 28L28 36" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+              <text x="50" y="30" font-family="Plus Jakarta Sans, sans-serif" font-size="22" font-weight="800"
+                fill="#0F172A" letter-spacing="-0.5">Krishi<tspan fill="#16A34A">Link</tspan></text>
+              <text x="51" y="41" font-family="Plus Jakarta Sans, sans-serif" font-size="8.5" font-weight="600"
+                fill="#64748B" letter-spacing="1.2">BUYER PORTAL</text>
+            </svg>
+            <h1 id="buyer-greeting" class="app-bar-title" style="font-size:17px;">नमस्ते! 🏪</h1>
+          </div>
+          <button onclick="App.navigate('notifications')" class="app-bar-icon"><span
+              class="material-symbols-outlined">notifications</span></button>
+          <button onclick="App.openLang()" class="header-lang-btn" id="buyer-lang-btn">
+            🌐 <span id="buyer-lang-lbl">ENGLISH (ENGLISH)</span> ▾
+          </button>
+          <button onclick="App.navigate('profile')" class="app-bar-icon"><span id="buyer-avatar-bar"
+              style="font-size:22px;">🏪</span></button>
+        </div>
+        <div class="search-bar" style="width:100%;">
+          <i data-lucide="search" style="width:18px;height:18px;color:var(--on-surface-variant);margin-left:4px;"></i>
+          <input type="text" placeholder="फसल खोजें / Search produce..." oninput="App.filterMarket()" />
+          <button onclick="App.showVoiceMsg()"
+            style="background:var(--secondary-container);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i data-lucide="mic" style="width:16px;height:16px;color:var(--on-secondary-container);"></i>
+          </button>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <!-- Buyer Stats -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+          <div class="stat-card">
+            <div class="stat-card-icon icon-amber">
+              <i data-lucide="tag"></i>
+            </div>
+            <span class="stat-value" id="buyer-stat-offers">0</span>
+            <span class="stat-label">My Offers</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon icon-green">
+              <i data-lucide="package"></i>
+            </div>
+            <span class="stat-value" id="buyer-stat-orders">0</span>
+            <span class="stat-label">Orders</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon icon-amber">
+              <i data-lucide="star"></i>
+            </div>
+            <span class="stat-value" id="buyer-rating">4.8</span>
+            <span class="stat-label">Rating</span>
+          </div>
+        </div>
+
+        <!-- Featured Listings -->
+        <div>
+          <div class="section-header">
+            <h2 class="section-title" style="display:flex;align-items:center;gap:6px;">
+              <i data-lucide="store" style="width:20px;height:20px;color:var(--primary);"></i>
+              Available Produce Lots
+            </h2>
+            <button class="section-link" onclick="App.navigate('marketplace')">Browse All <span
+                class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span></button>
+          </div>
+
+          <!-- Grade Filter Pills -->
+          <div class="grade-filter-row" style="width:100%;margin-bottom:8px;">
+            <button class="grade-pill active" data-grade="all" onclick="App.setGradeFilter(this,'all')">ALL GRADES</button>
+            <button class="grade-pill" data-grade="A+" onclick="App.setGradeFilter(this,'A+')">GRADE A+</button>
+            <button class="grade-pill" data-grade="A" onclick="App.setGradeFilter(this,'A')">GRADE A</button>
+            <button class="grade-pill" data-grade="B+" onclick="App.setGradeFilter(this,'B+')">GRADE B+</button>
+          </div>
+
+          <div class="filter-row">
+            <button class="tab-pill active" data-filter="all" onclick="App.setMarketFilter(this,'all')">🌾 All</button>
+            <button class="tab-pill" data-filter="Tomato" onclick="App.setMarketFilter(this,'Tomato')">Tomato</button>
+            <button class="tab-pill" data-filter="Potato" onclick="App.setMarketFilter(this,'Potato')">Potato</button>
+            <button class="tab-pill" data-filter="Onion" onclick="App.setMarketFilter(this,'Onion')">Onion</button>
+            <button class="tab-pill" data-filter="Wheat" onclick="App.setMarketFilter(this,'Wheat')">Wheat</button>
+          </div>
+          <div id="buyer-market-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));gap:14px;margin-top:12px;">
+          </div>
+        </div>
+        </div>
+
+        <!-- My Offers -->
+        <div>
+          <div class="section-header">
+            <h2 class="section-title">💰 My Offers</h2>
+            <button class="section-link" onclick="App.switchOrderTab('offers');App.navigate('orders')">View All</button>
+          </div>
+          <div id="buyer-offers-preview" style="display:flex;flex-direction:column;gap:10px;"></div>
+        </div>
+      </main>
+
+      <!-- Buyer Bottom Nav -->
+      <nav class="bottom-nav">
+        <button class="bottom-nav-item active" onclick="App.setActiveNav(this);App.navigate('buyer-dashboard')">
+          <div class="nav-indicator"></div>
+          <span class="material-symbols-outlined mat-icon">home</span><span data-i18n="home">होम</span>
+        </button>
+        <button class="bottom-nav-item" onclick="App.setActiveNav(this);App.navigate('marketplace')">
+          <span class="material-symbols-outlined mat-icon">storefront</span><span data-i18n="market">Browse</span>
+        </button>
+        <button class="bottom-nav-item" onclick="App.setActiveNav(this);App.navigate('mandi-prices')">
+          <span class="material-symbols-outlined mat-icon">bar_chart</span><span data-i18n="prices">Prices</span>
+        </button>
+        <button class="bottom-nav-item" onclick="App.setActiveNav(this);App.navigate('orders')">
+          <span class="material-symbols-outlined mat-icon">inventory_2</span><span data-i18n="orders">Orders</span>
+        </button>
+        <button class="bottom-nav-item" onclick="App.setActiveNav(this);App.navigate('profile')">
+          <span class="material-symbols-outlined mat-icon">person</span><span data-i18n="profile">Profile</span>
+        </button>
+      </nav>
+    </div>
+
+
+    <!-- ====================================================
+       SCREEN 15: ADMIN DASHBOARD
+       ==================================================== -->
+    <div id="screen-admin-dashboard" class="screen">
+      <header class="app-bar">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" fill="none" style="width:120px;height:29px;">
+          <rect width="40" height="40" y="4" rx="10" fill="#15803D" />
+          <path d="M14 28C14 20 20 14 26 14C26 22 20 28 14 28Z" fill="#86EFAC" />
+          <path d="M26 14C26 22 22 30 14 34" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+          <circle cx="28" cy="16" r="3" fill="#FACC15" />
+          <path d="M20 28L28 36" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+          <text x="50" y="30" font-family="Plus Jakarta Sans, sans-serif" font-size="22" font-weight="800"
+            fill="#0F172A" letter-spacing="-0.5">Krishi<tspan fill="#16A34A">Link</tspan></text>
+          <text x="51" y="41" font-family="Plus Jakarta Sans, sans-serif" font-size="8.5" font-weight="600"
+            fill="#64748B" letter-spacing="1.2">ADMIN</text>
+        </svg>
+        <button onclick="App.logout()" class="app-bar-icon" title="Logout"><span class="material-symbols-outlined"
+            style="color:var(--error);">logout</span></button>
+      </header>
+
+      <main class="main-content">
+        <!-- Admin Stats -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="stat-card">
+            <span style="font-size:22px;">👨‍🌾</span>
+            <span class="stat-value" id="admin-farmers">2</span>
+            <span class="stat-label">Total Farmers</span>
+          </div>
+          <div class="stat-card">
+            <span style="font-size:22px;">🏪</span>
+            <span class="stat-value" id="admin-buyers">2</span>
+            <span class="stat-label">Total Buyers</span>
+          </div>
+          <div class="stat-card">
+            <span style="font-size:22px;">📋</span>
+            <span class="stat-value" id="admin-listings">0</span>
+            <span class="stat-label">Active Listings</span>
+          </div>
+          <div class="stat-card">
+            <span style="font-size:22px;">💰</span>
+            <span class="stat-value" id="admin-offers">0</span>
+            <span class="stat-label">Pending Offers</span>
+          </div>
+          <div class="stat-card">
+            <span style="font-size:22px;">📦</span>
+            <span class="stat-value" id="admin-orders">0</span>
+            <span class="stat-label">Total Orders</span>
+          </div>
+          <div class="stat-card">
+            <span style="font-size:22px;">💵</span>
+            <span class="stat-value" id="admin-revenue" style="font-size:18px;">₹0</span>
+            <span class="stat-label">GMV (₹)</span>
+          </div>
+        </div>
+
+        <!-- Users table -->
+        <div>
+          <div class="section-header">
+            <h2 class="section-title">👥 Users</h2>
+          </div>
+          <div class="card" style="overflow-x:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Role</th>
+                  <th>Phone</th>
+                  <th>Verified</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-users-table"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Listings table -->
+        <div>
+          <div class="section-header">
+            <h2 class="section-title">🌾 Listings</h2>
+          </div>
+          <div class="card" style="overflow-x:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Crop</th>
+                  <th>Qty</th>
+                  <th>Price</th>
+                  <th>Farmer</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="admin-listings-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+
+
+    <!-- ====================================================
+       SCREEN 16: FARMER ONBOARDING WIZARD
+       ==================================================== -->
+    <div id="screen-onboarding-farmer" class="screen">
+      <div class="onboarding-screen">
+        <div class="onboarding-card">
+          <!-- Header Branding -->
+          <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f1f5f9;padding-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:36px;height:36px;border-radius:10px;background:#15803d;display:flex;align-items:center;justify-content:center;color:#fff;">
+                <i data-lucide="sprout" style="width:20px;height:20px;"></i>
+              </div>
+              <div>
+                <h3 style="margin:0;font-size:15px;font-weight:800;color:#0f172a;">KrishiLink Producer KYC</h3>
+                <span style="font-size:11px;color:#64748b;font-weight:600;">Farmer Onboarding & AI Verification</span>
+              </div>
+            </div>
+            <button onclick="App.navigate('farmer-dashboard')" class="btn btn-outline" style="min-height:30px;padding:2px 10px;font-size:12px;">Skip / बाद में</button>
+          </div>
+
+          <!-- Step Indicators -->
+          <div class="onboarding-progress">
+            <div class="onboarding-progress-track">
+              <div class="onboarding-progress-fill" id="farmer-ob-progress-bar" style="width: 33%;"></div>
+            </div>
+            <div class="onboarding-step-indicator active" id="f-step-ind-1">1</div>
+            <div class="onboarding-step-indicator" id="f-step-ind-2">2</div>
+            <div class="onboarding-step-indicator" id="f-step-ind-3">3</div>
+          </div>
+
+          <!-- STEP 1: Farm & KYC Details -->
+          <div id="farmer-ob-step-1" class="onboarding-step-pane">
+            <h2 class="onboarding-hero-title">कृषि भूमि एवं पहचान विवरण</h2>
+            <p class="onboarding-hero-desc">Enter your landholdings and farm details for AI produce grading verification.</p>
+
+            <div style="display:flex;flex-direction:column;gap:14px;margin-top:16px;">
+              <div class="input-wrap">
+                <label class="input-label">आधार संख्या / PM-KISAN Beneficiary ID *</label>
+                <input id="ob-f-aadhaar" class="input" type="text" placeholder="XXXX-XXXX-XXXX / 12-digit ID" />
+              </div>
+
+              <div class="onboarding-field-grid">
+                <div class="input-wrap">
+                  <label class="input-label">खेत का आकार / Landholding (Acres) *</label>
+                  <select id="ob-f-land" class="input">
+                    <option value="1-2">सीमांत (< 2.5 एकड़ / Marginal)</option>
+                    <option value="2-5" selected>लघु (2.5 - 5 एकड़ / Small)</option>
+                    <option value="5-10">मध्यम (5 - 10 एकड़ / Medium)</option>
+                    <option value="10+">बड़ा (10+ एकड़ / Large Commercial)</option>
+                  </select>
+                </div>
+                <div class="input-wrap">
+                  <label class="input-label">सिंचाई का साधन / Irrigation Source</label>
+                  <select id="ob-f-irrigation" class="input">
+                    <option value="drip">ड्रिप / स्प्रिंकलर (Drip/Micro)</option>
+                    <option value="tubewell" selected>नलकूप / बोरवेल (Tube Well)</option>
+                    <option value="canal">नहर (Canal Irrigation)</option>
+                    <option value="rainfed">वर्षा आधारित (Rainfed)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="input-wrap">
+                <label class="input-label">मुख्य उत्पादित फसलें / Primary Crops *</label>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;">
+                  <button type="button" class="tab-pill active" onclick="this.classList.toggle('active')">🧅 प्याज / Onion</button>
+                  <button type="button" class="tab-pill active" onclick="this.classList.toggle('active')">🍅 टमाटर / Tomato</button>
+                  <button type="button" class="tab-pill active" onclick="this.classList.toggle('active')">🥔 आलू / Potato</button>
+                  <button type="button" class="tab-pill" onclick="this.classList.toggle('active')">🌾 गेहूं / Wheat</button>
+                  <button type="button" class="tab-pill" onclick="this.classList.toggle('active')">🌽 मक्का / Maize</button>
+                  <button type="button" class="tab-pill" onclick="this.classList.toggle('active')">🫘 सोयाबीन / Soyabean</button>
+                </div>
+              </div>
+
+              <button type="button" class="btn btn-primary" style="margin-top:12px;min-height:48px;" onclick="App.setFarmerOBStep(2)">
+                आगे बढ़ें / Continue to Bank & Mandi →
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 2: Mandi & Bank Link -->
+          <div id="farmer-ob-step-2" class="onboarding-step-pane" style="display:none;">
+            <h2 class="onboarding-hero-title">बैंक खाता व पसंदीदा APMC मंडी</h2>
+            <p class="onboarding-hero-desc">Link your bank account for instant escrow payout and select your nearest mandi.</p>
+
+            <div style="display:flex;flex-direction:column;gap:14px;margin-top:16px;">
+              <div class="input-wrap">
+                <label class="input-label">निकटतम APMC मंडी / Nearest APMC Mandi *</label>
+                <select id="ob-f-mandi" class="input">
+                  <option value="Lasalgaon (Nashik)">Lasalgaon APMC (Nashik, Maharashtra)</option>
+                  <option value="Azadpur (Delhi)">Azadpur Mandi (New Delhi)</option>
+                  <option value="Vashi (Navi Mumbai)">Vashi APMC (Navi Mumbai)</option>
+                  <option value="Indore (Madhya Pradesh)">Indore Mandi (Madhya Pradesh)</option>
+                  <option value="Khanna (Punjab)">Khanna APMC (Punjab)</option>
+                  <option value="Gondal (Gujarat)">Gondal APMC (Gujarat)</option>
+                </select>
+              </div>
+
+              <div class="onboarding-field-grid">
+                <div class="input-wrap">
+                  <label class="input-label">बैंक खाता संख्या / Account Number *</label>
+                  <input id="ob-f-account" class="input" type="password" placeholder="Account Number" value="50100428919201" />
+                </div>
+                <div class="input-wrap">
+                  <label class="input-label">IFSC कोड / IFSC Code *</label>
+                  <input id="ob-f-ifsc" class="input" type="text" placeholder="HDFC0000123" value="SBIN0001234" />
+                </div>
+              </div>
+
+              <div style="background:#f8fafc;padding:12px 14px;border-radius:12px;border:1px solid #e2e8f0;display:flex;align-items:center;gap:10px;">
+                <i data-lucide="shield-check" style="width:24px;height:24px;color:#15803d;flex-shrink:0;"></i>
+                <div style="font-size:12px;color:#475569;">
+                  <strong style="color:#0f172a;display:block;">100% Escrow Protected</strong>
+                  Payment is locked by buyer in KrishiLink Escrow before dispatch and released directly upon delivery.
+                </div>
+              </div>
+
+              <div style="display:flex;gap:12px;margin-top:12px;">
+                <button type="button" class="btn btn-outline" style="flex:1;min-height:48px;" onclick="App.setFarmerOBStep(1)">← पीछे / Back</button>
+                <button type="button" class="btn btn-primary" style="flex:2;min-height:48px;" onclick="App.setFarmerOBStep(3)">AI सत्यापन पूरा करें / Verify →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 3: Instant AI Verification Success -->
+          <div id="farmer-ob-step-3" class="onboarding-step-pane" style="display:none;text-align:center;">
+            <div style="width:72px;height:72px;border-radius:50%;background:#dcfce7;color:#15803d;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 0 0 10px rgba(21, 128, 61, 0.1);">
+              <i data-lucide="award" style="width:40px;height:40px;"></i>
+            </div>
+            <h2 class="onboarding-hero-title">बधाई! AI सत्यापन सफल</h2>
+            <p class="onboarding-hero-desc">Your KrishiLink Verified Producer Pass has been generated with Multi-Spectral Computer Vision certification.</p>
+
+            <div style="margin:20px 0;background:#f0fdf4;border:1.5px solid #86efac;border-radius:16px;padding:16px;text-align:left;display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-weight:800;color:#166534;font-size:13px;display:flex;align-items:center;gap:6px;">
+                  <i data-lucide="check-circle" style="width:16px;height:16px;"></i> AI-VERIFIED PRODUCER
+                </span>
+                <span class="badge" style="background:#d1fae5;color:#065f46;font-size:10.5px;">ACTIVE</span>
+              </div>
+              <div style="font-size:12px;color:#334155;">
+                • Premium <strong>Grade A+ / A</strong> priority listing in Marketplace<br/>
+                • Direct bidding access to 1,200+ verified buyers<br/>
+                • AGMARKNET live price parity guarantee
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-primary" style="min-height:50px;width:100%;font-size:16px;font-weight:800;" onclick="App.finishFarmerOB()">
+              डैशबोर्ड खोलें / Go to Dashboard 🚀
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================
+       SCREEN 17: BUYER ONBOARDING WIZARD
+       ==================================================== -->
+    <div id="screen-onboarding-buyer" class="screen">
+      <div class="onboarding-screen">
+        <div class="onboarding-card">
+          <!-- Header Branding -->
+          <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f1f5f9;padding-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:36px;height:36px;border-radius:10px;background:#0284c7;display:flex;align-items:center;justify-content:center;color:#fff;">
+                <i data-lucide="building-2" style="width:20px;height:20px;"></i>
+              </div>
+              <div>
+                <h3 style="margin:0;font-size:15px;font-weight:800;color:#0f172a;">KrishiLink Institutional Procurement</h3>
+                <span style="font-size:11px;color:#64748b;font-weight:600;">Buyer Onboarding & Trade Verification</span>
+              </div>
+            </div>
+            <button onclick="App.navigate('buyer-dashboard')" class="btn btn-outline" style="min-height:30px;padding:2px 10px;font-size:12px;">Skip / बाद में</button>
+          </div>
+
+          <!-- Step Indicators -->
+          <div class="onboarding-progress">
+            <div class="onboarding-progress-track">
+              <div class="onboarding-progress-fill" id="buyer-ob-progress-bar" style="width: 33%;"></div>
+            </div>
+            <div class="onboarding-step-indicator active" id="b-step-ind-1">1</div>
+            <div class="onboarding-step-indicator" id="b-step-ind-2">2</div>
+            <div class="onboarding-step-indicator" id="b-step-ind-3">3</div>
+          </div>
+
+          <!-- STEP 1: Business Profile & KYC -->
+          <div id="buyer-ob-step-1" class="onboarding-step-pane">
+            <h2 class="onboarding-hero-title">व्यापार एवं टैक्स प्रोफाइल</h2>
+            <p class="onboarding-hero-desc">Register your enterprise details for tax-compliant direct farm procurement.</p>
+
+            <div style="display:flex;flex-direction:column;gap:14px;margin-top:16px;">
+              <div class="input-wrap">
+                <label class="input-label">कंपनी / फर्म का नाम / Legal Entity Name *</label>
+                <input id="ob-b-company" class="input" type="text" placeholder="e.g. Kisan Fresh Logistics Pvt Ltd" value="AgroMart Traders" />
+              </div>
+
+              <div class="onboarding-field-grid">
+                <div class="input-wrap">
+                  <label class="input-label">व्यापार का प्रकार / Business Type *</label>
+                  <select id="ob-b-type" class="input">
+                    <option value="wholesaler">थोक व्यापारी (Wholesaler / Trader)</option>
+                    <option value="processor">फूड प्रोसेसर (Food Processing Plant)</option>
+                    <option value="retail">खुदरा श्रृंखला (Supermarket / Retail Chain)</option>
+                    <option value="exporter">निर्यातक (Agricultural Exporter)</option>
+                  </select>
+                </div>
+                <div class="input-wrap">
+                  <label class="input-label">GSTIN / FSSAI लाइसेंस *</label>
+                  <input id="ob-b-gst" class="input" type="text" placeholder="27AAAAA0000A1Z5" value="27AABCK1234F1Z8" />
+                </div>
+              </div>
+
+              <div class="input-wrap">
+                <label class="input-label">प्राथमिक संचालन क्षेत्र / Operating State *</label>
+                <select id="ob-b-state" class="input">
+                  <option>Maharashtra</option>
+                  <option>Delhi NCR</option>
+                  <option>Gujarat</option>
+                  <option>Punjab</option>
+                  <option>Uttar Pradesh</option>
+                  <option>Madhya Pradesh</option>
+                  <option>Karnataka</option>
+                </select>
+              </div>
+
+              <button type="button" class="btn btn-primary" style="margin-top:12px;min-height:48px;" onclick="App.setBuyerOBStep(2)">
+                आगे बढ़ें / Procurement Preferences →
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 2: Trade & Procurement Preferences -->
+          <div id="buyer-ob-step-2" class="onboarding-step-pane" style="display:none;">
+            <h2 class="onboarding-hero-title">खरीद आवश्यकताएं एवं फसलें</h2>
+            <p class="onboarding-hero-desc">Set your commodity preferences to receive instant farmer lot notifications.</p>
+
+            <div style="display:flex;flex-direction:column;gap:14px;margin-top:16px;">
+              <div class="input-wrap">
+                <label class="input-label">प्राथमिक खरीद फसलें / Target Commodities *</label>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;">
+                  <button type="button" class="tab-pill active" onclick="this.classList.toggle('active')">🧅 प्याज / Onion</button>
+                  <button type="button" class="tab-pill active" onclick="this.classList.toggle('active')">🍅 टमाटर / Tomato</button>
+                  <button type="button" class="tab-pill active" onclick="this.classList.toggle('active')">🥔 आलू / Potato</button>
+                  <button type="button" class="tab-pill" onclick="this.classList.toggle('active')">🌾 गेहूं / Wheat</button>
+                  <button type="button" class="tab-pill" onclick="this.classList.toggle('active')">🌽 मक्का / Maize</button>
+                </div>
+              </div>
+
+              <div class="onboarding-field-grid">
+                <div class="input-wrap">
+                  <label class="input-label">मासिक खरीद मात्रा / Monthly Volume *</label>
+                  <select id="ob-b-volume" class="input">
+                    <option value="10-50">10 – 50 Metric Tonnes</option>
+                    <option value="50-200" selected>50 – 200 Metric Tonnes</option>
+                    <option value="200-1000">200 – 1,000 Metric Tonnes</option>
+                    <option value="1000+">1,000+ Metric Tonnes</option>
+                  </select>
+                </div>
+                <div class="input-wrap">
+                  <label class="input-label">पसंदीदा न्यूनतम ग्रेड / Min Grade</label>
+                  <select id="ob-b-grade" class="input">
+                    <option value="A+" selected>Grade A+ (Premium Export)</option>
+                    <option value="A">Grade A (Standard APMC)</option>
+                    <option value="B+">Grade B+ (Processing)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:12px;margin-top:12px;">
+                <button type="button" class="btn btn-outline" style="flex:1;min-height:48px;" onclick="App.setBuyerOBStep(1)">← पीछे / Back</button>
+                <button type="button" class="btn btn-primary" style="flex:2;min-height:48px;" onclick="App.setBuyerOBStep(3)">एस्क्रो व सत्यापन सक्रिय करें →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 3: Escrow & Institutional Pass -->
+          <div id="buyer-ob-step-3" class="onboarding-step-pane" style="display:none;text-align:center;">
+            <div style="width:72px;height:72px;border-radius:50%;background:#e0f2fe;color:#0284c7;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 0 0 10px rgba(2, 132, 199, 0.1);">
+              <i data-lucide="shield-check" style="width:40px;height:40px;"></i>
+            </div>
+            <h2 class="onboarding-hero-title">सत्यापित खरीदार खाता सक्रिय</h2>
+            <p class="onboarding-hero-desc">Your KrishiLink Institutional Buyer Account has been initialized with instant escrow capabilities.</p>
+
+            <div style="margin:20px 0;background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:16px;padding:16px;text-align:left;display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-weight:800;color:#0f172a;font-size:13px;display:flex;align-items:center;gap:6px;">
+                  <i data-lucide="check-circle" style="width:16px;height:16px;color:#0284c7;"></i> VERIFIED INSTITUTIONAL BUYER
+                </span>
+                <span class="badge" style="background:#e0f2fe;color:#0369a1;font-size:10.5px;">APPROVED</span>
+              </div>
+              <div style="font-size:12px;color:#475569;">
+                • Direct farmer bids with 0% middleman fees<br/>
+                • Multi-spectral computer vision inspection reports on every lot<br/>
+                • Digital tax invoice generation upon delivery
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-primary" style="min-height:50px;width:100%;font-size:16px;font-weight:800;" onclick="App.finishBuyerOB()">
+              मार्केटप्लेस देखें / Explore Live Market 🚀
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ====================================================
+       MODALS & SHEETS
+       ==================================================== -->
+
+    <!-- Voice Modal -->
+    <div class="modal-backdrop hidden" id="voice-modal" onclick="App.closeVoice()">
+      <div class="bottom-sheet" onclick="e=>e.stopPropagation()" style="text-align:center;">
+        <div class="sheet-handle"></div>
+        <div
+          style="width:80px;height:80px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;animation:pulse 1.5s ease infinite;box-shadow:0 0 0 16px rgba(27,94,32,0.1);">
+          <span class="material-symbols-outlined"
+            style="font-size:38px;color:#fff;font-variation-settings:'FILL' 1;">mic</span>
+        </div>
+        <h2 class="text-headline-md">सुन रहे हैं... 👂</h2>
+        <p class="text-body-md text-on-surface-variant" style="margin-top:8px;">Listening...</p>
+        <div style="margin:24px 0;display:flex;justify-content:center;gap:4px;" id="voice-wave">
+          <div
+            style="width:4px;border-radius:4px;background:var(--primary);animation:wave 1s ease infinite;animation-delay:0s;height:24px;">
+          </div>
+          <div
+            style="width:4px;border-radius:4px;background:var(--secondary);animation:wave 1s ease infinite;animation-delay:0.1s;height:24px;">
+          </div>
+          <div
+            style="width:4px;border-radius:4px;background:var(--primary);animation:wave 1s ease infinite;animation-delay:0.2s;height:24px;">
+          </div>
+          <div
+            style="width:4px;border-radius:4px;background:var(--secondary);animation:wave 1s ease infinite;animation-delay:0.3s;height:24px;">
+          </div>
+          <div
+            style="width:4px;border-radius:4px;background:var(--primary);animation:wave 1s ease infinite;animation-delay:0.4s;height:24px;">
+          </div>
+        </div>
+        <p style="font-size:13px;color:var(--on-surface-variant);">🎤 Voice feature – Demo mode. Real voice integration
+          via Web Speech API / AI available in full version.</p>
+        <button class="btn btn-outline" style="margin-top:16px;width:auto;padding:0 32px;"
+          onclick="App.closeVoice()">रद्द करें / Cancel</button>
+      </div>
+    </div>
+
+    <!-- ============ LANGUAGE SWITCHER MODAL ============ -->
+    <div class="modal-backdrop hidden" id="lang-modal" onclick="App.closeLang()">
+      <div class="bottom-sheet" onclick="event.stopPropagation()"
+        style="padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));">
+        <div class="sheet-handle"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <h2 style="font-size:20px;font-weight:800;color:var(--on-surface);">🌐 भाषा चुनें</h2>
+          <span style="font-size:13px;color:var(--on-surface-variant);">Choose Language</span>
+        </div>
+        <!-- Language options -->
+        <div style="display:flex;flex-direction:column;gap:10px;" id="lang-options">
+          <button onclick="App.setLang('hi')" id="lang-hi" class="lang-btn active-lang">
+            <span style="font-size:26px;">🇮🇳</span>
+            <div style="flex:1;text-align:left;">
+              <div style="font-size:16px;font-weight:700;">हिंदी</div>
+              <div style="font-size:12px;opacity:0.7;">Hindi (Default)</div>
+            </div>
+            <span id="lang-hi-check" class="material-symbols-outlined"
+              style="color:var(--primary);font-size:22px;font-variation-settings:'FILL' 1;">check_circle</span>
+          </button>
+          <button onclick="App.setLang('en')" id="lang-en" class="lang-btn">
+            <span style="font-size:26px;">🇬🇧</span>
+            <div style="flex:1;text-align:left;">
+              <div style="font-size:16px;font-weight:700;">English</div>
+              <div style="font-size:12px;opacity:0.7;">English Only</div>
+            </div>
+            <span id="lang-en-check" class="material-symbols-outlined"
+              style="color:var(--on-surface-variant);font-size:22px;">radio_button_unchecked</span>
+          </button>
+          <button onclick="App.setLang('hinglish')" id="lang-hinglish" class="lang-btn">
+            <span style="font-size:26px;">🇮🇳</span>
+            <div style="flex:1;text-align:left;">
+              <div style="font-size:16px;font-weight:700;">Hinglish</div>
+              <div style="font-size:12px;opacity:0.7;">Hindi + English mix</div>
+            </div>
+            <span id="lang-hinglish-check" class="material-symbols-outlined"
+              style="color:var(--on-surface-variant);font-size:22px;">radio_button_unchecked</span>
+          </button>
+          <button onclick="App.setLang('mr')" id="lang-mr" class="lang-btn">
+            <span style="font-size:26px;">🏛️</span>
+            <div style="flex:1;text-align:left;">
+              <div style="font-size:16px;font-weight:700;">मराठी</div>
+              <div style="font-size:12px;opacity:0.7;">Marathi (Maharashtra)</div>
+            </div>
+            <span id="lang-mr-check" class="material-symbols-outlined"
+              style="color:var(--on-surface-variant);font-size:22px;">radio_button_unchecked</span>
+          </button>
+          <button onclick="App.setLang('pa')" id="lang-pa" class="lang-btn">
+            <span style="font-size:26px;">🌾</span>
+            <div style="flex:1;text-align:left;">
+              <div style="font-size:16px;font-weight:700;">ਪੰਜਾਬੀ</div>
+              <div style="font-size:12px;opacity:0.7;">Punjabi (Punjab / Haryana)</div>
+            </div>
+            <span id="lang-pa-check" class="material-symbols-outlined"
+              style="color:var(--on-surface-variant);font-size:22px;">radio_button_unchecked</span>
+          </button>
+          <button onclick="App.setLang('gu')" id="lang-gu" class="lang-btn">
+            <span style="font-size:26px;">🏺</span>
+            <div style="flex:1;text-align:left;">
+              <div style="font-size:16px;font-weight:700;">ગુજરાતી</div>
+              <div style="font-size:12px;opacity:0.7;">Gujarati (Gujarat)</div>
+            </div>
+            <span id="lang-gu-check" class="material-symbols-outlined"
+              style="color:var(--on-surface-variant);font-size:22px;">radio_button_unchecked</span>
+          </button>
+        </div>
+        <p style="text-align:center;font-size:12px;color:var(--on-surface-variant);margin-top:16px;">* Instant Multilingual Engine (Client-Side Zero-Latency Offline I18N)</p>
+      </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div id="toast"
+      style="position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0px) + 12px);left:50%;transform:translateX(-50%) translateY(20px);background:var(--primary);color:#fff;padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;z-index:200;opacity:0;transition:all 0.3s;white-space:nowrap;box-shadow:var(--shadow-lg);pointer-events:none;display:flex;align-items:center;gap:8px;">
+    </div>
+
+  </div><!-- #app -->
+
+  <style>
+    @keyframes wave {
+
+      0%,
+      100% {
+        transform: scaleY(1);
+      }
+
+      50% {
+        transform: scaleY(2.5);
+      }
+    }
+  </style>
+
+  <!-- Firebase App & Auth SDK (v10 compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script>
+    // Initialize Firebase client SDK (customizable via window.firebaseConfig or fallback default)
+    window.firebaseConfig = window.firebaseConfig || {
+      apiKey: "AIzaSyDemoKrishiLinkKey0000000000000000",
+      authDomain: "krishilink-dev.firebaseapp.com",
+      projectId: "krishilink-dev",
+      storageBucket: "krishilink-dev.appspot.com",
+      messagingSenderId: "123456789012",
+      appId: "1:123456789012:web:abcdef123456"
+    };
+    if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+      try {
+        firebase.initializeApp(window.firebaseConfig);
+        console.log('🔥 Firebase Web Client initialized.');
+      } catch (e) {
+        console.warn('Firebase client initialization note:', e.message);
+      }
+    }
+  </script>
+
+  <script src="data.js?v=2.5"></script>
+  <script src="app.js?v=2.5"></script>
+</body>
+
+</html>
