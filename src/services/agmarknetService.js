@@ -51,9 +51,9 @@ const COMMODITY_HI = {
  * Fetch live mandi prices from data.gov.in AGMARKNET API
  */
 async function fetchLiveFromGovApi({ commodity, state, district, limit = 100, offset = 0 }) {
-  const apiKey = process.env.DATA_GOV_IN_API_KEY;
+  const apiKey = process.env.DATA_GOV_IN_API_KEY || process.env.DATA_GOV_API_KEY;
   if (!apiKey || apiKey === 'your_api_key_here' || apiKey === 'your_data_gov_in_api_key_here') {
-    throw new Error('data.gov.in API key is not configured in environment (DATA_GOV_IN_API_KEY)');
+    throw new Error('data.gov.in API key is not configured in environment (DATA_GOV_IN_API_KEY or DATA_GOV_API_KEY)');
   }
 
   const url = new URL(`${DATA_GOV_IN_BASE_URL}/${AGMARKNET_RESOURCE_ID}`);
