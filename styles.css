@@ -3264,6 +3264,7 @@ select.input {
     width: 100%;
     margin: auto;
     min-height: auto;
+    max-height: 92vh;
     display: grid !important;
     grid-template-columns: 1fr 1.15fr;
     border-radius: 28px;
@@ -3274,12 +3275,13 @@ select.input {
   }
 
   .auth-hero-pane {
-    padding: 48px 40px !important;
+    padding: 44px 40px !important;
     background: linear-gradient(155deg, #14532d 0%, #166534 60%, #1b8045 100%) !important;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     gap: 16px;
+    overflow-y: auto;
   }
 
   .auth-desktop-features {
@@ -3299,11 +3301,22 @@ select.input {
   }
 
   .auth-form-pane {
-    padding: 44px 48px !important;
+    padding: 36px 44px !important;
     background: #ffffff;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start !important;
+    overflow-y: auto;
+    max-height: 92vh;
+    box-sizing: border-box;
+  }
+
+  #screen-login .auth-form-pane {
+    justify-content: center !important;
+  }
+
+  #screen-register .auth-form-pane {
+    justify-content: flex-start !important;
   }
 }
 
