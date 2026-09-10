@@ -971,6 +971,14 @@ select.input {
 }
 
 /* --- BOTTOM NAV --- */
+#screen-splash .bottom-nav,
+#screen-login .bottom-nav,
+#screen-register .bottom-nav,
+#screen-onboarding-farmer .bottom-nav,
+#screen-onboarding-buyer .bottom-nav {
+  display: none !important;
+}
+
 .bottom-nav {
   position: fixed;
   bottom: 0;
