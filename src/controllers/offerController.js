@@ -191,7 +191,7 @@ const updateOffer = async (req, res, next) => {
 
       const orderRes = await client.query(`
         INSERT INTO orders (listing_id, offer_id, farmer_id, buyer_id, crop, quantity, unit, agreed_price, total_amount, status, payment_status, timeline)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'confirmed', 'pending', $10::jsonb)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::jsonb)
         RETURNING *;
       `, [
         currentOffer.listing_id,
@@ -203,6 +203,8 @@ const updateOffer = async (req, res, next) => {
         currentOffer.unit,
         currentOffer.offer_price,
         currentOffer.total_amount,
+        'confirmed',
+        'pending',
         initialTimeline
       ]);
       orderCreated = orderRes.rows[0];

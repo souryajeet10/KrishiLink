@@ -55,7 +55,10 @@ const listMarketPrices = async (req, res, next) => {
       isRealGovData: result.isRealGovData,
       dataSource: result.dataSource,
       resourceId: result.resourceId || AGMARKNET_RESOURCE_ID,
-      timestamp: result.timestamp || new Date().toISOString(),
+      timestamp: result.govUpdatedAt || result.timestamp || new Date().toISOString(),
+      govUpdatedAt: result.govUpdatedAt || null,
+      cachedAt: result.cachedAt || null,
+      priceDate: result.priceDate || (records[0] ? records[0].price_date : null),
       notice: result.notice || null,
     });
   } catch (err) {

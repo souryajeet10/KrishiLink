@@ -10,6 +10,25 @@
 
 const API_BASE = '/api/v1';
 
+// Global Crop Photography Map & Placeholders
+const GLOBAL_CROP_PHOTOS = {
+  Tomato: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&auto=format&fit=crop&q=80',
+  Potato: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=400&auto=format&fit=crop&q=80',
+  Onion: 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=400&auto=format&fit=crop&q=80',
+  Wheat: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&auto=format&fit=crop&q=80',
+  Maize: 'https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=400&auto=format&fit=crop&q=80',
+  Rice: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&auto=format&fit=crop&q=80',
+  Chilli: 'https://images.unsplash.com/photo-1588252303782-cb80119abd6d?w=400&auto=format&fit=crop&q=80',
+  Soyabean: 'https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=400&auto=format&fit=crop&q=80',
+  Mustard: 'https://images.unsplash.com/photo-1628102491629-778571d893a3?w=400&auto=format&fit=crop&q=80',
+  Garlic: 'https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?w=400&auto=format&fit=crop&q=80',
+  Ginger: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400&auto=format&fit=crop&q=80',
+};
+if (typeof window !== 'undefined') {
+  window.cropPhotos = GLOBAL_CROP_PHOTOS;
+}
+
+
 /**
  * Shared API Client (fetch wrapper with Firebase Auth & token handling)
  * @param {string} endpoint
@@ -281,7 +300,10 @@ const MarketService = {
         isRealGovData: status.isRealGovData,
         resourceId: res.resourceId || '9ef84268-d588-465a-a308-a864a43d0070',
         notice: res.notice || null,
-        updatedAt: res.timestamp || new Date().toISOString(),
+        updatedAt: res.govUpdatedAt || res.cachedAt || res.timestamp || new Date().toISOString(),
+        govUpdatedAt: res.govUpdatedAt || null,
+        cachedAt: res.cachedAt || null,
+        priceDate: res.priceDate || (data[0] ? data[0].date : null),
       };
     } catch (err) {
       console.error('Error fetching mandi prices:', err);
@@ -721,6 +743,33 @@ const OfferService = {
 // ============================================================
 const OrderService = {
   _mapOrder(o) {
+    let status = o.status || 'confirmed';
+    let timeline = o.timeline;
+    if (typeof status === 'string' && status.trim().startsWith('[')) {
+      try {
+        timeline = JSON.parse(status);
+      } catch {
+        timeline = [];
+      }
+      status = 'confirmed';
+    }
+    if (typeof timeline === 'string') {
+      try {
+        timeline = JSON.parse(timeline);
+      } catch {
+        timeline = [];
+      }
+    }
+    if (!Array.isArray(timeline) || !timeline.length) {
+      const todayStr = (o.created_at ? o.created_at.split('T')[0] : new Date().toISOString().split('T')[0]);
+      timeline = [
+        { step: 'Order Created', date: todayStr, done: true },
+        { step: 'Pickup Scheduled', date: '', done: false },
+        { step: 'In Transit', date: '', done: false },
+        { step: 'Delivered', date: '', done: false },
+        { step: 'Payment Released', date: '', done: false }
+      ];
+    }
     return {
       id: o.id,
       listingId: o.listing_id,
@@ -732,9 +781,9 @@ const OrderService = {
       unit: o.unit || 'kg',
       agreedPrice: parseFloat(o.agreed_price),
       totalAmount: parseFloat(o.total_amount),
-      status: o.status,
+      status: status,
       paymentStatus: o.payment_status,
-      timeline: Array.isArray(o.timeline) ? o.timeline : [],
+      timeline: timeline,
       createdAt: o.created_at ? o.created_at.split('T')[0] : '',
       variety: o.variety || '',
       grade: o.grade || 'A',

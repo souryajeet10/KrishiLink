@@ -371,8 +371,8 @@
       <!-- App Bar -->
       <header class="app-bar"
         style="position:sticky;flex-direction:column;gap:8px;min-height:auto;padding-top:var(--spacing-sm);">
-        <div style="display:flex;align-items:center;width:100%;gap:8px;">
-          <div style="display:flex;flex-direction:column;flex:1;min-width:0;">
+        <div class="app-bar-top-row" style="display:flex;align-items:center;width:100%;gap:8px;">
+          <div class="app-bar-brand-group" style="display:flex;flex-direction:column;flex:1;min-width:0;">
             <!-- KrishiLink inline logo -->
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" fill="none"
               style="width:120px;height:29px;flex-shrink:0;">
@@ -388,17 +388,43 @@
             </svg>
             <h1 id="farmer-greeting" class="app-bar-title" style="font-size:17px;">नमस्ते, रमेश भाई! 👋</h1>
           </div>
-          <button onclick="App.navigate('notifications')" class="app-bar-icon" style="position:relative;">
-            <span class="material-symbols-outlined">notifications</span>
-            <span id="notif-badge"
-              style="position:absolute;top:4px;right:4px;width:10px;height:10px;background:var(--tertiary-container);border-radius:50%;border:2px solid var(--surface-container-lowest);"></span>
-          </button>
-          <button onclick="App.openLang()" class="app-bar-icon" title="Change Language">
-            <span class="material-symbols-outlined">translate</span>
-          </button>
-          <button onclick="App.navigate('profile')" class="app-bar-icon">
-            <span id="farmer-avatar-bar" style="font-size:22px;">👨‍🌾</span>
-          </button>
+          <!-- Desktop Navigation Bar -->
+          <nav class="desktop-nav-bar">
+            <button class="desktop-nav-link active" data-nav-target="home" onclick="App.navTo('home')">
+              <span class="material-symbols-outlined mat-icon">home</span>
+              <span data-i18n="home">होम</span>
+            </button>
+            <button class="desktop-nav-link" data-nav-target="market" onclick="App.navTo('market')">
+              <span class="material-symbols-outlined mat-icon">storefront</span>
+              <span data-i18n="market">मार्केट</span>
+            </button>
+            <button class="desktop-nav-link desktop-nav-btn-sell" data-nav-target="sell" onclick="App.navTo('sell')">
+              <span class="material-symbols-outlined mat-icon">add_circle</span>
+              <span data-i18n="sell">बेचें</span>
+            </button>
+            <button class="desktop-nav-link" data-nav-target="orders" onclick="App.navTo('orders')">
+              <span class="material-symbols-outlined mat-icon">inventory_2</span>
+              <span data-i18n="orders">ऑर्डर</span>
+            </button>
+            <button class="desktop-nav-link" data-nav-target="profile" onclick="App.navTo('profile')">
+              <span class="material-symbols-outlined mat-icon">person</span>
+              <span data-i18n="profile">प्रोफ़ाइल</span>
+            </button>
+          </nav>
+          <div class="app-bar-actions-group" style="display:flex;align-items:center;gap:6px;">
+            <button onclick="App.openLang()" class="header-lang-btn" title="Change Language / भाषा बदलें">
+              <span class="material-symbols-outlined" style="font-size:16px;">translate</span>
+              <span>Language / भाषा</span>
+            </button>
+            <button onclick="App.navigate('notifications')" class="app-bar-icon" style="position:relative;">
+              <span class="material-symbols-outlined">notifications</span>
+              <span id="notif-badge"
+                style="position:absolute;top:4px;right:4px;width:10px;height:10px;background:var(--tertiary-container);border-radius:50%;border:2px solid var(--surface-container-lowest);"></span>
+            </button>
+            <button onclick="App.navigate('profile')" class="app-bar-icon">
+              <span id="farmer-avatar-bar" style="font-size:22px;">👨‍🌾</span>
+            </button>
+          </div>
         </div>
         <!-- Network status -->
         <div id="network-status-bar"
@@ -416,6 +442,34 @@
       </header>
 
       <main class="main-content">
+        <!-- Quick Actions (Top of Page) -->
+        <div class="quick-actions-section">
+          <div class="section-header" style="margin-bottom:8px;">
+            <h2 class="section-title" style="display:flex;align-items:center;gap:6px;">
+              <i data-lucide="zap" class="lucide-header-icon" style="color:#f59e0b;width:18px;height:18px;"></i>
+              <span data-i18n="quick_actions">Quick Actions</span>
+            </h2>
+          </div>
+          <div class="quick-actions-grid">
+            <button class="quick-action-btn quick-action-sell" onclick="App.navigate('add-produce')">
+              <span class="quick-action-icon"><i data-lucide="plus-circle" style="width:22px;height:22px;"></i></span>
+              <span class="quick-action-label" data-i18n="sell_produce">फसल बेचें</span>
+            </button>
+            <button class="quick-action-btn quick-action-prices" onclick="App.navigate('mandi-prices')">
+              <span class="quick-action-icon"><i data-lucide="bar-chart-3" style="width:22px;height:22px;"></i></span>
+              <span class="quick-action-label" data-i18n="mandi_prices">मंडी भाव</span>
+            </button>
+            <button class="quick-action-btn quick-action-mandis" onclick="App.navigate('nearby-mandis')">
+              <span class="quick-action-icon"><i data-lucide="map-pin" style="width:22px;height:22px;"></i></span>
+              <span class="quick-action-label" data-i18n="nearby_mandi">पास की मंडी</span>
+            </button>
+            <button class="quick-action-btn quick-action-orders" onclick="App.navigate('orders')">
+              <span class="quick-action-icon"><i data-lucide="package" style="width:22px;height:22px;"></i></span>
+              <span class="quick-action-label" data-i18n="my_orders">मेरे ऑर्डर</span>
+            </button>
+          </div>
+        </div>
+
         <!-- Voice Banner -->
         <button onclick="App.showVoiceMsg()"
           style="width:100%;background:var(--surface-container-low);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px;text-align:left;">
@@ -425,79 +479,100 @@
               style="font-size:22px;color:var(--on-secondary-container);">mic</span>
           </div>
           <div>
-            <div class="text-label-md" style="color:var(--on-surface);">बोलकर पूछें: "टमाटर का भाव बताओ"</div>
-            <div class="text-label-sm text-on-surface-variant">Tap to speak · Voice search active</div>
+            <div class="text-label-md" style="color:var(--on-surface);" data-i18n="voice_search_prompt">बोलकर पूछें: "टमाटर का भाव बताओ"</div>
+            <div class="text-label-sm text-on-surface-variant" data-i18n="voice_search_sub">माइक दबाएं · बोलकर खोजें</div>
           </div>
           <span class="material-symbols-outlined text-primary"
             style="margin-left:auto;font-size:20px;">graphic_eq</span>
         </button>
 
         <!-- Stats Row -->
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+        <div class="farmer-stats-row">
           <div class="stat-card">
             <div class="stat-card-icon icon-blue">
               <i data-lucide="clipboard-list"></i>
             </div>
             <span class="stat-value" id="farmer-stat-listings">0</span>
-            <span class="stat-label">लिस्टिंग<br />Listings</span>
+            <span class="stat-label" data-i18n="stat_listings_label">लिस्टिंग</span>
           </div>
           <div class="stat-card">
             <div class="stat-card-icon icon-amber">
               <i data-lucide="indian-rupee"></i>
             </div>
             <span class="stat-value" id="farmer-stat-offers">0</span>
-            <span class="stat-label">ऑफर<br />Offers</span>
+            <span class="stat-label" data-i18n="stat_offers_label">ऑफर</span>
           </div>
           <div class="stat-card">
             <div class="stat-card-icon icon-green">
               <i data-lucide="check-circle-2"></i>
             </div>
             <span class="stat-value" id="farmer-stat-orders">0</span>
-            <span class="stat-label">ऑर्डर<br />Orders</span>
+            <span class="stat-label" data-i18n="stat_orders_label">ऑर्डर</span>
           </div>
         </div>
 
-        <!-- Today's Prices -->
-        <div>
-          <div class="section-header">
-            <h2 class="section-title" style="display:flex;align-items:center;gap:6px;">
-              <i data-lucide="bar-chart-3" class="lucide-header-icon" style="color:var(--primary);width:20px;height:20px;"></i> आज के भाव
-            </h2>
-            <button class="section-link" onclick="App.navigate('mandi-prices')">सभी देखें <span
-                class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span></button>
-          </div>
-          <!-- Crop tabs -->
-          <div class="tabs" id="farmer-crop-tabs">
-            <button class="tab-pill active" data-crop="Tomato" onclick="App.selectCropTab(this,'farmer-price-card')">🍅
-              टमाटर</button>
-            <button class="tab-pill" data-crop="Potato" onclick="App.selectCropTab(this,'farmer-price-card')">🥔
-              आलू</button>
-            <button class="tab-pill" data-crop="Onion" onclick="App.selectCropTab(this,'farmer-price-card')">🧅
-              प्याज</button>
-            <button class="tab-pill" data-crop="Wheat" onclick="App.selectCropTab(this,'farmer-price-card')">🌾
-              गेहूं</button>
-            <button class="tab-pill" data-crop="Maize" onclick="App.selectCropTab(this,'farmer-price-card')">🌽
-              मक्का</button>
-          </div>
-          <div id="farmer-price-card" class="card card-body" style="margin-top:10px;"></div>
-        </div>
+        <!-- Today's Prices & AI Advisor (Responsive 2-Col on Desktop, Stacked on Mobile) -->
+        <div class="farmer-intel-row">
+          <!-- Column 1: Today's Mandi Prices -->
+          <div class="farmer-intel-col-prices">
+            <div class="section-header">
+              <h2 class="section-title" style="display:flex;align-items:center;gap:6px;">
+                <i data-lucide="bar-chart-3" class="lucide-header-icon" style="color:var(--primary);width:20px;height:20px;"></i>
+                <span data-i18n="todays_prices">आज के भाव</span>
+              </h2>
+              <button class="section-link" onclick="App.navigate('mandi-prices')">
+                <span data-i18n="view_all">सभी देखें</span>
+                <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span>
+              </button>
+            </div>
+            <!-- Crop tabs (Mobile only) -->
+            <div class="tabs" id="farmer-crop-tabs">
+              <button class="tab-pill active" data-crop="Tomato" onclick="App.selectCropTab(this,'farmer-price-card')"><img src="https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=100&auto=format&fit=crop&q=80" alt="Tomato" class="crop-pill-avatar" /><span data-i18n="crop_tomato">टमाटर</span></button>
+              <button class="tab-pill" data-crop="Potato" onclick="App.selectCropTab(this,'farmer-price-card')"><img src="https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=100&auto=format&fit=crop&q=80" alt="Potato" class="crop-pill-avatar" /><span data-i18n="crop_potato">आलू</span></button>
+              <button class="tab-pill" data-crop="Onion" onclick="App.selectCropTab(this,'farmer-price-card')"><img src="https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=100&auto=format&fit=crop&q=80" alt="Onion" class="crop-pill-avatar" /><span data-i18n="crop_onion">प्याज</span></button>
+              <button class="tab-pill" data-crop="Wheat" onclick="App.selectCropTab(this,'farmer-price-card')"><img src="https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=100&auto=format&fit=crop&q=80" alt="Wheat" class="crop-pill-avatar" /><span data-i18n="crop_wheat">गेहूं</span></button>
+              <button class="tab-pill" data-crop="Maize" onclick="App.selectCropTab(this,'farmer-price-card')"><img src="https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=100&auto=format&fit=crop&q=80" alt="Maize" class="crop-pill-avatar" /><span data-i18n="crop_maize">मक्का</span></button>
+            </div>
+            <!-- Single Price Card (Mobile only) -->
+            <div id="farmer-price-card" class="card card-body" style="margin-top:10px;"></div>
 
-        <!-- AI Insights -->
-        <div class="ai-card">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <div class="ai-badge"><span class="material-symbols-outlined"
-                style="font-size:14px;">auto_awesome</span>Krishi<b style="color:var(--primary);">Link</b> AI सलाहकार
+            <!-- Responsive Crop Price Grid (Desktop >=1024px) -->
+            <div id="farmer-desktop-price-grid" class="farmer-desktop-price-grid"></div>
+
+            <!-- Desktop View All Mandis Standard-Width Button (250-300px) -->
+            <div class="desktop-view-all-mandis-wrap">
+              <button class="btn btn-outline desktop-view-all-mandis-btn" onclick="App.navigate('mandi-prices')">
+                <span data-i18n="view_all_mandis">सभी 100 मंडियों के भाव देखें →</span>
+              </button>
             </div>
-            <span class="demo-badge">SIMULATED</span>
           </div>
-          <div id="ai-insights-farmer" style="display:flex;flex-direction:column;gap:8px;">
-            <div
-              style="background:rgba(255,255,255,0.6);border-radius:10px;padding:10px 12px;font-size:14px;color:var(--on-surface);display:flex;align-items:center;gap:8px;">
-              <span style="color:#16a34a;display:inline-flex;"><i data-lucide="trending-up" style="width:18px;height:18px;"></i></span>टमाटर का भाव बढ़ रहा है – बेचने का सही समय!
+
+          <!-- Column 2: KrishiLink AI Advisor -->
+          <div class="farmer-intel-col-ai">
+            <div class="section-header desktop-ai-header">
+              <h2 class="section-title" style="display:flex;align-items:center;gap:6px;">
+                <i data-lucide="sparkles" class="lucide-header-icon" style="color:#d97706;width:20px;height:20px;"></i>
+                <span data-i18n="ai_advisor">KrishiLink AI सलाहकार</span>
+              </h2>
+              <span class="demo-badge">SIMULATED</span>
             </div>
-            <div
-              style="background:rgba(255,255,255,0.6);border-radius:10px;padding:10px 12px;font-size:14px;color:var(--on-surface);display:flex;align-items:center;gap:8px;">
-              <span style="color:#d97706;display:inline-flex;"><i data-lucide="lightbulb" style="width:18px;height:18px;"></i></span>आजादपुर मंडी में सबसे अधिक भाव – ₹2,250/क्विंटल
+            <div class="ai-card" id="farmer-ai-card">
+              <div class="ai-card-inner-head" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                <div class="ai-badge"><span class="material-symbols-outlined"
+                    style="font-size:14px;">auto_awesome</span><span data-i18n="ai_advisor">KrishiLink AI सलाहकार</span>
+                </div>
+                <span class="demo-badge">SIMULATED</span>
+              </div>
+              <div id="ai-insights-farmer" style="display:flex;flex-direction:column;gap:8px;">
+                <div
+                  style="background:rgba(255,255,255,0.6);border-radius:10px;padding:10px 12px;font-size:14px;color:var(--on-surface);display:flex;align-items:center;gap:8px;">
+                  <span style="color:#16a34a;display:inline-flex;"><i data-lucide="trending-up" style="width:18px;height:18px;"></i></span>टमाटर का भाव बढ़ रहा है – बेचने का सही समय!
+                </div>
+                <div
+                  style="background:rgba(255,255,255,0.6);border-radius:10px;padding:10px 12px;font-size:14px;color:var(--on-surface);display:flex;align-items:center;gap:8px;">
+                  <span style="color:#d97706;display:inline-flex;"><i data-lucide="lightbulb" style="width:18px;height:18px;"></i></span>आजादपुर मंडी में सबसे अधिक भाव – ₹2,250/क्विंटल
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -506,16 +581,17 @@
         <div>
           <div class="section-header">
             <h2 class="section-title" style="display:flex;align-items:center;gap:6px;">
-              <i data-lucide="sprout" class="lucide-header-icon" style="color:var(--primary);width:20px;height:20px;"></i> मेरी लिस्टिंग
+              <i data-lucide="sprout" class="lucide-header-icon" style="color:var(--primary);width:20px;height:20px;"></i>
+              <span data-i18n="my_listings">मेरी लिस्टिंग</span>
             </h2>
-            <button class="section-link" onclick="App.navigate('add-produce')">+ जोड़ें</button>
+            <button class="section-link" onclick="App.navigate('add-produce')" data-i18n="add_new">+ जोड़ें</button>
           </div>
           <div id="farmer-listings" style="display:flex;flex-direction:column;gap:10px;"></div>
           <div id="farmer-listings-empty" class="hidden"
             style="text-align:center;padding:32px 16px;color:var(--on-surface-variant);">
             <div style="margin-bottom:8px;color:var(--primary);display:flex;justify-content:center;"><i data-lucide="sprout" style="width:40px;height:40px;"></i></div>
-            <p class="text-body-md" style="margin-bottom:16px;">अभी कोई लिस्टिंग नहीं<br />No listings yet</p>
-            <button class="btn btn-primary" style="width:auto;padding:0 24px;" onclick="App.navigate('add-produce')">
+            <p class="text-body-md" style="margin-bottom:16px;" data-i18n="no_listings_yet">अभी कोई लिस्टिंग नहीं</p>
+            <button class="btn btn-primary" style="width:auto;padding:0 24px;" onclick="App.navigate('add-produce')" data-i18n="create_first_listing">
               + पहली लिस्टिंग बनाएं
             </button>
           </div>
@@ -525,41 +601,15 @@
         <div>
           <div class="section-header">
             <h2 class="section-title" style="display:flex;align-items:center;gap:6px;">
-              <i data-lucide="tag" class="lucide-header-icon" style="color:#d97706;width:20px;height:20px;"></i> आए हुए ऑफर
+              <i data-lucide="tag" class="lucide-header-icon" style="color:#d97706;width:20px;height:20px;"></i>
+              <span data-i18n="incoming_offers">आए हुए ऑफर</span>
             </h2>
-            <button class="section-link" onclick="App.navigate('orders')">सभी देखें</button>
+            <button class="section-link" onclick="App.navigate('orders')" data-i18n="view_all">सभी देखें</button>
           </div>
           <div id="farmer-offers" style="display:flex;flex-direction:column;gap:10px;"></div>
         </div>
 
-        <!-- Quick Actions -->
-        <div>
-          <h2 class="section-title" style="margin-bottom:12px;display:flex;align-items:center;gap:6px;">
-            <i data-lucide="zap" class="lucide-header-icon" style="color:#f59e0b;width:18px;height:18px;"></i> Quick Actions
-          </h2>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-            <button onclick="App.navigate('add-produce')"
-              style="background:var(--primary);color:#fff;border-radius:var(--radius);padding:18px 12px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;font-size:15px;font-weight:700;">
-              <span style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.2);"><i data-lucide="plus-circle" style="width:24px;height:24px;"></i></span>फसल बेचें<br /><span
-                style="font-size:12px;font-weight:400;opacity:0.85;">Sell Produce</span>
-            </button>
-            <button onclick="App.navigate('mandi-prices')"
-              style="background:var(--secondary-container);color:var(--on-secondary-container);border-radius:var(--radius);padding:18px 12px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;font-size:15px;font-weight:700;">
-              <span style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:rgba(21,128,61,0.12);color:var(--primary);"><i data-lucide="bar-chart-3" style="width:24px;height:24px;"></i></span>मंडी भाव<br /><span
-                style="font-size:12px;font-weight:400;opacity:0.85;">Mandi Prices</span>
-            </button>
-            <button onclick="App.navigate('nearby-mandis')"
-              style="background:rgba(27,94,32,0.1);color:var(--primary);border-radius:var(--radius);padding:18px 12px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;font-size:15px;font-weight:700;">
-              <span style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:rgba(21,128,61,0.15);color:var(--primary);"><i data-lucide="map-pin" style="width:24px;height:24px;"></i></span>पास की मंडी<br /><span
-                style="font-size:12px;font-weight:400;opacity:0.85;">Nearby Mandis</span>
-            </button>
-            <button onclick="App.navigate('orders')"
-              style="background:rgba(108,34,0,0.08);color:var(--tertiary);border-radius:var(--radius);padding:18px 12px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;font-size:15px;font-weight:700;">
-              <span style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:rgba(108,34,0,0.12);color:var(--tertiary);"><i data-lucide="package" style="width:24px;height:24px;"></i></span>मेरे ऑर्डर<br /><span
-                style="font-size:12px;font-weight:400;opacity:0.85;">My Orders</span>
-            </button>
-          </div>
-        </div>
+
       </main>
 
       <!-- Bottom Nav -->
@@ -600,9 +650,47 @@
        ==================================================== -->
     <div id="screen-add-produce" class="screen">
       <header class="app-bar">
-        <button onclick="App.goBack()" class="app-bar-icon"><span
-            class="material-symbols-outlined">arrow_back</span></button>
-        <h1 class="app-bar-title">🌱 फसल लिस्ट करें</h1>
+        <div class="app-bar-top-row" style="display:flex;align-items:center;gap:8px;width:100%;">
+          <div class="app-bar-brand-group" style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+            <button onclick="App.goBack()" class="app-bar-icon"><span
+                class="material-symbols-outlined">arrow_back</span></button>
+            <h1 class="app-bar-title" style="margin:0;white-space:nowrap;">🌱 फसल लिस्ट करें</h1>
+          </div>
+          <!-- Desktop Navigation Bar -->
+          <nav class="desktop-nav-bar">
+            <button class="desktop-nav-link" data-nav-target="home" onclick="App.navTo('home')">
+              <span class="material-symbols-outlined mat-icon">home</span>
+              <span data-i18n="home">होम</span>
+            </button>
+            <button class="desktop-nav-link" data-nav-target="market" onclick="App.navTo('market')">
+              <span class="material-symbols-outlined mat-icon">storefront</span>
+              <span data-i18n="market">मार्केट</span>
+            </button>
+            <button class="desktop-nav-link desktop-nav-btn-sell active" data-nav-target="sell" onclick="App.navTo('sell')">
+              <span class="material-symbols-outlined mat-icon">add_circle</span>
+              <span data-i18n="sell">बेचें</span>
+            </button>
+            <button class="desktop-nav-link" data-nav-target="orders" onclick="App.navTo('orders')">
+              <span class="material-symbols-outlined mat-icon">inventory_2</span>
+              <span data-i18n="orders">ऑर्डर</span>
+            </button>
+            <button class="desktop-nav-link" data-nav-target="profile" onclick="App.navTo('profile')">
+              <span class="material-symbols-outlined mat-icon">person</span>
+              <span data-i18n="profile">प्रोफ़ाइल</span>
+            </button>
+          </nav>
+          <div class="app-bar-actions-group" style="display:flex;align-items:center;gap:6px;">
+            <button onclick="App.openLang()" class="header-lang-btn" title="Change Language / भाषा बदलें">
+              <span class="material-symbols-outlined" style="font-size:16px;">translate</span>
+              <span>Language / भाषा</span>
+            </button>
+            <button onclick="App.navigate('notifications')" class="app-bar-icon"><span
+                class="material-symbols-outlined">notifications</span></button>
+            <button onclick="App.navigate('profile')" class="app-bar-icon">
+              <span style="font-size:22px;">👨‍🌾</span>
+            </button>
+          </div>
+        </div>
       </header>
 
       <main class="main-content" style="padding-bottom:40px;">
@@ -892,31 +980,48 @@
        ==================================================== -->
     <div id="screen-marketplace" class="screen">
       <header class="app-bar" style="flex-direction:column;gap:10px;min-height:auto;padding-top:12px;">
-        <div style="display:flex;align-items:center;gap:8px;width:100%;">
-          <button onclick="App.goBack()" class="app-bar-icon"><span
-              class="material-symbols-outlined">arrow_back</span></button>
-          <h1 class="app-bar-title" style="flex:1;display:flex;align-items:center;gap:8px;">
-            <i data-lucide="store" style="width:20px;height:20px;color:var(--primary);"></i>
-            <span data-i18n="market">मार्केटप्लेस / Market</span>
-          </h1>
-          <button onclick="App.openLang()" class="header-lang-btn" id="market-lang-btn">
-            🌐 <span id="market-lang-lbl">ENGLISH (ENGLISH)</span> ▾
-          </button>
-          <button onclick="App.navigate('notifications')" class="app-bar-icon"><span
-              class="material-symbols-outlined">notifications</span></button>
-        </div>
-
-        <!-- Top Live Controls (Key Points & 4G Live indicators) -->
-        <div class="market-top-controls" style="width:100%;">
-          <div class="market-live-bar">
-            <span class="market-pill-tag pill-key-points">
-              <i data-lucide="sparkles" style="width:13px;height:13px;color:#d97706;"></i>
-              Key Points
-            </span>
-            <span class="market-pill-tag pill-4g-live">
-              <span class="pill-live-dot"></span>
-              4G LIVE
-            </span>
+        <div class="app-bar-top-row" style="display:flex;align-items:center;gap:8px;width:100%;">
+          <div class="app-bar-brand-group" style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+            <button onclick="App.goBack()" class="app-bar-icon"><span
+                class="material-symbols-outlined">arrow_back</span></button>
+            <h1 class="app-bar-title" style="margin:0;display:flex;align-items:center;gap:8px;white-space:nowrap;">
+              <i data-lucide="store" style="width:20px;height:20px;color:var(--primary);"></i>
+              <span data-i18n="market">मार्केटप्लेस / Market</span>
+            </h1>
+          </div>
+          <!-- Desktop Navigation Bar -->
+          <nav class="desktop-nav-bar">
+            <button class="desktop-nav-link" data-nav-target="home" onclick="App.navTo('home')">
+              <span class="material-symbols-outlined mat-icon">home</span>
+              <span data-i18n="home">होम</span>
+            </button>
+            <button class="desktop-nav-link active" data-nav-target="market" onclick="App.navTo('market')">
+              <span class="material-symbols-outlined mat-icon">storefront</span>
+              <span data-i18n="market">मार्केट</span>
+            </button>
+            <button class="desktop-nav-link desktop-nav-btn-sell" data-nav-target="sell" onclick="App.navTo('sell')">
+              <span class="material-symbols-outlined mat-icon">add_circle</span>
+              <span data-i18n="sell">बेचें</span>
+            </button>
+            <button class="desktop-nav-link" data-nav-target="orders" onclick="App.navTo('orders')">
+              <span class="material-symbols-outlined mat-icon">inventory_2</span>
+              <span data-i18n="orders">ऑर्डर</span>
+            </button>
+            <button class="desktop-nav-link" data-nav-target="profile" onclick="App.navTo('profile')">
+              <span class="material-symbols-outlined mat-icon">person</span>
+              <span data-i18n="profile">प्रोफ़ाइल</span>
+            </button>
+          </nav>
+          <div class="app-bar-actions-group" style="display:flex;align-items:center;gap:6px;">
+            <button onclick="App.openLang()" class="header-lang-btn" id="market-lang-btn" title="Change Language / भाषा बदलें">
+              <span class="material-symbols-outlined" style="font-size:16px;">translate</span>
+              <span id="market-lang-lbl">Language / भाषा</span>
+            </button>
+            <button onclick="App.navigate('notifications')" class="app-bar-icon"><span
+                class="material-symbols-outlined">notifications</span></button>
+            <button onclick="App.navigate('profile')" class="app-bar-icon">
+              <span style="font-size:22px;">👨‍🌾</span>
+            </button>
           </div>
         </div>
 
@@ -932,7 +1037,7 @@
 
         <!-- Grade Filter Pills Row (All Grades, Grade A+, Grade A, Grade B+) -->
         <div class="grade-filter-row" style="width:100%;margin-top:2px;">
-          <button class="grade-pill active" data-grade="all" onclick="App.setGradeFilter(this,'all')">ALL GRADES</button>
+          <button class="grade-pill active" data-grade="all" onclick="App.setGradeFilter(this,'all')" data-i18n="all_grades">ALL GRADES</button>
           <button class="grade-pill" data-grade="A+" onclick="App.setGradeFilter(this,'A+')">GRADE A+</button>
           <button class="grade-pill" data-grade="A" onclick="App.setGradeFilter(this,'A')">GRADE A</button>
           <button class="grade-pill" data-grade="B+" onclick="App.setGradeFilter(this,'B+')">GRADE B+</button>
@@ -940,12 +1045,12 @@
 
         <!-- Commodity Filter Tabs -->
         <div class="filter-row" style="width:100%;">
-          <button class="tab-pill active" data-filter="all" onclick="App.setMarketFilter(this,'all')">🌾 सभी / All</button>
-          <button class="tab-pill" data-filter="Tomato" onclick="App.setMarketFilter(this,'Tomato')">टमाटर / Tomato</button>
-          <button class="tab-pill" data-filter="Potato" onclick="App.setMarketFilter(this,'Potato')">आलू / Potato</button>
-          <button class="tab-pill" data-filter="Onion" onclick="App.setMarketFilter(this,'Onion')">प्याज / Onion</button>
-          <button class="tab-pill" data-filter="Wheat" onclick="App.setMarketFilter(this,'Wheat')">गेहूं / Wheat</button>
-          <button class="tab-pill" data-filter="Maize" onclick="App.setMarketFilter(this,'Maize')">मक्का / Maize</button>
+          <button class="tab-pill active" data-filter="all" onclick="App.setMarketFilter(this,'all')" data-i18n="all_crops">🌾 सभी फसलें</button>
+          <button class="tab-pill" data-filter="Tomato" onclick="App.setMarketFilter(this,'Tomato')">🍅 <span data-i18n="crop_tomato">टमाटर</span></button>
+          <button class="tab-pill" data-filter="Potato" onclick="App.setMarketFilter(this,'Potato')">🥔 <span data-i18n="crop_potato">आलू</span></button>
+          <button class="tab-pill" data-filter="Onion" onclick="App.setMarketFilter(this,'Onion')">🧅 <span data-i18n="crop_onion">प्याज</span></button>
+          <button class="tab-pill" data-filter="Wheat" onclick="App.setMarketFilter(this,'Wheat')">🌾 <span data-i18n="crop_wheat">गेहूं</span></button>
+          <button class="tab-pill" data-filter="Maize" onclick="App.setMarketFilter(this,'Maize')">🌽 <span data-i18n="crop_maize">मक्का</span></button>
         </div>
       </header>
 
@@ -1086,12 +1191,36 @@
             <span>AGMARKNET · data.gov.in Live APMC Feed</span>
           </div>
         </div>
+        <!-- Desktop Navigation Bar -->
+        <nav class="desktop-nav-bar">
+          <button class="desktop-nav-link" data-nav-target="home" onclick="App.navTo('home')">
+            <span class="material-symbols-outlined mat-icon">home</span>
+            <span data-i18n="home">होम</span>
+          </button>
+          <button class="desktop-nav-link" data-nav-target="market" onclick="App.navTo('market')">
+            <span class="material-symbols-outlined mat-icon">storefront</span>
+            <span data-i18n="market">मार्केट</span>
+          </button>
+          <button class="desktop-nav-link desktop-nav-btn-sell" data-nav-target="sell" onclick="App.navTo('sell')">
+            <span class="material-symbols-outlined mat-icon">add_circle</span>
+            <span data-i18n="sell">बेचें</span>
+          </button>
+          <button class="desktop-nav-link" data-nav-target="orders" onclick="App.navTo('orders')">
+            <span class="material-symbols-outlined mat-icon">inventory_2</span>
+            <span data-i18n="orders">ऑर्डर</span>
+          </button>
+          <button class="desktop-nav-link" data-nav-target="profile" onclick="App.navTo('profile')">
+            <span class="material-symbols-outlined mat-icon">person</span>
+            <span data-i18n="profile">प्रोफ़ाइल</span>
+          </button>
+        </nav>
         <div class="mandi-header-actions">
           <button onclick="App.refreshMandiPrices()" class="app-bar-icon" title="ताज़ा करें / Refresh">
             <i data-lucide="refresh-cw" style="width:18px;height:18px;"></i>
           </button>
-          <button onclick="App.openLang()" class="app-bar-icon" title="Change Language">
-            <span class="material-symbols-outlined">translate</span>
+          <button onclick="App.openLang()" class="header-lang-btn" title="Change Language / भाषा बदलें">
+            <span class="material-symbols-outlined" style="font-size:16px;">translate</span>
+            <span>Language / भाषा</span>
           </button>
           <span class="mandi-live-badge" id="mandi-header-badge">
             <span class="mandi-pulse-indicator"></span>
@@ -1286,12 +1415,46 @@
        ==================================================== -->
     <div id="screen-orders" class="screen">
       <header class="app-bar" style="flex-direction:column;gap:8px;min-height:auto;padding-top:12px;">
-        <div style="display:flex;align-items:center;gap:8px;width:100%;">
-          <button onclick="App.goBack()" class="app-bar-icon"><span
-              class="material-symbols-outlined">arrow_back</span></button>
-          <h1 class="app-bar-title" data-i18n="order_offers">📦 ऑर्डर & ऑफर</h1>
-          <button onclick="App.openLang()" class="app-bar-icon" style="margin-left:auto;" title="Change Language"><span
-              class="material-symbols-outlined">translate</span></button>
+        <div class="app-bar-top-row" style="display:flex;align-items:center;gap:8px;width:100%;">
+          <div class="app-bar-brand-group" style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+            <button onclick="App.goBack()" class="app-bar-icon"><span
+                class="material-symbols-outlined">arrow_back</span></button>
+            <h1 class="app-bar-title" data-i18n="order_offers" style="margin:0;white-space:nowrap;">📦 ऑर्डर & ऑफर</h1>
+          </div>
+          <!-- Desktop Navigation Bar -->
+          <nav class="desktop-nav-bar">
+            <button class="desktop-nav-link" data-nav-target="home" onclick="App.navTo('home')">
+              <span class="material-symbols-outlined mat-icon">home</span>
+              <span data-i18n="home">होम</span>
+            </button>
+            <button class="desktop-nav-link" data-nav-target="market" onclick="App.navTo('market')">
+              <span class="material-symbols-outlined mat-icon">storefront</span>
+              <span data-i18n="market">मार्केट</span>
+            </button>
+            <button class="desktop-nav-link desktop-nav-btn-sell" data-nav-target="sell" onclick="App.navTo('sell')">
+              <span class="material-symbols-outlined mat-icon">add_circle</span>
+              <span data-i18n="sell">बेचें</span>
+            </button>
+            <button class="desktop-nav-link active" data-nav-target="orders" onclick="App.navTo('orders')">
+              <span class="material-symbols-outlined mat-icon">inventory_2</span>
+              <span data-i18n="orders">ऑर्डर</span>
+            </button>
+            <button class="desktop-nav-link" data-nav-target="profile" onclick="App.navTo('profile')">
+              <span class="material-symbols-outlined mat-icon">person</span>
+              <span data-i18n="profile">प्रोफ़ाइल</span>
+            </button>
+          </nav>
+          <div class="app-bar-actions-group" style="display:flex;align-items:center;gap:6px;">
+            <button onclick="App.openLang()" class="header-lang-btn" title="Change Language / भाषा बदलें">
+              <span class="material-symbols-outlined" style="font-size:16px;">translate</span>
+              <span>Language / भाषा</span>
+            </button>
+            <button onclick="App.navigate('notifications')" class="app-bar-icon"><span
+                class="material-symbols-outlined">notifications</span></button>
+            <button onclick="App.navigate('profile')" class="app-bar-icon">
+              <span style="font-size:22px;">👨‍🌾</span>
+            </button>
+          </div>
         </div>
         <div class="tabs">
           <button class="tab-pill active" id="ord-tab-offers" onclick="App.switchOrderTab('offers')"
@@ -1302,8 +1465,8 @@
       </header>
 
       <main class="main-content">
-        <div id="orders-offers-view" style="display:flex;flex-direction:column;gap:12px;"></div>
-        <div id="orders-orders-view" class="hidden" style="display:flex;flex-direction:column;gap:12px;"></div>
+        <div id="orders-offers-view"></div>
+        <div id="orders-orders-view" class="hidden"></div>
       </main>
 
       <!-- Orders Bottom Nav -->
@@ -1332,6 +1495,46 @@
        SCREEN 13: PROFILE
        ==================================================== -->
     <div id="screen-profile" class="screen">
+      <header class="app-bar desktop-only-header" style="flex-direction:column;gap:8px;min-height:auto;padding-top:12px;">
+        <div class="app-bar-top-row" style="display:flex;align-items:center;gap:8px;width:100%;">
+          <div class="app-bar-brand-group" style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+            <button onclick="App.goBack()" class="app-bar-icon"><span
+                class="material-symbols-outlined">arrow_back</span></button>
+            <h1 class="app-bar-title" data-i18n="profile" style="margin:0;white-space:nowrap;">👤 प्रोफ़ाइल</h1>
+          </div>
+          <!-- Desktop Navigation Bar -->
+          <nav class="desktop-nav-bar">
+            <button class="desktop-nav-link" data-nav-target="home" onclick="App.navTo('home')">
+              <span class="material-symbols-outlined mat-icon">home</span>
+              <span data-i18n="home">होम</span>
+            </button>
+            <button class="desktop-nav-link" data-nav-target="market" onclick="App.navTo('market')">
+              <span class="material-symbols-outlined mat-icon">storefront</span>
+              <span data-i18n="market">मार्केट</span>
+            </button>
+            <button class="desktop-nav-link desktop-nav-btn-sell" data-nav-target="sell" onclick="App.navTo('sell')">
+              <span class="material-symbols-outlined mat-icon">add_circle</span>
+              <span data-i18n="sell">बेचें</span>
+            </button>
+            <button class="desktop-nav-link" data-nav-target="orders" onclick="App.navTo('orders')">
+              <span class="material-symbols-outlined mat-icon">inventory_2</span>
+              <span data-i18n="orders">ऑर्डर</span>
+            </button>
+            <button class="desktop-nav-link active" data-nav-target="profile" onclick="App.navTo('profile')">
+              <span class="material-symbols-outlined mat-icon">person</span>
+              <span data-i18n="profile">प्रोफ़ाइल</span>
+            </button>
+          </nav>
+          <div class="app-bar-actions-group" style="display:flex;align-items:center;gap:6px;">
+            <button onclick="App.openLang()" class="header-lang-btn" title="Change Language / भाषा बदलें">
+              <span class="material-symbols-outlined" style="font-size:16px;">translate</span>
+              <span>Language / भाषा</span>
+            </button>
+            <button onclick="App.navigate('notifications')" class="app-bar-icon"><span
+                class="material-symbols-outlined">notifications</span></button>
+          </div>
+        </div>
+      </header>
       <main class="main-content profile-main-wrapper">
 
         <!-- Unified Profile Hero Card -->
@@ -1562,8 +1765,8 @@
        ==================================================== -->
     <div id="screen-buyer-dashboard" class="screen">
       <header class="app-bar" style="flex-direction:column;gap:8px;min-height:auto;padding-top:12px;">
-        <div style="display:flex;align-items:center;gap:8px;width:100%;">
-          <div style="flex:1;">
+        <div class="app-bar-top-row" style="display:flex;align-items:center;gap:8px;width:100%;">
+          <div class="app-bar-brand-group" style="flex:1;">
             <!-- KrishiLink logo -->
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" fill="none"
               style="width:110px;height:26px;flex-shrink:0;">
@@ -1579,13 +1782,39 @@
             </svg>
             <h1 id="buyer-greeting" class="app-bar-title" style="font-size:17px;">नमस्ते! 🏪</h1>
           </div>
-          <button onclick="App.navigate('notifications')" class="app-bar-icon"><span
-              class="material-symbols-outlined">notifications</span></button>
-          <button onclick="App.openLang()" class="header-lang-btn" id="buyer-lang-btn">
-            🌐 <span id="buyer-lang-lbl">ENGLISH (ENGLISH)</span> ▾
-          </button>
-          <button onclick="App.navigate('profile')" class="app-bar-icon"><span id="buyer-avatar-bar"
-              style="font-size:22px;">🏪</span></button>
+          <!-- Desktop Navigation Bar -->
+          <nav class="desktop-nav-bar">
+            <button class="desktop-nav-link active" data-nav-target="home" onclick="App.navTo('home')">
+              <span class="material-symbols-outlined mat-icon">home</span>
+              <span data-i18n="home">होम</span>
+            </button>
+            <button class="desktop-nav-link" data-nav-target="market" onclick="App.navTo('market')">
+              <span class="material-symbols-outlined mat-icon">storefront</span>
+              <span data-i18n="market">मार्केट</span>
+            </button>
+            <button class="desktop-nav-link desktop-nav-btn-sell" data-nav-target="sell" onclick="App.navTo('sell')">
+              <span class="material-symbols-outlined mat-icon">add_circle</span>
+              <span data-i18n="sell">बेचें</span>
+            </button>
+            <button class="desktop-nav-link" data-nav-target="orders" onclick="App.navTo('orders')">
+              <span class="material-symbols-outlined mat-icon">inventory_2</span>
+              <span data-i18n="orders">ऑर्डर</span>
+            </button>
+            <button class="desktop-nav-link" data-nav-target="profile" onclick="App.navTo('profile')">
+              <span class="material-symbols-outlined mat-icon">person</span>
+              <span data-i18n="profile">प्रोफ़ाइल</span>
+            </button>
+          </nav>
+          <div class="app-bar-actions-group" style="display:flex;align-items:center;gap:6px;">
+            <button onclick="App.navigate('notifications')" class="app-bar-icon"><span
+                class="material-symbols-outlined">notifications</span></button>
+            <button onclick="App.openLang()" class="header-lang-btn" id="buyer-lang-btn" title="Change Language / भाषा बदलें">
+              <span class="material-symbols-outlined" style="font-size:16px;">translate</span>
+              <span id="buyer-lang-lbl">Language / भाषा</span>
+            </button>
+            <button onclick="App.navigate('profile')" class="app-bar-icon"><span id="buyer-avatar-bar"
+                style="font-size:22px;">🏪</span></button>
+          </div>
         </div>
         <div class="search-bar" style="width:100%;">
           <i data-lucide="search" style="width:18px;height:18px;color:var(--on-surface-variant);margin-left:4px;"></i>
@@ -1605,21 +1834,21 @@
               <i data-lucide="tag"></i>
             </div>
             <span class="stat-value" id="buyer-stat-offers">0</span>
-            <span class="stat-label">My Offers</span>
+            <span class="stat-label" data-i18n="stat_offers_label">ऑफर</span>
           </div>
           <div class="stat-card">
             <div class="stat-card-icon icon-green">
               <i data-lucide="package"></i>
             </div>
             <span class="stat-value" id="buyer-stat-orders">0</span>
-            <span class="stat-label">Orders</span>
+            <span class="stat-label" data-i18n="stat_orders_label">ऑर्डर</span>
           </div>
           <div class="stat-card">
             <div class="stat-card-icon icon-amber">
               <i data-lucide="star"></i>
             </div>
             <span class="stat-value" id="buyer-rating">4.8</span>
-            <span class="stat-label">Rating</span>
+            <span class="stat-label" data-i18n="stat_rating_label">रेटिंग</span>
           </div>
         </div>
 
@@ -1628,26 +1857,26 @@
           <div class="section-header">
             <h2 class="section-title" style="display:flex;align-items:center;gap:6px;">
               <i data-lucide="store" style="width:20px;height:20px;color:var(--primary);"></i>
-              Available Produce Lots
+              <span data-i18n="available_produce">उपलब्ध फसल लॉट</span>
             </h2>
-            <button class="section-link" onclick="App.navigate('marketplace')">Browse All <span
+            <button class="section-link" onclick="App.navigate('marketplace')"><span data-i18n="view_all">सभी देखें</span> <span
                 class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span></button>
           </div>
 
           <!-- Grade Filter Pills -->
           <div class="grade-filter-row" style="width:100%;margin-bottom:8px;">
-            <button class="grade-pill active" data-grade="all" onclick="App.setGradeFilter(this,'all')">ALL GRADES</button>
+            <button class="grade-pill active" data-grade="all" onclick="App.setGradeFilter(this,'all')" data-i18n="all_grades">ALL GRADES</button>
             <button class="grade-pill" data-grade="A+" onclick="App.setGradeFilter(this,'A+')">GRADE A+</button>
             <button class="grade-pill" data-grade="A" onclick="App.setGradeFilter(this,'A')">GRADE A</button>
             <button class="grade-pill" data-grade="B+" onclick="App.setGradeFilter(this,'B+')">GRADE B+</button>
           </div>
 
           <div class="filter-row">
-            <button class="tab-pill active" data-filter="all" onclick="App.setMarketFilter(this,'all')">🌾 All</button>
-            <button class="tab-pill" data-filter="Tomato" onclick="App.setMarketFilter(this,'Tomato')">Tomato</button>
-            <button class="tab-pill" data-filter="Potato" onclick="App.setMarketFilter(this,'Potato')">Potato</button>
-            <button class="tab-pill" data-filter="Onion" onclick="App.setMarketFilter(this,'Onion')">Onion</button>
-            <button class="tab-pill" data-filter="Wheat" onclick="App.setMarketFilter(this,'Wheat')">Wheat</button>
+            <button class="tab-pill active" data-filter="all" onclick="App.setMarketFilter(this,'all')" data-i18n="all_crops">🌾 सभी फसलें</button>
+            <button class="tab-pill" data-filter="Tomato" onclick="App.setMarketFilter(this,'Tomato')">🍅 <span data-i18n="crop_tomato">टमाटर</span></button>
+            <button class="tab-pill" data-filter="Potato" onclick="App.setMarketFilter(this,'Potato')">🥔 <span data-i18n="crop_potato">आलू</span></button>
+            <button class="tab-pill" data-filter="Onion" onclick="App.setMarketFilter(this,'Onion')">🧅 <span data-i18n="crop_onion">प्याज</span></button>
+            <button class="tab-pill" data-filter="Wheat" onclick="App.setMarketFilter(this,'Wheat')">🌾 <span data-i18n="crop_wheat">गेहूं</span></button>
           </div>
           <div id="buyer-market-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));gap:14px;margin-top:12px;">
           </div>
@@ -2150,7 +2379,7 @@
               style="color:var(--primary);font-size:22px;font-variation-settings:'FILL' 1;">check_circle</span>
           </button>
           <button onclick="App.setLang('en')" id="lang-en" class="lang-btn">
-            <span style="font-size:26px;">🇬🇧</span>
+            <span style="font-size:22px;font-weight:800;min-width:32px;text-align:center;letter-spacing:-0.5px;">EN</span>
             <div style="flex:1;text-align:left;">
               <div style="font-size:16px;font-weight:700;">English</div>
               <div style="font-size:12px;opacity:0.7;">English Only</div>

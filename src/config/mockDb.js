@@ -1118,12 +1118,44 @@ class MockDbStore {
       }
 
       const enriched = list.map(o => {
+        let status = o.status || 'confirmed';
+        let timeline = o.timeline || [];
+        if (typeof status === 'string' && status.trim().startsWith('[')) {
+          try {
+            timeline = JSON.parse(status);
+          } catch {
+            timeline = [];
+          }
+          status = 'confirmed';
+        }
+        if (typeof timeline === 'string') {
+          try {
+            timeline = JSON.parse(timeline);
+          } catch {
+            timeline = [];
+          }
+        }
+        if (!timeline || !timeline.length) {
+          const todayStr = (o.created_at ? o.created_at.split('T')[0] : new Date().toISOString().split('T')[0]);
+          timeline = [
+            { step: 'Order Created', date: todayStr, done: true },
+            { step: 'Pickup Scheduled', date: '', done: false },
+            { step: 'In Transit', date: '', done: false },
+            { step: 'Delivered', date: '', done: false },
+            { step: 'Payment Released', date: '', done: false }
+          ];
+        }
+        o.status = status;
+        o.timeline = timeline;
+
         const farmer = this.data.users.find(u => u.id === o.farmer_id) || {};
         const buyer = this.data.users.find(u => u.id === o.buyer_id) || {};
         const bp = this.data.buyer_profiles.find(p => p.user_id === o.buyer_id) || {};
         const l = this.data.produce_listings.find(x => x.id === o.listing_id) || {};
         return {
           ...o,
+          status,
+          timeline,
           farmer_name: farmer.name,
           farmer_phone: farmer.phone,
           buyer_name: buyer.name,
@@ -1192,6 +1224,16 @@ class MockDbStore {
         newOrder.unit = unit || 'kg';
         newOrder.agreed_price = parseFloat(agreed_price);
         newOrder.total_amount = parseFloat(total_amount);
+      }
+
+      // Defensive check: if status was passed stringified timeline
+      if (typeof newOrder.status === 'string' && newOrder.status.trim().startsWith('[')) {
+        try {
+          newOrder.timeline = JSON.parse(newOrder.status);
+        } catch {
+          newOrder.timeline = [];
+        }
+        newOrder.status = 'confirmed';
       }
 
       this.data.orders.unshift(newOrder);

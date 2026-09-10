@@ -81,11 +81,12 @@ async function fetchLiveFromGovApi({ commodity, state, district, limit = 100, of
 
     const json = await res.json();
     const rawRecords = json.records || [];
+    const govUpdatedAt = json.updated_date || (json.updated ? new Date(json.updated * 1000).toISOString() : null) || json.created_date || null;
 
-    console.log(`✅ [AGMARKNET Service] Successfully fetched ${rawRecords.length} records from data.gov.in`);
+    console.log(`✅ [AGMARKNET Service] Successfully fetched ${rawRecords.length} records from data.gov.in (Gov update: ${govUpdatedAt})`);
 
     // Standardize fields
-    return rawRecords.map((r, index) => {
+    const records = rawRecords.map((r, index) => {
       const commName = r.commodity || 'Produce';
       const minP = parseFloat(r.min_price || r.modal_price || 0);
       const maxP = parseFloat(r.max_price || r.modal_price || 0);
@@ -117,8 +118,12 @@ async function fetchLiveFromGovApi({ commodity, state, district, limit = 100, of
         trend: 'stable',
         change_amount: 0,
         source: 'GOVERNMENT_API_AGMARKNET',
+        gov_updated_at: govUpdatedAt,
       };
     });
+
+    records.govUpdatedAt = govUpdatedAt;
+    return records;
   } catch (err) {
     clearTimeout(timeoutId);
     console.warn('⚠️ [AGMARKNET Service] data.gov.in fetch failed:', err.message);
@@ -185,26 +190,46 @@ async function getMarketPricesWithFallback(options = {}) {
 
   // ── Tier 1: Check Redis Cache ──────────────────────────────
   const cached = await getCache(cacheKey);
-  if (cached && Array.isArray(cached) && cached.length > 0) {
-    console.log(`⚡ [AGMARKNET Service] Serving ${cached.length} prices from Redis cache (key: ${cacheKey})`);
-    return {
-      source: 'REDIS_CACHE',
-      isRealGovData: true,
-      dataSource: 'Redis Cache (TTL ~3 hours) - Cached from data.gov.in AGMARKNET',
-      resourceId: AGMARKNET_RESOURCE_ID,
-      data: cached,
-      count: cached.length,
-      timestamp: new Date().toISOString(),
-    };
+  if (cached) {
+    const isPayloadObj = !Array.isArray(cached) && cached.records;
+    const records = isPayloadObj ? cached.records : cached;
+    const cachedAt = isPayloadObj ? cached.cachedAt : null;
+    const govUpdatedAt = isPayloadObj ? cached.govUpdatedAt : (records.govUpdatedAt || null);
+    const priceDate = isPayloadObj ? cached.priceDate : (records[0]?.price_date || null);
+
+    if (records && records.length > 0) {
+      console.log(`⚡ [AGMARKNET Service] Serving ${records.length} prices from Redis cache (key: ${cacheKey})`);
+      return {
+        source: 'REDIS_CACHE',
+        isRealGovData: true,
+        dataSource: 'Redis Cache (TTL ~3 hours) - Cached from data.gov.in AGMARKNET',
+        resourceId: AGMARKNET_RESOURCE_ID,
+        data: records,
+        count: records.length,
+        timestamp: govUpdatedAt || cachedAt || new Date().toISOString(),
+        govUpdatedAt: govUpdatedAt,
+        cachedAt: cachedAt,
+        priceDate: priceDate,
+      };
+    }
   }
 
   // ── Tier 2: Fetch Live from data.gov.in AGMARKNET ─────────
   try {
     const liveRecords = await fetchLiveFromGovApi({ commodity, state, district, limit, offset });
     if (liveRecords && liveRecords.length > 0) {
-      // 1. Cache in Redis with 3-hour TTL
+      const govUpdatedAt = liveRecords.govUpdatedAt || new Date().toISOString();
+      const cachedAt = new Date().toISOString();
+      const priceDate = liveRecords[0]?.price_date || null;
+
+      // 1. Cache in Redis with 3-hour TTL (storing records + metadata)
       const ttl = parseInt(process.env.REDIS_CACHE_TTL || '10800', 10);
-      await setCache(cacheKey, liveRecords, ttl);
+      await setCache(cacheKey, {
+        records: liveRecords,
+        cachedAt,
+        govUpdatedAt,
+        priceDate,
+      }, ttl);
 
       // 2. Persist/refresh to PostgreSQL market_prices table asynchronously
       syncPricesToDatabase(liveRecords).catch(() => {});
@@ -216,7 +241,10 @@ async function getMarketPricesWithFallback(options = {}) {
         resourceId: AGMARKNET_RESOURCE_ID,
         data: liveRecords,
         count: liveRecords.length,
-        timestamp: new Date().toISOString(),
+        timestamp: govUpdatedAt,
+        govUpdatedAt: govUpdatedAt,
+        cachedAt: cachedAt,
+        priceDate: priceDate,
       };
     }
   } catch (apiErr) {
@@ -262,13 +290,18 @@ async function getMarketPricesWithFallback(options = {}) {
         source: 'POSTGRESQL_FALLBACK',
       }));
 
+      const latestDbUpdate = dbRes.rows[0]?.updated_at ? new Date(dbRes.rows[0].updated_at).toISOString() : null;
+      const priceDate = dbRes.rows[0]?.price_date ? new Date(dbRes.rows[0].price_date).toISOString().split('T')[0] : null;
+
       return {
         source: 'POSTGRESQL_FALLBACK',
         isRealGovData: false,
         dataSource: 'PostgreSQL market_prices Table (Historical Mandi Records)',
         data: records,
         count: records.length,
-        timestamp: new Date().toISOString(),
+        timestamp: latestDbUpdate || new Date().toISOString(),
+        govUpdatedAt: latestDbUpdate,
+        priceDate: priceDate,
         notice: 'Served from PostgreSQL database fallback due to live API offline/unconfigured.',
       };
     }

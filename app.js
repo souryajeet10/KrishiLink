@@ -28,6 +28,64 @@ window.App = {
     btn.classList.add('active');
   },
 
+  navTo(target) {
+    const user = AuthService.getUser();
+    const role = user ? user.role : 'farmer';
+    if (target === 'home') {
+      this.navigate(role === 'buyer' ? 'buyer-dashboard' : role === 'admin' ? 'admin-dashboard' : 'farmer-dashboard');
+    } else if (target === 'market') {
+      this.navigate('marketplace');
+    } else if (target === 'sell') {
+      this.navigate('add-produce');
+    } else if (target === 'orders') {
+      this.navigate('orders');
+    } else if (target === 'profile') {
+      this.navigate('profile');
+    }
+  },
+
+  updateActiveNav(screenId) {
+    let activeTarget = '';
+    if (['farmer-dashboard', 'buyer-dashboard', 'admin-dashboard'].includes(screenId)) {
+      activeTarget = 'home';
+    } else if (['marketplace', 'product-detail', 'make-offer'].includes(screenId)) {
+      activeTarget = 'market';
+    } else if (screenId === 'add-produce') {
+      activeTarget = 'sell';
+    } else if (screenId === 'orders') {
+      activeTarget = 'orders';
+    } else if (screenId === 'profile') {
+      activeTarget = 'profile';
+    }
+
+    document.querySelectorAll('.desktop-nav-link').forEach(link => {
+      if (link.dataset.navTarget === activeTarget) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
+
+    // Also update bottom nav active states for mobile
+    document.querySelectorAll('.bottom-nav').forEach(nav => {
+      nav.querySelectorAll('.bottom-nav-item').forEach(btn => {
+        const oc = btn.getAttribute('onclick') || '';
+        const t = btn.textContent.trim();
+        let match = false;
+        if (activeTarget === 'home' && (oc.includes('dashboard') || t.includes('होम') || t.includes('Home'))) match = true;
+        if (activeTarget === 'market' && (oc.includes('marketplace') || t.includes('मार्केट') || t.includes('Market'))) match = true;
+        if (activeTarget === 'orders' && (oc.includes('orders') || t.includes('ऑर्डर') || t.includes('Orders'))) match = true;
+        if (activeTarget === 'profile' && (oc.includes('profile') || t.includes('प्रोफ़ाइल') || t.includes('प्रोफाइल') || t.includes('Profile'))) match = true;
+
+        if (match) {
+          btn.classList.add('active');
+        } else if (activeTarget && (oc.includes('dashboard') || oc.includes('marketplace') || oc.includes('orders') || oc.includes('profile'))) {
+          btn.classList.remove('active');
+        }
+      });
+    });
+  },
+
   showToast(msg, duration = 3000) {
     const el = document.getElementById('toast');
     if (!el) return;
@@ -74,6 +132,7 @@ window.App = {
     const el = document.getElementById(`screen-${id}`);
     if (el) el.classList.add('active');
     window.scrollTo(0, 0);
+    this.updateActiveNav(id);
     setTimeout(() => {
       if (window.lucide) {
         try { lucide.createIcons(); } catch (e) {}
@@ -215,7 +274,9 @@ window.App = {
 
     // Greeting & Avatar
     const greetingEl = document.getElementById('farmer-greeting');
-    if (greetingEl) greetingEl.textContent = `नमस्ते, ${user.name.split(' ')[0]}! 👋`;
+    const t = this._i18n[this.currentLang] || this._i18n.hi;
+    const greetingPrefix = t.greeting_farmer || (this.currentLang === 'en' ? 'Hello' : 'नमस्ते');
+    if (greetingEl) greetingEl.textContent = `${greetingPrefix}, ${user.name.split(' ')[0]}! 👋`;
     const avatarEl = document.getElementById('farmer-avatar-bar');
     if (avatarEl) avatarEl.textContent = user.avatar || '👨‍🌾';
 
@@ -246,8 +307,10 @@ window.App = {
       const statOrders = document.getElementById('farmer-stat-orders');
       if (statOrders) statOrders.textContent = orders.length;
 
-      // Price card (Tomato default)
+      // Price card (Tomato default for mobile)
       this.renderCropPriceCard('farmer-price-card', 'Tomato');
+      // Price grid (4 crops side-by-side for desktop >=1024px)
+      this.renderDesktopPriceGrid('farmer-desktop-price-grid');
 
       // Listings section
       if (listingsEl) {
@@ -277,10 +340,11 @@ window.App = {
       // AI Insights
       const insights = await AIService.getMarketInsights('Tomato');
       const aiInsightsEl = document.getElementById('ai-insights-farmer');
+      const isEn = this.currentLang === 'en';
       if (aiInsightsEl) {
         aiInsightsEl.innerHTML = insights.map(i =>
-          `<div style="background:rgba(255,255,255,0.6);border-radius:10px;padding:10px 12px;font-size:14px;color:var(--on-surface);">
-            <span style="font-size:18px;margin-right:6px;">${i.emoji}</span>${i.textHi}
+          `<div style="background:rgba(255,255,255,0.65);border-radius:10px;padding:10px 12px;font-size:14px;color:var(--on-surface);display:flex;align-items:center;gap:8px;">
+            <span style="font-size:18px;margin-right:6px;">${i.emoji}</span>${isEn && i.text ? i.text : i.textHi}
            </div>`
         ).join('');
       }
@@ -381,6 +445,34 @@ window.App = {
     }
   },
 
+  formatFetchTime(isoString) {
+    const timestamp = isoString || this.lastGovUpdatedAt || this.lastMandiFetchedAt || new Date().toISOString();
+    try {
+      const d = new Date(timestamp);
+      if (isNaN(d.getTime())) return '';
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    } catch (e) {
+      return '';
+    }
+  },
+
+  formatGovDate(dateStr) {
+    if (!dateStr) return '';
+    try {
+      let d;
+      if (dateStr.includes('/')) {
+        const [day, month, year] = dateStr.split('/');
+        d = new Date(`${year}-${month}-${day}`);
+      } else {
+        d = new Date(dateStr);
+      }
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    } catch (e) {
+      return dateStr;
+    }
+  },
+
   // ── CROP PRICE CARD ────────────────────────────────────────
   async renderCropPriceCard(cardId, crop) {
     const cardEl = document.getElementById(cardId);
@@ -389,10 +481,18 @@ window.App = {
 
     const res = await MarketService.getMandiPrices(crop);
     const prices = res.data || [];
-    this.updateNetworkStatus(res.source, res.isRealGovData);
+    this.updateNetworkStatus(res.source, res.isRealGovData, res.updatedAt, {
+      govUpdatedAt: res.govUpdatedAt,
+      cachedAt: res.cachedAt,
+      priceDate: res.priceDate,
+    });
+    const govTime = this.formatFetchTime(res.govUpdatedAt || res.updatedAt);
+    const govDate = res.priceDate ? this.formatGovDate(res.priceDate) : '';
+    const dateSuffix = govDate ? ` (${govDate})` : '';
+    const isEn = this.currentLang === 'en';
 
     if (!prices.length) {
-      cardEl.innerHTML = `<p class="text-body-md text-on-surface-variant">कोई डेटा नहीं / No data</p>`;
+      cardEl.innerHTML = `<p class="text-body-md text-on-surface-variant">${isEn ? 'No live mandi rates available' : 'कोई डेटा नहीं / No data'}</p>`;
       return;
     }
     const best = prices.sort((a, b) => b.modalPrice - a.modalPrice)[0];
@@ -403,56 +503,197 @@ window.App = {
       ? '⚡ Mandi Rate (AGMARKNET · Cached)'
       : '🏛️ Mandi Rate (AGMARKNET · Govt. of India)';
 
+    const syncLabel = isEn ? 'Govt Updated' : 'सरकारी अपडेट';
+    const viewAllMandis = isEn ? `View all ${prices.length} mandis rates →` : `सभी ${prices.length} मंडियों के भाव देखें →`;
+    const perQuintalText = isEn ? '/ quintal' : '/ क्विंटल';
+    const todayTrend = best.trend === 'up'
+      ? (isEn ? `+₹${best.change} today` : `+₹${best.change} आज`)
+      : best.trend === 'down'
+      ? (isEn ? `-₹${Math.abs(best.change)} down` : `₹${Math.abs(best.change)} कम`)
+      : (isEn ? 'Stable' : 'स्थिर');
+
+    const cropPhotoUrl = (window.cropPhotos && window.cropPhotos[crop]) || 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&auto=format&fit=crop&q=80';
+
     cardEl.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:start;">
+      <div style="display:flex;justify-content:space-between;align-items:start;gap:12px;">
         <div>
-          <span class="badge" style="font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(21,128,61,0.12);color:#15803d;display:inline-block;margin-bottom:4px;">
-            ${sourceLabel}
-          </span>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+            <span class="badge" style="font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(21,128,61,0.12);color:#15803d;display:inline-block;">
+              ${sourceLabel}
+            </span>
+            <span style="font-size:11px;font-weight:600;color:var(--on-surface-variant);display:inline-flex;align-items:center;gap:4px;background:var(--surface-container-high);padding:2px 8px;border-radius:6px;">
+              <i data-lucide="clock" style="width:12px;height:12px;color:var(--primary);"></i>
+              ${syncLabel}: ${govTime}${dateSuffix}
+            </span>
+          </div>
           <p class="text-label-md text-on-surface-variant">${best.market} (${best.state})</p>
           <div style="display:flex;align-items:baseline;gap:8px;margin-top:4px;">
             <span class="text-price" style="color:var(--primary);">₹${best.modalPrice}</span>
-            <span class="text-label-sm text-on-surface-variant">/ क्विंटल</span>
+            <span class="text-label-sm text-on-surface-variant">${perQuintalText}</span>
           </div>
         </div>
-        <span style="font-size:40px;">${crop_data.emoji}</span>
+        <div class="crop-price-img-thumb" style="width:68px;height:68px;border-radius:12px;overflow:hidden;background:var(--surface-container-low);border:2px solid var(--surface-container-high);box-shadow:var(--shadow-sm);flex-shrink:0;position:relative;">
+          <img src="${cropPhotoUrl}" alt="${crop}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.onerror=null;this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:rgba(21,128,61,0.08);color:var(--primary);\\'><i data-lucide=\\'sprout\\' style=\\'width:28px;height:28px;\\'></i></div>';if(window.lucide)lucide.createIcons();" />
+        </div>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap;gap:8px;">
         <span class="chip ${best.trend === 'up' ? 'chip-success' : best.trend === 'down' ? 'chip-error' : 'chip-surface'}">
-          ${best.trend === 'up' ? '📈' : best.trend === 'down' ? '📉' : '➡️'} ${best.trend === 'up' ? `+₹${best.change} आज` : best.trend === 'down' ? `₹${Math.abs(best.change)} कम` : 'स्थिर'}
+          ${best.trend === 'up' ? '📈' : best.trend === 'down' ? '📉' : '➡️'} ${todayTrend}
         </span>
         <div style="font-size:12px;color:var(--on-surface-variant);">
           Min: ₹${best.minPrice} · Max: ₹${best.maxPrice}
         </div>
       </div>
       <button class="btn btn-outline" style="margin-top:12px;min-height:38px;font-size:13px;" onclick="App.navigate('mandi-prices')">
-        सभी ${prices.length} मंडियों के भाव देखें →
+        ${viewAllMandis}
       </button>`;
+    if (window.lucide) {
+      try { lucide.createIcons(); } catch (e) {}
+    }
+  },
+
+  // ── DESKTOP RESPONSIVE PRICE GRID (4 CROPS SIDE-BY-SIDE) ───
+  async renderDesktopPriceGrid(containerId) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    el.innerHTML = `
+      <div class="state-loading" style="grid-column: 1 / -1; padding: 24px; text-align: center;">
+        <div class="spinner"></div>
+      </div>`;
+
+    const crops = [
+      { key: 'Tomato', hi: 'टमाटर', defaultMandi: 'Azadpur', defaultState: 'Delhi' },
+      { key: 'Potato', hi: 'आलू', defaultMandi: 'Agra', defaultState: 'UP' },
+      { key: 'Onion', hi: 'प्याज', defaultMandi: 'Lasalgaon', defaultState: 'Maharashtra' },
+      { key: 'Wheat', hi: 'गेहूं', defaultMandi: 'Khanna', defaultState: 'Punjab' }
+    ];
+
+    try {
+      const results = await Promise.all(crops.map(c => MarketService.getMandiPrices(c.key).catch(() => ({ data: [] }))));
+      const isEn = this.currentLang === 'en';
+      const perQuintalText = isEn ? '/ quintal' : '/ क्विंटल';
+
+      let html = '';
+      crops.forEach((crop, idx) => {
+        const res = results[idx] || {};
+        const prices = res.data || [];
+        const photoUrl = (window.cropPhotos && window.cropPhotos[crop.key]) || 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&auto=format&fit=crop&q=80';
+
+        let best = prices.length ? [...prices].sort((a, b) => b.modalPrice - a.modalPrice)[0] : null;
+        if (!best) {
+          best = {
+            market: crop.defaultMandi,
+            state: crop.defaultState,
+            modalPrice: crop.key === 'Tomato' ? 2250 : crop.key === 'Potato' ? 1450 : crop.key === 'Onion' ? 1850 : 2350,
+            minPrice: crop.key === 'Tomato' ? 1800 : crop.key === 'Potato' ? 1200 : crop.key === 'Onion' ? 1500 : 2100,
+            maxPrice: crop.key === 'Tomato' ? 2500 : crop.key === 'Potato' ? 1700 : crop.key === 'Onion' ? 2200 : 2600,
+            trend: 'up',
+            change: 80
+          };
+        }
+
+        const todayTrend = best.trend === 'up'
+          ? (isEn ? `+₹${best.change || 50} today` : `+₹${best.change || 50} आज`)
+          : best.trend === 'down'
+          ? (isEn ? `-₹${Math.abs(best.change || 50)} down` : `₹${Math.abs(best.change || 50)} कम`)
+          : (isEn ? 'Stable' : 'स्थिर');
+        const trendChipClass = best.trend === 'up' ? 'chip-success' : best.trend === 'down' ? 'chip-error' : 'chip-surface';
+        const trendIcon = best.trend === 'up' ? '📈' : best.trend === 'down' ? '📉' : '➡️';
+        const govTime = this.formatFetchTime(res.govUpdatedAt || res.updatedAt || new Date().toISOString());
+
+        html += `
+          <div class="desktop-price-card">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:48px;height:48px;border-radius:12px;overflow:hidden;background:var(--surface-container);border:1.5px solid var(--outline-variant);flex-shrink:0;">
+                <img src="${photoUrl}" alt="${crop.key}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&auto=format&fit=crop&q=80'" />
+              </div>
+              <div style="min-width:0;flex:1;">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;">
+                  <h3 style="font-size:15px;font-weight:700;margin:0;color:var(--on-surface);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                    ${isEn ? crop.key : crop.hi} <span style="font-size:11px;font-weight:500;color:var(--on-surface-variant);">${isEn ? `(${crop.hi})` : `(${crop.key})`}</span>
+                  </h3>
+                </div>
+                <p style="font-size:11.5px;color:var(--on-surface-variant);margin:2px 0 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                  📍 ${best.market}${best.state ? ` (${best.state})` : ''}
+                </p>
+              </div>
+            </div>
+
+            <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--outline-variant);display:flex;align-items:baseline;justify-content:space-between;">
+              <div>
+                <span style="font-size:22px;font-weight:800;color:var(--primary);letter-spacing:-0.5px;">₹${best.modalPrice}</span>
+                <span style="font-size:11px;font-weight:600;color:var(--on-surface-variant);">${perQuintalText}</span>
+              </div>
+              <span class="chip ${trendChipClass}" style="font-size:10.5px;padding:2px 6px;margin:0;font-weight:700;">
+                ${trendIcon} ${todayTrend}
+              </span>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:10.5px;color:var(--on-surface-variant);">
+              <span>Min: ₹${best.minPrice} · Max: ₹${best.maxPrice}</span>
+              <span style="display:inline-flex;align-items:center;gap:3px;font-weight:600;">
+                <i data-lucide="clock" style="width:11px;height:11px;color:var(--primary);"></i>
+                ${govTime}
+              </span>
+            </div>
+          </div>`;
+      });
+
+      el.innerHTML = html;
+      if (window.lucide) {
+        try { lucide.createIcons(); } catch (e) {}
+      }
+    } catch (err) {
+      console.error('Error rendering desktop price grid:', err);
+    }
   },
 
   // ── NETWORK & DATA SOURCE STATUS BAR ────────────────────────
-  updateNetworkStatus(source, isRealGovData) {
+  updateNetworkStatus(source, isRealGovData, timestamp, meta = {}) {
+    if (timestamp) this.lastMandiFetchedAt = timestamp;
+    if (meta.govUpdatedAt) this.lastGovUpdatedAt = meta.govUpdatedAt;
+    if (meta.priceDate) this.lastPriceDate = meta.priceDate;
+
+    const displayTimestamp = this.lastGovUpdatedAt || this.lastMandiFetchedAt;
+    const timeStr = this.formatFetchTime(displayTimestamp);
+    const dateStr = this.lastPriceDate ? ` (${this.formatGovDate(this.lastPriceDate)})` : '';
     const bar = document.getElementById('network-status-bar');
     const dot = document.getElementById('network-status-dot');
     const text = document.getElementById('network-status-text');
     const content = document.getElementById('network-status-content');
     if (!text) return;
 
+    const isEn = this.currentLang === 'en';
+
     if (source === 'GOVERNMENT_API_AGMARKNET' || (isRealGovData && source !== 'REDIS_CACHE' && source !== 'POSTGRESQL_FALLBACK')) {
       // 1. Live Data from Government AGMARKNET API (Green)
-      text.textContent = '📶 नेटवर्क ठीक है · LIVE DATA';
+      text.textContent = isEn
+        ? `📶 Online · Govt AGMARKNET API · Govt Updated: ${timeStr}${dateStr}`
+        : `📶 नेटवर्क ठीक है · सरकारी AGMARKNET भाव · सरकारी अपडेट: ${timeStr}${dateStr}`;
       if (dot) dot.style.background = '#16a34a';
       if (bar) bar.style.background = 'rgba(21, 128, 61, 0.08)';
       if (content) content.style.color = '#15803d';
-    } else if (source === 'REDIS_CACHE' || source === 'POSTGRESQL_FALLBACK') {
-      // 2. Cached / Fallback Data (Amber)
-      text.textContent = '📶 नेटवर्क ठीक है · CACHED DATA';
+    } else if (source === 'REDIS_CACHE') {
+      // 2. Cached Data (Amber)
+      text.textContent = isEn
+        ? `📶 Online · Cached AGMARKNET Rates · Govt Updated: ${timeStr}${dateStr}`
+        : `📶 नेटवर्क ठीक है · कैश AGMARKNET भाव · सरकारी अपडेट: ${timeStr}${dateStr}`;
+      if (dot) dot.style.background = '#d97706';
+      if (bar) bar.style.background = 'rgba(217, 119, 6, 0.12)';
+      if (content) content.style.color = '#b45309';
+    } else if (source === 'POSTGRESQL_FALLBACK') {
+      // 3. PostgreSQL Database Fallback
+      text.textContent = isEn
+        ? `📶 Online · Verified Database Rates · Govt Updated: ${timeStr}${dateStr}`
+        : `📶 नेटवर्क ठीक है · सत्यापित डेटाबेस भाव · सरकारी अपडेट: ${timeStr}${dateStr}`;
       if (dot) dot.style.background = '#d97706';
       if (bar) bar.style.background = 'rgba(217, 119, 6, 0.12)';
       if (content) content.style.color = '#b45309';
     } else {
-      // 3. Demo / Offline Data (Slate / Amber)
-      text.textContent = '📶 नेटवर्क ठीक है · DEMO DATA';
+      // 4. Demo / Offline Data (Slate / Amber)
+      text.textContent = isEn
+        ? `📶 Online · AGMARKNET Rates · Updated: ${timeStr}`
+        : `📶 नेटवर्क ठीक है · AGMARKNET भाव · अपडेट: ${timeStr}`;
       if (dot) dot.style.background = '#64748b';
       if (bar) bar.style.background = 'rgba(100, 116, 139, 0.12)';
       if (content) content.style.color = '#475569';
@@ -461,30 +702,44 @@ window.App = {
     const mandiBadge = document.getElementById('mandi-header-badge');
     if (mandiBadge) {
       if (source === 'GOVERNMENT_API_AGMARKNET') {
-        mandiBadge.textContent = 'LIVE DATA';
+        mandiBadge.textContent = isEn ? `LIVE APMC (${timeStr})` : `LIVE भाव (${timeStr})`;
         mandiBadge.className = 'badge';
         mandiBadge.style.background = 'rgba(21, 128, 61, 0.15)';
         mandiBadge.style.color = '#15803d';
         mandiBadge.style.fontWeight = '700';
       } else if (source === 'REDIS_CACHE' || source === 'POSTGRESQL_FALLBACK') {
-        mandiBadge.textContent = 'CACHED DATA';
+        mandiBadge.textContent = isEn ? `CACHED (${timeStr})` : `कैश भाव (${timeStr})`;
         mandiBadge.className = 'badge';
         mandiBadge.style.background = 'rgba(217, 119, 6, 0.15)';
         mandiBadge.style.color = '#d97706';
         mandiBadge.style.fontWeight = '700';
       } else {
-        mandiBadge.textContent = 'DEMO DATA';
+        mandiBadge.textContent = isEn ? `DEMO (${timeStr})` : `डेमो भाव (${timeStr})`;
         mandiBadge.className = 'demo-badge';
       }
     }
   },
 
-  selectCropTab(btn, cardId) {
+  async selectCropTab(btn, cardId) {
     btn.closest('.tabs, #farmer-crop-tabs, #mandi-crop-tabs, .filter-row').querySelectorAll('.tab-pill').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     const crop = btn.dataset.crop;
     this.currentCropTab = crop;
     this.renderCropPriceCard(cardId, crop);
+    if (cardId === 'farmer-price-card') {
+      try {
+        const insights = await AIService.getMarketInsights(crop);
+        const aiInsightsEl = document.getElementById('ai-insights-farmer');
+        const isEn = this.currentLang === 'en';
+        if (aiInsightsEl && insights && insights.length) {
+          aiInsightsEl.innerHTML = insights.map(i =>
+            `<div style="background:rgba(255,255,255,0.65);border-radius:10px;padding:10px 12px;font-size:14px;color:var(--on-surface);display:flex;align-items:center;gap:8px;">
+              <span style="font-size:18px;margin-right:6px;">${i.emoji}</span>${isEn && i.text ? i.text : i.textHi}
+             </div>`
+          ).join('');
+        }
+      } catch (e) {}
+    }
   },
 
   // ── BUYER DASHBOARD ────────────────────────────────────────
@@ -493,7 +748,9 @@ window.App = {
     if (!user) { this.navigate('login'); return; }
 
     const greetingEl = document.getElementById('buyer-greeting');
-    if (greetingEl) greetingEl.textContent = `Welcome, ${user.name.split(' ')[0]}! 🏪`;
+    const t = this._i18n[this.currentLang] || this._i18n.hi;
+    const prefix = t.greeting_buyer_prefix || (this.currentLang === 'en' ? 'Welcome' : 'स्वागत है');
+    if (greetingEl) greetingEl.textContent = `${prefix}, ${user.name.split(' ')[0]}! 🏪`;
     const avatarEl = document.getElementById('buyer-avatar-bar');
     if (avatarEl) avatarEl.textContent = user.avatar || '🏪';
 
@@ -643,7 +900,7 @@ window.App = {
 
     // Format price per quintal matching reference design
     const pricePerQuintal = l.unit === 'kg' ? (l.askingPrice * 100) : l.askingPrice;
-    const formattedPrice = Number(pricePerQuintal).toLocaleString('en-IN');
+    const formattedPrice = Math.round(Number(pricePerQuintal) || 0).toLocaleString('en-IN');
 
     return `
       <div class="market-card-v2" onclick="App.viewProduct('${l.id}')">
@@ -678,36 +935,6 @@ window.App = {
           </div>
         </div>
 
-        <!-- AI-VERIFIED GRADE SEAL Box (Mint Green, Spec verified) -->
-        <div class="ai-grade-seal-box">
-          <div class="ai-grade-seal-head">
-            <span class="ai-grade-seal-title">
-              <i data-lucide="shield-check" style="width:14px;height:14px;"></i>
-              AI-VERIFIED GRADE SEAL
-            </span>
-            <span class="ai-grade-seal-tag">${gradeLabel} · AGMARK SPEC</span>
-          </div>
-
-          <div class="ai-grade-seal-metrics">
-            <div class="ai-metric-item">
-              <span class="ai-metric-label">FIRMNESS</span>
-              <span class="ai-metric-val">${l.firmness || '8.8/10'}</span>
-            </div>
-            <div class="ai-metric-item">
-              <span class="ai-metric-label">AVG SIZE</span>
-              <span class="ai-metric-val">${l.avg_size || '55-65mm'}</span>
-            </div>
-            <div class="ai-metric-item">
-              <span class="ai-metric-label">DEFECT</span>
-              <span class="ai-metric-val">${l.defect_rate || '<1.2%'}</span>
-            </div>
-          </div>
-
-          <div class="ai-grade-seal-sub">
-            <i data-lucide="sparkles" style="width:12px;height:12px;"></i>
-            Verified via Multi-Spectral Computer Vision
-          </div>
-        </div>
 
         <!-- Price & Mandi Delta Row with Sparkline -->
         <div class="market-card-price-row">
@@ -724,16 +951,15 @@ window.App = {
           <div>${sparklineSvg}</div>
         </div>
 
-        <!-- Card Actions & Micro-AI badge -->
+        <!-- Card Actions: Prominent Make Offer Button without AgroGuide AI macro -->
         <div class="market-card-actions">
-          <span class="agroguide-ai-pill">
-            AgroGuide AI <span class="micro-tag">MICRO-AI</span>
-          </span>
           <button class="btn-card-offer" onclick="event.stopPropagation();App.startOffer('${l.id}')">
-            <i data-lucide="tag" style="width:14px;height:14px;"></i> Make Offer
+            <i data-lucide="handshake" style="width:16px;height:16px;"></i>
+            <span>${this.currentLang === 'en' ? 'Make Offer' : this.currentLang === 'hi' ? 'ऑफर भेजें' : 'ऑफर भेजें / Make Offer'}</span>
           </button>
-          <button class="btn-card-view" onclick="event.stopPropagation();App.viewProduct('${l.id}')">
-            View Lot
+          <button class="btn-card-view" onclick="event.stopPropagation();App.viewProduct('${l.id}')" title="विवरण देखें / View Details">
+            <i data-lucide="arrow-up-right" style="width:15px;height:15px;"></i>
+            <span>${this.currentLang === 'en' ? 'Details' : this.currentLang === 'hi' ? 'विवरण' : 'विवरण'}</span>
           </button>
         </div>
       </div>`;
@@ -1620,27 +1846,34 @@ window.App = {
     try {
       const res = await MarketService.getMandiPrices(filter || null);
       this.allMandiPrices = res.data || [];
+      this.lastMandiFetchedAt = res.updatedAt || new Date().toISOString();
+      const timeStr = this.formatFetchTime(this.lastMandiFetchedAt);
 
-      this.updateNetworkStatus(res.source, res.isRealGovData);
+      this.updateNetworkStatus(res.source, res.isRealGovData, res.updatedAt);
+
+      const metaEl = document.querySelector('.mandi-header-meta');
+      if (metaEl) {
+        metaEl.innerHTML = `<span class="mandi-meta-dot"></span><span>AGMARKNET · data.gov.in Live APMC Feed · ${this.currentLang === 'en' ? 'Last Synced' : 'अंतिम सिंक'}: ${timeStr}</span>`;
+      }
 
       if (sourceBadge) {
         if (res.source === 'GOVERNMENT_API_AGMARKNET') {
-          sourceBadge.innerHTML = '<i data-lucide="check-circle-2" style="width:13px;height:13px;"></i> Live: data.gov.in AGMARKNET';
+          sourceBadge.innerHTML = `<i data-lucide="check-circle-2" style="width:13px;height:13px;"></i> Live: data.gov.in AGMARKNET · ${timeStr}`;
           sourceBadge.style.background = 'rgba(21,128,61,0.12)';
           sourceBadge.style.color = '#15803d';
         } else if (res.source === 'REDIS_CACHE') {
-          sourceBadge.innerHTML = '<i data-lucide="zap" style="width:13px;height:13px;"></i> Redis Cached (data.gov.in AGMARKNET)';
+          sourceBadge.innerHTML = `<i data-lucide="zap" style="width:13px;height:13px;"></i> Redis Cached (data.gov.in) · ${timeStr}`;
           sourceBadge.style.background = 'rgba(37,99,235,0.12)';
           sourceBadge.style.color = '#2563eb';
         } else {
-          sourceBadge.innerHTML = '<i data-lucide="shield-check" style="width:13px;height:13px;"></i> Mandi Rate (AGMARKNET · Govt. of India)';
+          sourceBadge.innerHTML = `<i data-lucide="shield-check" style="width:13px;height:13px;"></i> Mandi Rate (AGMARKNET · Govt. of India) · ${timeStr}`;
           sourceBadge.style.background = 'rgba(234,88,12,0.12)';
           sourceBadge.style.color = '#ea580c';
         }
       }
 
       if (badgeText) {
-        badgeText.textContent = res.source === 'REDIS_CACHE' ? 'CACHE SYNCED' : 'LIVE APMC';
+        badgeText.textContent = res.source === 'REDIS_CACHE' ? `CACHE SYNCED (${timeStr})` : `LIVE APMC (${timeStr})`;
       }
 
       // Populate State filter dropdown dynamically from available records
@@ -1703,7 +1936,10 @@ window.App = {
     }
 
     if (countBadge) {
-      countBadge.textContent = `${list.length} मंडियां उपलब्ध / ${list.length} APMC Records`;
+      const timeStr = this.formatFetchTime(this.lastMandiFetchedAt);
+      countBadge.textContent = this.currentLang === 'en'
+        ? `${list.length} Mandis available · Last Synced: ${timeStr}`
+        : `${list.length} मंडियां उपलब्ध · अंतिम सिंक: ${timeStr}`;
     }
 
     if (!list.length) {
@@ -1975,8 +2211,14 @@ window.App = {
     const offersView = document.getElementById('orders-offers-view');
     const ordersView = document.getElementById('orders-orders-view');
 
-    if (offersView) offersView.style.display = tab === 'offers' ? 'flex' : 'none';
-    if (ordersView) ordersView.classList.toggle('hidden', tab !== 'orders');
+    if (offersView) {
+      offersView.classList.toggle('hidden', tab !== 'offers');
+      offersView.style.display = '';
+    }
+    if (ordersView) {
+      ordersView.classList.toggle('hidden', tab !== 'orders');
+      ordersView.style.display = '';
+    }
 
     if (tab === 'offers') {
       if (!offersView) return;
@@ -2043,6 +2285,26 @@ window.App = {
     const statusColors = {
       confirmed: 'chip-primary', delivered: 'chip-success', cancelled: 'chip-error', in_transit: 'chip-warning'
     };
+    let status = order.status || 'confirmed';
+    let timeline = Array.isArray(order.timeline) ? order.timeline : [];
+    if (typeof status === 'string' && status.trim().startsWith('[')) {
+      try {
+        timeline = JSON.parse(status);
+      } catch {
+        timeline = [];
+      }
+      status = 'confirmed';
+    }
+    if (!timeline.length) {
+      const todayStr = order.createdAt || new Date().toISOString().split('T')[0];
+      timeline = [
+        { step: 'Order Created', date: todayStr, done: true },
+        { step: 'Pickup Scheduled', date: '', done: false },
+        { step: 'In Transit', date: '', done: false },
+        { step: 'Delivered', date: '', done: false },
+        { step: 'Payment Released', date: '', done: false }
+      ];
+    }
     return `
     <div class="card card-body">
       <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
@@ -2052,19 +2314,19 @@ window.App = {
           <p class="text-label-sm text-on-surface-variant">${user.role === 'farmer' ? `Buyer: ${other?.name || other?.company || 'Verified'}` : `Farmer: ${other?.name || 'Farmer'}`}</p>
         </div>
         <div style="text-align:right;">
-          <span class="chip ${statusColors[order.status] || 'chip-surface'}">${(order.status || 'CONFIRMED').toUpperCase()}</span>
+          <span class="chip ${statusColors[status.toLowerCase()] || 'chip-surface'}">${status.toUpperCase()}</span>
           <div style="font-size:20px;font-weight:800;color:var(--primary);margin-top:4px;">₹${(order.totalAmount || 0).toLocaleString('en-IN')}</div>
           <div style="font-size:12px;color:var(--on-surface-variant);">@ ₹${order.agreedPrice}/${order.unit || 'kg'}</div>
         </div>
       </div>
       <!-- Timeline -->
       <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px;">
-        ${(order.timeline || []).map((t, idx) => {
-          const isLast = idx === order.timeline.length - 1;
+        ${timeline.map((t, idx) => {
+          const isLast = idx === timeline.length - 1;
           return `
           <div class="timeline-item">
             ${!isLast ? `<div class="timeline-line ${t.done ? 'done' : ''}"></div>` : ''}
-            <div class="timeline-dot ${t.done ? '' : idx === order.timeline.findIndex(x => !x.done) ? 'pending' : 'inactive'}"></div>
+            <div class="timeline-dot ${t.done ? '' : idx === timeline.findIndex(x => !x.done) ? 'pending' : 'inactive'}"></div>
             <div style="flex:1;">
               <p style="font-size:14px;font-weight:${t.done ? '600' : '400'};color:${t.done ? 'var(--on-surface)' : 'var(--on-surface-variant)'};">${t.step}</p>
               ${t.date ? `<p style="font-size:12px;color:var(--on-surface-variant);">${t.date}</p>` : ''}
@@ -2609,6 +2871,40 @@ window.App = {
       order_offers: 'ऑर्डर & ऑफर',
       offers_tab: '💰 ऑफर',
       orders_tab: '📦 ऑर्डर',
+      voice_search_prompt: 'बोलकर पूछें: "टमाटर का भाव बताओ"',
+      voice_search_sub: 'माइक दबाएं · बोलकर खोजें',
+      stat_listings_label: 'लिस्टिंग',
+      stat_offers_label: 'ऑफर',
+      stat_orders_label: 'ऑर्डर',
+      stat_rating_label: 'रेटिंग',
+      todays_prices: 'आज के भाव',
+      view_all: 'सभी देखें',
+      view_all_mandis: 'सभी 100 मंडियों के भाव देखें →',
+      my_listings: 'मेरी लिस्टिंग',
+      add_new: '+ जोड़ें',
+      no_listings_yet: 'अभी कोई लिस्टिंग नहीं',
+      create_first_listing: '+ पहली लिस्टिंग बनाएं',
+      incoming_offers: 'आए हुए ऑफर',
+      quick_actions: 'Quick Actions',
+      sell_produce: 'फसल बेचें',
+      mandi_prices: 'मंडी भाव',
+      my_orders: 'मेरे ऑर्डर',
+      ai_advisor: 'KrishiLink AI सलाहकार',
+      all_grades: 'ALL GRADES',
+      all_crops: '🌾 सभी फसलें',
+      available_produce: 'उपलब्ध फसल लॉट',
+      crop_tomato: 'टमाटर',
+      crop_potato: 'आलू',
+      crop_onion: 'प्याज',
+      crop_wheat: 'गेहूं',
+      crop_maize: 'मक्का',
+      crop_rice: 'चावल',
+      crop_chilli: 'मिर्च',
+      crop_garlic: 'लहसुन',
+      greeting_farmer: 'नमस्ते',
+      greeting_buyer_prefix: 'स्वागत है',
+      make_offer: 'ऑफर भेजें',
+      view_details: 'विवरण',
     },
     en: {
       label: 'English',
@@ -2632,6 +2928,40 @@ window.App = {
       order_offers: 'Orders & Offers',
       offers_tab: '💰 Offers',
       orders_tab: '📦 Orders',
+      voice_search_prompt: 'Voice Search: "What is tomato rate today?"',
+      voice_search_sub: 'Tap mic · Live voice search',
+      stat_listings_label: 'Listings',
+      stat_offers_label: 'Offers',
+      stat_orders_label: 'Orders',
+      stat_rating_label: 'Rating',
+      todays_prices: "Today's Mandi Rates",
+      view_all: 'View All',
+      view_all_mandis: 'View All 100 Mandis Rates →',
+      my_listings: 'My Produce Listings',
+      add_new: '+ Add New',
+      no_listings_yet: 'No produce listed yet',
+      create_first_listing: '+ Create First Listing',
+      incoming_offers: 'Incoming Offers',
+      quick_actions: 'Quick Actions',
+      sell_produce: 'Sell Produce',
+      mandi_prices: 'Mandi Rates',
+      my_orders: 'My Orders',
+      ai_advisor: 'KrishiLink AI Advisor',
+      all_grades: 'ALL GRADES',
+      all_crops: '🌾 All Produce',
+      available_produce: 'Available Produce Lots',
+      crop_tomato: 'Tomato',
+      crop_potato: 'Potato',
+      crop_onion: 'Onion',
+      crop_wheat: 'Wheat',
+      crop_maize: 'Maize',
+      crop_rice: 'Rice',
+      crop_chilli: 'Chilli',
+      crop_garlic: 'Garlic',
+      greeting_farmer: 'Hello',
+      greeting_buyer_prefix: 'Welcome',
+      make_offer: 'Make Offer',
+      view_details: 'Details',
     },
     hinglish: {
       label: 'Hinglish',
@@ -2655,6 +2985,40 @@ window.App = {
       order_offers: 'Orders & Offers',
       offers_tab: '💰 Offers',
       orders_tab: '📦 Orders',
+      voice_search_prompt: 'Bolkar poochein: "Tamatar ka bhav batao"',
+      voice_search_sub: 'Mic dabayein · Live search',
+      stat_listings_label: 'Listings',
+      stat_offers_label: 'Offers',
+      stat_orders_label: 'Orders',
+      stat_rating_label: 'Rating',
+      todays_prices: 'Aaj Ke Mandi Bhav',
+      view_all: 'Sabhi Dekhein',
+      view_all_mandis: 'Sabhi 100 Mandiyon Ke Bhav Dekhein →',
+      my_listings: 'Meri Listings',
+      add_new: '+ Naya Jodein',
+      no_listings_yet: 'Abhi koi listing nahi hai',
+      create_first_listing: '+ Pehli Listing Banayein',
+      incoming_offers: 'Aaye Huye Offers',
+      quick_actions: 'Quick Actions',
+      sell_produce: 'Fasal Bechein',
+      mandi_prices: 'Mandi Bhav',
+      my_orders: 'Mere Orders',
+      ai_advisor: 'KrishiLink AI Advisor',
+      all_grades: 'ALL GRADES',
+      all_crops: '🌾 Sabhi Fasal',
+      available_produce: 'Available Produce Lots',
+      crop_tomato: 'Tamatar',
+      crop_potato: 'Aloo',
+      crop_onion: 'Pyaaz',
+      crop_wheat: 'Gehun',
+      crop_maize: 'Makka',
+      crop_rice: 'Chawal',
+      crop_chilli: 'Mirchi',
+      crop_garlic: 'Lahsun',
+      greeting_farmer: 'Namaste',
+      greeting_buyer_prefix: 'Welcome',
+      make_offer: 'Offer Bhejein',
+      view_details: 'Details',
     },
     mr: {
       label: 'मराठी',
@@ -2678,6 +3042,40 @@ window.App = {
       order_offers: 'ऑर्डर्स आणि ऑफर्स',
       offers_tab: '💰 ऑफर्स',
       orders_tab: '📦 ऑर्डर्स',
+      voice_search_prompt: 'बोलून विचारा: "टोमॅटोचा भाव सांगा"',
+      voice_search_sub: 'माईक दाबा · बोलून शोधा',
+      stat_listings_label: 'लिस्टिंग',
+      stat_offers_label: 'ऑफर',
+      stat_orders_label: 'ऑर्डर',
+      stat_rating_label: 'रेटिंग',
+      todays_prices: 'आजचे बाजारभाव',
+      view_all: 'सर्व पहा',
+      view_all_mandis: 'सर्व 100 बाजारांचे दर पहा →',
+      my_listings: 'माझी लिस्टिंग',
+      add_new: '+ नवीन जोडा',
+      no_listings_yet: 'अद्याप कोणतीही लिस्टिंग नाही',
+      create_first_listing: '+ पहिली लिस्टिंग तयार करा',
+      incoming_offers: 'आलेल्या ऑफर्स',
+      quick_actions: 'जलद कृती',
+      sell_produce: 'माल विका',
+      mandi_prices: 'बाजारभाव',
+      my_orders: 'माझे ऑर्डर्स',
+      ai_advisor: 'कृषी लिंक AI सल्लागार',
+      all_grades: 'सर्व ग्रेड',
+      all_crops: '🌾 सर्व पिके',
+      available_produce: 'उपलब्ध शेतीमाल',
+      crop_tomato: 'टोमॅटो',
+      crop_potato: 'बटाटा',
+      crop_onion: 'कांदा',
+      crop_wheat: 'गहू',
+      crop_maize: 'मका',
+      crop_rice: 'तांदूळ',
+      crop_chilli: 'मिरची',
+      crop_garlic: 'लसूण',
+      greeting_farmer: 'नमस्कार',
+      greeting_buyer_prefix: 'स्वागत आहे',
+      make_offer: 'ऑफर पाठवा',
+      view_details: 'तपशील',
     },
     pa: {
       label: 'ਪੰਜਾਬੀ',
@@ -2701,6 +3099,40 @@ window.App = {
       order_offers: 'ਆਰਡਰ ਅਤੇ ਆਫਰ',
       offers_tab: '💰 ਆਫਰ',
       orders_tab: '📦 ਆਰਡਰ',
+      voice_search_prompt: 'ਬੋਲ ਕੇ ਪੁੱਛੋ: "ਟਮਾਟਰ ਦਾ ਭਾਅ ਦੱਸੋ"',
+      voice_search_sub: 'ਮਾਈਕ ਦਬਾਓ · ਬੋਲ ਕੇ ਖੋਜੋ',
+      stat_listings_label: 'ਲਿਸਟਿੰਗ',
+      stat_offers_label: 'ਆਫਰ',
+      stat_orders_label: 'ਆਰਡਰ',
+      stat_rating_label: 'ਰੇਟਿੰਗ',
+      todays_prices: 'ਅੱਜ ਦੇ ਮੰਡੀ ਭਾਅ',
+      view_all: 'ਸਾਰੇ ਦੇਖੋ',
+      view_all_mandis: 'ਸਾਰੀਆਂ 100 ਮੰਡੀਆਂ ਦੇ ਭਾਅ ਵੇਖੋ →',
+      my_listings: 'ਮੇਰੀਆਂ ਲਿਸਟਿੰਗਾਂ',
+      add_new: '+ ਨਵਾਂ ਜੋੜੋ',
+      no_listings_yet: 'ਅਜੇ ਕੋਈ ਲਿਸਟਿੰਗ ਨਹੀਂ',
+      create_first_listing: '+ ਪਹਿਲੀ ਲਿਸਟਿੰਗ ਬਣਾਓ',
+      incoming_offers: 'ਪ੍ਰਾਪਤ ਆਫਰ',
+      quick_actions: 'ਤੁਰੰਤ ਕਾਰਵਾਈਆਂ',
+      sell_produce: 'ਫਸਲ ਵੇਚੋ',
+      mandi_prices: 'ਮੰਡੀ ਭਾਅ',
+      my_orders: 'ਮੇਰੇ ਆਰਡਰ',
+      ai_advisor: 'ਕ੍ਰਿਸ਼ੀ ਲਿੰਕ AI ਸਲਾਹਕਾਰ',
+      all_grades: 'ਸਾਰੇ ਗ੍ਰੇਡ',
+      all_crops: '🌾 ਸਾਰੀਆਂ ਫਸਲਾਂ',
+      available_produce: 'ਉਪਲਬਧ ਫਸਲਾਂ',
+      crop_tomato: 'ਟਮਾਟਰ',
+      crop_potato: 'ਆਲੂ',
+      crop_onion: 'ਪਿਆਜ',
+      crop_wheat: 'ਕਣਕ',
+      crop_maize: 'ਮੱਕੀ',
+      crop_rice: 'ਚੌਲ',
+      crop_chilli: 'ਮਿਰਚ',
+      crop_garlic: 'ਲਸਣ',
+      greeting_farmer: 'ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ',
+      greeting_buyer_prefix: 'ਜੀ ਆਇਆਂ ਨੂੰ',
+      make_offer: 'ਆਫਰ ਭੇਜੋ',
+      view_details: 'ਵੇਰਵੇ',
     },
     gu: {
       label: 'ગુજરાતી',
@@ -2724,6 +3156,40 @@ window.App = {
       order_offers: 'ઓર્ડર અને ઑફર',
       offers_tab: '💰 ઑફર',
       orders_tab: '📦 ઓર્ડર',
+      voice_search_prompt: 'બોલીને પૂછો: "ટામેટાંનો ભાવ જણાવો"',
+      voice_search_sub: 'માઇક દબાવો · બોલીને શોધો',
+      stat_listings_label: 'લિસ્ટિંગ',
+      stat_offers_label: 'ઑફર',
+      stat_orders_label: 'ઓર્ડર',
+      stat_rating_label: 'રેટિંગ',
+      todays_prices: 'આજના માર્કેટ ભાવ',
+      view_all: 'બધું જુઓ',
+      view_all_mandis: 'બધા 100 માર્કેટના ભાવ જુઓ →',
+      my_listings: 'મારી લિસ્ટિંગ',
+      add_new: '+ નવું ઉમેરો',
+      no_listings_yet: 'હજી કોઈ લિસ્ટિંગ નથી',
+      create_first_listing: '+ પહેલી લિસ્ટિંગ બનાવો',
+      incoming_offers: 'આવેલી ઑફર્સ',
+      quick_actions: 'ઝડપી ક્રિયાઓ',
+      sell_produce: 'પાક વેચો',
+      mandi_prices: 'માર્કેટ ભાવ',
+      my_orders: 'મારા ઓર્ડર',
+      ai_advisor: 'કૃષિ લિંક AI સલાહકાર',
+      all_grades: 'બધા ગ્રેડ',
+      all_crops: '🌾 બધા પાક',
+      available_produce: 'ઉપલબ્ધ પાક લૉટ્સ',
+      crop_tomato: 'ટામેટાં',
+      crop_potato: 'બટાકા',
+      crop_onion: 'ડુંગળી',
+      crop_wheat: 'ઘઉં',
+      crop_maize: 'મકાઈ',
+      crop_rice: 'ચોખા',
+      crop_chilli: 'મરચાં',
+      crop_garlic: 'લસણ',
+      greeting_farmer: 'નમસ્તે',
+      greeting_buyer_prefix: 'સ્વાગત છે',
+      make_offer: 'ઑફર મોકલો',
+      view_details: 'વિગત',
     }
   },
 
@@ -2754,8 +3220,12 @@ window.App = {
     try { localStorage.setItem('krishilink_lang', lang); } catch (e) {}
     this.applyLang();
     this.closeLang();
+    // Re-render current active screen dynamically so all cards, stats & greetings update immediately
+    if (this.currentScreen) {
+      this.onScreenEnter(this.currentScreen);
+    }
     const t = this._i18n[lang] || this._i18n.hi;
-    this.showToast('🌐 Language: ' + t.label);
+    this.showToast('🌐 ' + t.label);
   },
 
   applyLang() {
@@ -2770,14 +3240,14 @@ window.App = {
 
     // Header Language buttons on Marketplace & Buyer dashboard
     const marketLangLbl = document.getElementById('market-lang-lbl');
-    if (marketLangLbl) marketLangLbl.textContent = `${t.label.toUpperCase()} (${t.label.toUpperCase()})`;
+    if (marketLangLbl) marketLangLbl.textContent = `${t.label.toUpperCase()}`;
     const buyerLangLbl = document.getElementById('buyer-lang-lbl');
-    if (buyerLangLbl) buyerLangLbl.textContent = `${t.label.toUpperCase()} (${t.label.toUpperCase()})`;
+    if (buyerLangLbl) buyerLangLbl.textContent = `${t.label.toUpperCase()}`;
 
     // All elements with data-i18n attribute
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.getAttribute('data-i18n');
-      if (t[key] !== undefined) el.textContent = t[key];
+      if (t[key] !== undefined) el.innerHTML = t[key];
     });
 
     // All elements with data-i18n-placeholder attribute

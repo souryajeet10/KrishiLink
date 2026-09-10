@@ -1034,6 +1034,136 @@ select.input {
   font-weight: 700;
 }
 
+/* --- DESKTOP TOP HORIZONTAL NAVBAR --- */
+.desktop-nav-bar {
+  display: none;
+}
+
+.desktop-only-header {
+  display: none !important;
+}
+
+@media (min-width: 1024px) {
+  .desktop-only-header {
+    display: flex !important;
+  }
+
+  .app-bar-top-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    gap: 16px !important;
+  }
+
+  .app-bar-brand-group {
+    flex: 0 0 auto !important;
+  }
+
+  .app-bar-actions-group {
+    flex: 0 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  .mandi-header-title-box {
+    flex: 0 0 auto !important;
+  }
+
+  .mandi-header-actions {
+    flex: 0 0 auto !important;
+  }
+
+  .desktop-nav-bar {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    margin: 0 auto;
+  }
+
+  .desktop-nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--on-surface-variant);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .desktop-nav-link .mat-icon {
+    font-size: 20px;
+    color: inherit;
+    font-variation-settings: 'FILL' 0;
+    transition: transform 0.15s ease;
+  }
+
+  .desktop-nav-link:hover {
+    color: var(--primary);
+    background: rgba(21, 128, 61, 0.08);
+  }
+
+  .desktop-nav-link.active {
+    color: var(--primary) !important;
+    background: rgba(21, 128, 61, 0.12) !important;
+    font-weight: 700;
+  }
+
+  .desktop-nav-link.active .mat-icon {
+    font-variation-settings: 'FILL' 1;
+    color: var(--primary);
+  }
+
+  /* Requirement 3: Distinct primary filled green button for "बेचें" (Sell) */
+  .desktop-nav-btn-sell {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: none;
+    background: var(--primary);
+    color: #ffffff !important;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.28);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    margin-left: 8px;
+  }
+
+  .desktop-nav-btn-sell .mat-icon {
+    font-size: 19px;
+    color: #ffffff;
+    font-variation-settings: 'FILL' 1;
+  }
+
+  .desktop-nav-btn-sell:hover {
+    background: #15803d;
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.38);
+    transform: translateY(-1px);
+  }
+
+  .desktop-nav-btn-sell:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(22, 163, 74, 0.2);
+  }
+
+  .desktop-nav-btn-sell.active {
+    background: #166534;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--primary);
+  }
+}
+
 /* --- PRODUCE CARD --- */
 .produce-card {
   background: var(--surface-container-lowest);
@@ -1542,6 +1672,327 @@ select.input {
   font-weight: 700;
 }
 
+/* --- FARMER DASHBOARD INTEL ROW (TODAY'S PRICES + AI ADVISOR) --- */
+.farmer-intel-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  width: 100%;
+}
+
+.farmer-intel-col-prices,
+.farmer-intel-col-ai {
+  width: 100%;
+}
+
+.desktop-ai-header {
+  display: none;
+}
+
+#farmer-ai-card {
+  width: 100%;
+}
+
+/* Farmer Dashboard Stats Row */
+.farmer-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+/* Price Section Responsive Desktop Grid */
+.farmer-desktop-price-grid {
+  display: none;
+}
+
+.desktop-view-all-mandis-wrap {
+  display: none;
+}
+
+@media (min-width: 860px) and (max-width: 1023px) {
+  .farmer-intel-row {
+    display: grid !important;
+    grid-template-columns: 1.15fr 0.85fr !important;
+    gap: 20px !important;
+    align-items: stretch !important;
+  }
+
+  .desktop-ai-header {
+    display: flex !important;
+  }
+
+  .ai-card-inner-head {
+    display: none !important;
+  }
+
+  #farmer-ai-card {
+    height: calc(100% - 46px) !important;
+    min-height: 220px !important;
+    margin-top: 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    padding: 16px 18px !important;
+  }
+
+  #farmer-ai-card #ai-insights-farmer {
+    flex: 1;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-around !important;
+    gap: 10px !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  /* Requirement 1: Constrain stat cards and align left */
+  .farmer-stats-row {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    gap: 16px !important;
+    width: 100% !important;
+    max-width: 640px !important;
+  }
+
+  .farmer-stats-row .stat-card {
+    flex: 1 1 0 !important;
+    max-width: 200px !important;
+    min-width: 160px !important;
+    padding: 16px 18px !important;
+  }
+
+  /* Requirement 2: Full-width stacked intel row on desktop for price grid + AI */
+  .farmer-intel-row {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 24px !important;
+  }
+
+  .farmer-intel-col-prices,
+  .farmer-intel-col-ai {
+    width: 100% !important;
+  }
+
+  /* Hide single-card tabs on desktop */
+  #farmer-crop-tabs {
+    display: none !important;
+  }
+
+  #farmer-price-card {
+    display: none !important;
+  }
+
+  /* Requirement 2: Responsive 4-card grid for desktop */
+  .farmer-desktop-price-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 16px !important;
+    margin-top: 10px !important;
+  }
+
+  /* Desktop Crop Price Card */
+  .desktop-price-card {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    padding: 16px !important;
+    border-radius: 16px !important;
+    border: 1px solid var(--outline-variant) !important;
+    background: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+  }
+
+  .desktop-price-card:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
+    border-color: var(--primary) !important;
+  }
+
+  /* Requirement 3: Restyle 'सभी 100 मंडियों के भाव देखें' to standard-width button (250-300px) */
+  .desktop-view-all-mandis-wrap {
+    display: flex !important;
+    justify-content: flex-start !important;
+    margin-top: 14px !important;
+  }
+
+  .desktop-view-all-mandis-btn {
+    width: 280px !important;
+    max-width: 280px !important;
+    min-height: 42px !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    border-radius: 10px !important;
+    background: #ffffff !important;
+    border: 1.5px solid var(--outline-variant) !important;
+    color: var(--primary) !important;
+    transition: all 0.2s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+  }
+
+  .desktop-view-all-mandis-btn:hover {
+    border-color: var(--primary) !important;
+    background: rgba(21, 128, 61, 0.04) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(21, 128, 61, 0.1) !important;
+  }
+
+  /* AI Advisor Card on Desktop */
+  .desktop-ai-header {
+    display: flex !important;
+  }
+
+  .ai-card-inner-head {
+    display: none !important;
+  }
+
+  #farmer-ai-card {
+    width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    margin-top: 0 !important;
+    padding: 20px 24px !important;
+  }
+
+  #farmer-ai-card #ai-insights-farmer {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
+  }
+}
+
+/* --- QUICK ACTIONS AT TOP OF PAGE --- */
+.quick-actions-section {
+  width: 100%;
+}
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.quick-action-btn {
+  border-radius: var(--radius);
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  text-align: left;
+  box-shadow: var(--shadow-sm);
+  width: 100%;
+}
+
+.quick-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.quick-action-btn:active {
+  transform: translateY(0);
+}
+
+.quick-action-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.quick-action-btn.quick-action-sell {
+  background: var(--primary);
+  color: #ffffff;
+}
+.quick-action-btn.quick-action-sell .quick-action-icon {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.quick-action-btn.quick-action-prices {
+  background: var(--secondary-container);
+  color: var(--on-secondary-container);
+  border-color: rgba(21, 128, 61, 0.12);
+}
+.quick-action-btn.quick-action-prices .quick-action-icon {
+  background: rgba(21, 128, 61, 0.12);
+  color: var(--primary);
+}
+
+.quick-action-btn.quick-action-mandis {
+  background: rgba(27, 94, 32, 0.08);
+  color: var(--primary);
+  border-color: rgba(27, 94, 32, 0.15);
+}
+.quick-action-btn.quick-action-mandis .quick-action-icon {
+  background: rgba(21, 128, 61, 0.15);
+  color: var(--primary);
+}
+
+.quick-action-btn.quick-action-orders {
+  background: rgba(108, 34, 0, 0.08);
+  color: var(--tertiary);
+  border-color: rgba(108, 34, 0, 0.15);
+}
+.quick-action-btn.quick-action-orders .quick-action-icon {
+  background: rgba(108, 34, 0, 0.12);
+  color: var(--tertiary);
+}
+
+@media (min-width: 768px) {
+  .quick-actions-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 14px;
+  }
+
+  .quick-action-btn {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    min-height: 60px;
+  }
+
+  .quick-action-label {
+    font-size: 14px;
+    font-weight: 700;
+  }
+}
+
+/* Crop Tab & Price Card Image Thumbnails */
+.crop-pill-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.crop-price-img-thumb {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+}
+
+.crop-price-img-thumb:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-md);
+}
+
 /* --- SECTION HEADER --- */
 .section-header {
   display: flex;
@@ -2038,7 +2489,7 @@ select.input {
   flex-direction: column;
   gap: var(--spacing-md);
   padding: var(--spacing-sm) var(--screen-margin);
-  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px) + var(--spacing-md));
+  padding-bottom: calc(105px + env(safe-area-inset-bottom, 0px) + var(--spacing-md));
   overflow-y: auto;
 }
 
@@ -2883,7 +3334,7 @@ select.input {
     max-width: 100% !important;
   }
 
-  /* Full Widescreen Layout - Expands Corner to Corner */
+  /* App-bar header spans full width, with inner elements aligned to centered content width */
   .app-bar {
     width: 100% !important;
     max-width: 100% !important;
@@ -2892,54 +3343,44 @@ select.input {
     right: 0 !important;
     border-radius: 0 !important;
     box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04) !important;
-    padding: 14px 40px !important;
+    padding: 12px 32px !important;
     border-bottom: 1px solid var(--outline-variant) !important;
+    box-sizing: border-box !important;
   }
 
+  .app-bar-top-row,
+  #network-status-bar {
+    max-width: 1240px !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Requirement 4: Overall desktop content container constrained to 1240px and centered */
   .main-content {
     width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 24px 40px 130px 40px !important;
+    max-width: 1240px !important;
+    margin: 0 auto !important;
+    padding: 24px 32px 48px 32px !important;
+    box-sizing: border-box !important;
   }
 
-  /* Full-width Corner-to-Corner Bottom Bar on Desktop */
+  /* Requirement 1 & 4: Replace bottom tab bar on desktop (>=1024px) */
   .bottom-nav {
-    width: 100% !important;
-    max-width: 100% !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    transform: none !important;
-    border-radius: 0 !important;
-    margin: 0 !important;
-    border-top: 1px solid var(--outline-variant) !important;
-    background: rgba(255, 255, 255, 0.98) !important;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08) !important;
-    padding: 6px 40px !important;
-  }
-
-  .bottom-nav-item {
-    min-height: 60px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  .bottom-nav-item.active {
-    color: var(--primary) !important;
-  }
-
-  .bottom-nav-item .nav-indicator {
     display: none !important;
     visibility: hidden !important;
-    opacity: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    pointer-events: none !important;
   }
 
   .voice-orb {
     right: 32px;
-    bottom: 84px;
+    bottom: 32px;
   }
 
   /* Multi-column produce grid */
@@ -3094,8 +3535,8 @@ select.input {
   }
 
   /* Orders Desktop Layout */
-  #orders-offers-view,
-  #orders-orders-view {
+  #orders-offers-view:not(.hidden),
+  #orders-orders-view:not(.hidden) {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
@@ -3105,6 +3546,22 @@ select.input {
   #orders-orders-view.hidden {
     display: none !important;
   }
+}
+
+.hidden {
+  display: none !important;
+}
+
+#orders-offers-view,
+#orders-orders-view {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#orders-offers-view.hidden,
+#orders-orders-view.hidden {
+  display: none !important;
 }
 
 /* === LANGUAGE SWITCHER === */
@@ -3582,25 +4039,37 @@ select.input {
 }
 
 .header-lang-btn {
-  background: #ffffff;
-  border: 1.5px solid #cbd5e1;
-  color: #0f172a;
-  padding: 5px 14px;
+  background: var(--surface-container-lowest, #ffffff);
+  border: 1.5px solid var(--outline-variant, #cbd5e1);
+  color: var(--on-surface, #0f172a);
+  padding: 5px 12px;
   border-radius: 999px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  white-space: nowrap;
+  font-family: inherit;
+  flex-shrink: 0;
 }
 
 .header-lang-btn:hover {
   border-color: var(--primary, #15803d);
   color: var(--primary, #15803d);
+  background: rgba(27, 94, 32, 0.04);
   box-shadow: 0 2px 6px rgba(21, 128, 61, 0.15);
+}
+
+@media (max-width: 480px) {
+  .header-lang-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+    gap: 4px;
+  }
 }
 
 /* Grade Filter Pills Row */
@@ -3947,40 +4416,48 @@ select.input {
 .market-card-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 2px;
-}
-
-.agroguide-ai-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  font-size: 10.5px;
-  font-weight: 700;
-  color: #475569;
-  letter-spacing: 0.3px;
-}
-
-.agroguide-ai-pill .micro-tag {
-  background: #0284c7;
-  color: #ffffff;
-  padding: 1px 4px;
-  border-radius: 3px;
-  font-size: 8.5px;
-  font-weight: 800;
+  gap: 10px;
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px dashed #e2e8f0;
 }
 
 .btn-card-offer {
   flex: 1;
-  min-height: 38px;
-  background: var(--primary, #15803d);
+  min-height: 42px;
+  background: linear-gradient(135deg, #15803d 0%, #166534 100%);
   color: #ffffff;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(21, 128, 61, 0.25);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-card-offer:hover {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(21, 128, 61, 0.35);
+}
+
+.btn-card-offer:active {
+  transform: translateY(0);
+}
+
+.btn-card-view {
+  min-height: 42px;
+  padding: 0 14px;
+  background: #f8fafc;
+  color: #334155;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -3991,30 +4468,10 @@ select.input {
   transition: all 0.15s ease;
 }
 
-.btn-card-offer:hover {
-  background: #166534;
-  box-shadow: 0 4px 12px rgba(21, 128, 61, 0.25);
-}
-
-.btn-card-view {
-  min-height: 38px;
-  padding: 0 12px;
-  background: #ffffff;
-  color: #334155;
-  border: 1.5px solid #cbd5e1;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
-}
-
 .btn-card-view:hover {
-  background: #f8fafc;
+  background: #f1f5f9;
   border-color: #94a3b8;
+  color: #0f172a;
 }
 
 /* ============================================================
