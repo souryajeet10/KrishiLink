@@ -111,7 +111,9 @@ if (require.main === module) {
     console.log(`  ➜ Local:       http://localhost:${PORT}/`);
     console.log(`  ➜ App:         http://localhost:${PORT}/app.html`);
     console.log(`  ➜ API Health:  http://localhost:${PORT}/api/health`);
-    console.log(`  ➜ API Base:    http://localhost:${PORT}/api/v1/\n`);
+    console.log(`  ➜ API Base:    http://localhost:${PORT}/api/v1/`);
+    console.log(`  ➜ GEMINI_API_KEY: ${process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your_gemini_api_key_here' ? 'loaded' : 'MISSING'}`);
+    console.log(`  ➜ OPENAI_API_KEY: ${process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'your_openai_api_key_here' ? 'loaded' : 'MISSING'}\n`);
 
     autoMigrateDatabase();
   });

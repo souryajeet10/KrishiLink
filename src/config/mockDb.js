@@ -1090,16 +1090,34 @@ class MockDbStore {
         const o = this.data.orders.find(x => x.id === oid);
         if (!o) return { rows: [], rowCount: 0 };
         const farmer = this.data.users.find(u => u.id === o.farmer_id) || {};
+        const fp = this.data.farmer_profiles.find(p => p.user_id === o.farmer_id) || {};
         const buyer = this.data.users.find(u => u.id === o.buyer_id) || {};
+        const bp = this.data.buyer_profiles.find(p => p.user_id === o.buyer_id) || {};
+        const l = this.data.produce_listings.find(x => x.id === o.listing_id) || {};
         return {
           rows: [{
             ...o,
             farmer_name: farmer.name,
             farmer_phone: farmer.phone,
             farmer_email: farmer.email,
+            farmer_village: fp.village,
+            farmer_district: fp.district,
+            farmer_state: fp.state,
+            farmer_lat: fp.latitude,
+            farmer_lng: fp.longitude,
             buyer_name: buyer.name,
             buyer_phone: buyer.phone,
             buyer_email: buyer.email,
+            buyer_company: bp.company,
+            buyer_city: bp.city,
+            buyer_state: bp.state,
+            buyer_lat: bp.latitude,
+            buyer_lng: bp.longitude,
+            variety: l.variety,
+            grade: l.grade,
+            location_address: l.location_address || o.location_address,
+            listing_lat: l.latitude,
+            listing_lng: l.longitude,
           }],
           rowCount: 1
         };

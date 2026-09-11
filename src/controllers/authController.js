@@ -63,7 +63,7 @@ const register = async (req, res, next) => {
     );
     const newUser = userRes.rows[0];
 
-    // 3. Create role-specific profile
+    // 3. Create role-specific profile (Farmers are exempt from GSTIN under Indian agricultural law)
     if (role === 'farmer') {
       const cropsArray = Array.isArray(crops) ? crops : (crops ? [crops] : []);
       await client.query(

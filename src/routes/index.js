@@ -11,6 +11,12 @@ const offerRoutes = require('./offerRoutes');
 const orderRoutes = require('./orderRoutes');
 const marketPriceRoutes = require('./marketPriceRoutes');
 const notificationRoutes = require('./notificationRoutes');
+const paymentRoutes = require('./paymentRoutes');
+const voiceRoutes = require('./voiceRoutes');
+const {
+  createRazorpayOrder,
+  verifyPaymentSignature,
+} = require('../controllers/paymentController');
 
 const router = express.Router();
 
@@ -24,6 +30,12 @@ router.use('/offers', offerRoutes);
 router.use('/orders', orderRoutes);
 router.use('/market-prices', marketPriceRoutes);
 router.use('/notifications', notificationRoutes);
+router.use('/payment', paymentRoutes);
+router.use('/voice', voiceRoutes);
+
+// Direct top-level aliases for Razorpay Standard Checkout specification
+router.post('/create-order', createRazorpayOrder);
+router.post('/verify-payment', verifyPaymentSignature);
 
 // Admin Analytics & Dashboard Overview (Strictly restricted to Admin role)
 router.get(

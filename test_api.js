@@ -284,13 +284,21 @@ async function runTests() {
     const testOfferId = newOfferRes.data.data.id;
     assert(Boolean(testOfferId), `Offer created with ID ${testOfferId}`);
 
-    // List offers
+    // Buyer attempting to list offers must receive 403 Forbidden
+    const buyerListOffersRes = await makeRequest(testServer, {
+      path: '/api/v1/offers',
+      method: 'GET',
+      headers: { 'Authorization': buyerToken }
+    });
+    assert(buyerListOffersRes.status === 403, 'GET /api/v1/offers returns 403 Forbidden for buyer role');
+
+    // List offers with farmer token
     const listOffersRes = await makeRequest(testServer, {
       path: `/api/v1/offers?listingId=${testListingId}`,
       method: 'GET',
       headers: { 'Authorization': farmerToken }
     });
-    assert(listOffersRes.status === 200 && listOffersRes.data.success, 'GET /api/v1/offers returns offers');
+    assert(listOffersRes.status === 200 && listOffersRes.data.success, 'GET /api/v1/offers returns offers for farmer');
     assert(listOffersRes.data.data.length >= 1, 'Offers list contains newly created offer');
 
     // Get offer by ID
@@ -301,7 +309,7 @@ async function runTests() {
     });
     assert(getOfferRes.status === 200 && getOfferRes.data.success, 'GET /api/v1/offers/:id retrieves offer');
 
-    console.log('\n--- 13. Testing Orders Endpoints ---');
+    console.log('\n--- 13. Testing Orders Endpoints & Detailed View ---');
     // Create order directly
     const newOrderRes = await makeRequest(testServer, {
       path: '/api/v1/orders',
@@ -324,21 +332,53 @@ async function runTests() {
     assert(newOrderRes.status === 201 && newOrderRes.data.success, 'POST /api/v1/orders creates order');
     const testOrderId = newOrderRes.data.data.id;
 
-    // List orders
-    const listOrdersRes = await makeRequest(testServer, {
+    // List orders as Buyer: role-aware scoping
+    const buyerOrdersRes = await makeRequest(testServer, {
       path: '/api/v1/orders',
       method: 'GET',
       headers: { 'Authorization': buyerToken }
     });
-    assert(listOrdersRes.status === 200 && listOrdersRes.data.success, 'GET /api/v1/orders lists orders');
+    assert(buyerOrdersRes.status === 200 && buyerOrdersRes.data.success, 'GET /api/v1/orders lists orders for buyer');
+    const allBuyerOwned = buyerOrdersRes.data.data.every(o => o.buyer_id === syncRes.data.user.id);
+    assert(allBuyerOwned, 'Buyer orders only contain current buyer_id');
 
-    // Get order by ID
+    // List orders as Farmer: role-aware scoping
+    const farmerOrdersRes = await makeRequest(testServer, {
+      path: '/api/v1/orders',
+      method: 'GET',
+      headers: { 'Authorization': farmerToken }
+    });
+    assert(farmerOrdersRes.status === 200 && farmerOrdersRes.data.success, 'GET /api/v1/orders lists orders for farmer');
+    const allFarmerOwned = farmerOrdersRes.data.data.every(o => o.farmer_id === meRes.data.user.id);
+    assert(allFarmerOwned, 'Farmer orders only contain current farmer_id');
+
+    // Get order by ID: verify full detailed structure
     const getOrderRes = await makeRequest(testServer, {
       path: `/api/v1/orders/${testOrderId}`,
       method: 'GET',
       headers: { 'Authorization': buyerToken }
     });
     assert(getOrderRes.status === 200 && getOrderRes.data.success, 'GET /api/v1/orders/:id retrieves order details');
+    const orderData = getOrderRes.data.data;
+    assert(orderData.orderId === testOrderId, 'Order detail includes orderId');
+    assert(['Ordered', 'Paid', 'Packed', 'Delivered', 'Cancelled'].includes(orderData.status), `Status is normalized: ${orderData.status}`);
+    assert(Boolean(orderData.produce && orderData.produce.name === 'Fresh Green Peas'), 'Produce section contains name');
+    assert(Boolean(orderData.produce && orderData.produce.quantity === 200), 'Produce section contains quantity');
+    assert(Boolean(orderData.produce && orderData.produce.pricePerUnit === 44), 'Produce section contains pricePerUnit');
+    assert(Boolean(orderData.payment && orderData.payment.status && orderData.payment.method), 'Payment section contains status and method');
+    assert(Boolean(orderData.buyer && orderData.buyer.id === syncRes.data.user.id), 'Buyer section contains buyer details');
+    assert(Boolean(orderData.seller && orderData.seller.id === meRes.data.user.id), 'Seller section contains seller details');
+    assert(Boolean(orderData.location && typeof orderData.location.pickupAddress === 'string'), 'Location section contains pickupAddress');
+    assert(Boolean(orderData.timestamps && orderData.timestamps.orderedAt), 'Timestamps section contains orderedAt');
+
+    // Access control test: unrelated user fetching order detail must receive 403 Forbidden
+    const unrelatedToken = 'Bearer dev-token-unrelatedbuyer:buyer:9234567890';
+    const unauthorizedOrderRes = await makeRequest(testServer, {
+      path: `/api/v1/orders/${testOrderId}`,
+      method: 'GET',
+      headers: { 'Authorization': unrelatedToken }
+    });
+    assert(unauthorizedOrderRes.status === 403, 'GET /api/v1/orders/:id returns 403 Forbidden for unauthorized user');
 
     // Update order status
     const updateOrderRes = await makeRequest(testServer, {

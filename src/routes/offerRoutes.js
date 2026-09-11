@@ -15,9 +15,10 @@ const router = express.Router();
 // All offer routes require Firebase Authentication
 router.use(verifyFirebaseAuth);
 
-// GET /api/v1/offers
+// GET /api/v1/offers (Farmer and Admin only; 403 Forbidden for buyers)
 router.get(
   '/',
+  requireRole('farmer', 'admin'),
   validate([
     queryValidator('page').optional().isInt({ min: 1 }),
     queryValidator('limit').optional().isInt({ min: 1, max: 100 }),

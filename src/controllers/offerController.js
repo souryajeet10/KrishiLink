@@ -5,26 +5,42 @@ const { sendNotification } = require('../services/notificationService');
 // GET /api/v1/offers
 const listOffers = async (req, res, next) => {
   try {
+    // Defense-in-depth: Ensure buyers cannot access offers list
+    if (req.user && req.user.role === 'buyer') {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden: Access restricted to role(s): [farmer, admin]. Your current role is "buyer".',
+      });
+    }
+
     const { page, limit, offset } = getPaginationParams(req);
     const { listingId, buyerId, farmerId, status } = req.query;
 
     let whereClauses = [];
     let params = [];
 
+    // Role-aware scoping: farmers only see offers on their own listings
+    if (req.user && req.user.role === 'farmer') {
+      params.push(req.user.id);
+      whereClauses.push(`l.farmer_id = $${params.length}`);
+    } else if (farmerId) {
+      params.push(farmerId);
+      whereClauses.push(`l.farmer_id = $${params.length}`);
+    }
+
     if (listingId) {
       params.push(listingId);
       whereClauses.push(`o.listing_id = $${params.length}`);
     }
-    if (buyerId) {
+    if (buyerId && req.user?.role === 'admin') {
       params.push(buyerId);
       whereClauses.push(`o.buyer_id = $${params.length}`);
     }
-    if (farmerId) {
-      params.push(farmerId);
-      whereClauses.push(`l.farmer_id = $${params.length}`);
-    }
-    if (status) {
-      params.push(status);
+
+    // Default to 'pending' offers if not specified
+    const targetStatus = status || (req.user?.role === 'farmer' ? 'pending' : null);
+    if (targetStatus) {
+      params.push(targetStatus);
       whereClauses.push(`o.status = $${params.length}`);
     }
 

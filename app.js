@@ -36,7 +36,14 @@ window.App = {
     } else if (target === 'market') {
       this.navigate('marketplace');
     } else if (target === 'sell') {
+      if (role === 'buyer') {
+        this.showToast('⚠️ खरीदार फसल नहीं बेच सकते / Buyers cannot sell produce');
+        this.navigate('buyer-dashboard');
+        return;
+      }
       this.navigate('add-produce');
+    } else if (target === 'prices') {
+      this.navigate('mandi-prices');
     } else if (target === 'orders') {
       this.navigate('orders');
     } else if (target === 'profile') {
@@ -45,6 +52,11 @@ window.App = {
   },
 
   updateActiveNav(screenId) {
+    const user = AuthService.getUser();
+    const role = user ? user.role : 'farmer';
+    document.body.classList.toggle('role-buyer', role === 'buyer');
+    document.body.classList.toggle('role-farmer', role === 'farmer');
+
     let activeTarget = '';
     if (['farmer-dashboard', 'buyer-dashboard', 'admin-dashboard'].includes(screenId)) {
       activeTarget = 'home';
@@ -52,7 +64,9 @@ window.App = {
       activeTarget = 'market';
     } else if (screenId === 'add-produce') {
       activeTarget = 'sell';
-    } else if (screenId === 'orders') {
+    } else if (screenId === 'mandi-prices' || screenId === 'nearby-mandis') {
+      activeTarget = 'prices';
+    } else if (screenId === 'orders' || screenId === 'order-detail') {
       activeTarget = 'orders';
     } else if (screenId === 'profile') {
       activeTarget = 'profile';
@@ -74,12 +88,13 @@ window.App = {
         let match = false;
         if (activeTarget === 'home' && (oc.includes('dashboard') || t.includes('होम') || t.includes('Home'))) match = true;
         if (activeTarget === 'market' && (oc.includes('marketplace') || t.includes('मार्केट') || t.includes('Market'))) match = true;
+        if (activeTarget === 'prices' && (oc.includes('mandi-prices') || t.includes('भाव') || t.includes('Prices'))) match = true;
         if (activeTarget === 'orders' && (oc.includes('orders') || t.includes('ऑर्डर') || t.includes('Orders'))) match = true;
         if (activeTarget === 'profile' && (oc.includes('profile') || t.includes('प्रोफ़ाइल') || t.includes('प्रोफाइल') || t.includes('Profile'))) match = true;
 
         if (match) {
           btn.classList.add('active');
-        } else if (activeTarget && (oc.includes('dashboard') || oc.includes('marketplace') || oc.includes('orders') || oc.includes('profile'))) {
+        } else if (activeTarget && (oc.includes('dashboard') || oc.includes('marketplace') || oc.includes('mandi-prices') || oc.includes('orders') || oc.includes('profile'))) {
           btn.classList.remove('active');
         }
       });
@@ -101,6 +116,21 @@ window.App = {
 
   // ── Navigation ─────────────────────────────────────────────
   navigate(screenId) {
+    const user = AuthService.getUser();
+    if (screenId === 'add-produce' && user && user.role === 'buyer') {
+      this.showToast('⚠️ खरीदार फसल नहीं बेच सकते / Buyers cannot sell produce');
+      if (this.currentScreen === 'buyer-dashboard') return;
+      this.navigate('buyer-dashboard');
+      return;
+    }
+    if (screenId === 'onboarding-buyer' && user && user.role === 'farmer') {
+      this.navigate('onboarding-farmer');
+      return;
+    }
+    if (screenId === 'onboarding-farmer' && user && user.role === 'buyer') {
+      this.navigate('onboarding-buyer');
+      return;
+    }
     const prev = this.currentScreen;
     if (prev !== screenId) {
       this.history.push(prev);
@@ -145,10 +175,16 @@ window.App = {
       case 'farmer-dashboard': this.renderFarmerDashboard(); break;
       case 'buyer-dashboard':  this.renderBuyerDashboard();  break;
       case 'admin-dashboard':  this.renderAdminDashboard();  break;
-      case 'marketplace':      this.renderMarketplace('all'); break;
+      case 'marketplace':      {
+        const u = AuthService.getUser();
+        this.updateMarketNav(u?.role || 'farmer');
+        this.renderMarketplace('all');
+        break;
+      }
       case 'mandi-prices':     this.renderMandiPrices('');   break;
       case 'nearby-mandis':    this.renderNearbyMandis();    break;
       case 'orders':           this.renderOrders();          break;
+      case 'order-detail':     this.renderOrderDetail();     break;
       case 'notifications':    this.renderNotifications();   break;
       case 'profile':          this.renderProfile();         break;
       case 'add-produce':      this.initAddProduce();        break;
@@ -201,8 +237,11 @@ window.App = {
     this.doLogin();
   },
 
+  regRole: 'farmer',
+
   async doRegister() {
-    const role = document.querySelector('#reg-role-farmer').style.borderColor.includes('primary') ? 'farmer' : 'buyer';
+    const roleInput = document.getElementById('reg-selected-role');
+    const role = roleInput?.value || this.regRole || 'farmer';
     const name = document.getElementById('reg-name').value.trim();
     const phone = document.getElementById('reg-phone').value.trim();
     const pass = document.getElementById('reg-pass').value;
@@ -218,12 +257,17 @@ window.App = {
     errEl.classList.add('hidden');
     const data = {
       role, name, phone, email, password: pass,
-      village: document.getElementById('reg-village')?.value || '',
-      district: document.getElementById('reg-district')?.value || '',
-      state: document.getElementById('reg-state')?.value || '',
-      company: document.getElementById('reg-company')?.value || '',
-      city: document.getElementById('reg-city')?.value || '',
+      village: role === 'farmer' ? (document.getElementById('reg-village')?.value || '') : '',
+      district: role === 'farmer' ? (document.getElementById('reg-district')?.value || '') : '',
+      state: role === 'farmer' ? (document.getElementById('reg-state')?.value || '') : '',
+      company: role === 'buyer' ? (document.getElementById('reg-company')?.value || '') : '',
+      city: role === 'buyer' ? (document.getElementById('reg-city')?.value || '') : '',
     };
+    if (role === 'farmer') {
+      delete data.company;
+      delete data.city;
+      delete data.gstin;
+    }
     try {
       const result = await AuthService.register(data);
       if (result.success) {
@@ -239,18 +283,23 @@ window.App = {
   },
 
   setRegRole(role) {
+    this.regRole = role;
+    const roleInput = document.getElementById('reg-selected-role');
+    if (roleInput) roleInput.value = role;
     const fa = document.getElementById('reg-role-farmer');
     const bu = document.getElementById('reg-role-buyer');
     const farmerFields = document.getElementById('farmer-fields');
     const buyerFields  = document.getElementById('buyer-fields');
     if (role === 'farmer') {
-      fa.style.cssText = 'flex:1;padding:16px 8px;border-radius:16px;border:2.5px solid var(--primary);background:rgba(27,94,32,0.08);color:var(--primary);font-size:14px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:6px;';
-      bu.style.cssText = 'flex:1;padding:16px 8px;border-radius:16px;border:2.5px solid var(--outline-variant);background:var(--surface-container);color:var(--on-surface-variant);font-size:14px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:6px;';
-      farmerFields.classList.remove('hidden'); buyerFields.classList.add('hidden');
+      fa.style.cssText = 'flex:1;padding:16px 8px;border-radius:16px;border:2.5px solid var(--primary);background:rgba(27,94,32,0.08);color:var(--primary);font-size:14px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;';
+      bu.style.cssText = 'flex:1;padding:16px 8px;border-radius:16px;border:2.5px solid var(--outline-variant);background:var(--surface-container);color:var(--on-surface-variant);font-size:14px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;';
+      if (farmerFields) farmerFields.classList.remove('hidden');
+      if (buyerFields) buyerFields.classList.add('hidden');
     } else {
-      bu.style.cssText = 'flex:1;padding:16px 8px;border-radius:16px;border:2.5px solid var(--primary);background:rgba(27,94,32,0.08);color:var(--primary);font-size:14px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:6px;';
-      fa.style.cssText = 'flex:1;padding:16px 8px;border-radius:16px;border:2.5px solid var(--outline-variant);background:var(--surface-container);color:var(--on-surface-variant);font-size:14px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:6px;';
-      buyerFields.classList.remove('hidden'); farmerFields.classList.add('hidden');
+      bu.style.cssText = 'flex:1;padding:16px 8px;border-radius:16px;border:2.5px solid var(--primary);background:rgba(27,94,32,0.08);color:var(--primary);font-size:14px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;';
+      fa.style.cssText = 'flex:1;padding:16px 8px;border-radius:16px;border:2.5px solid var(--outline-variant);background:var(--surface-container);color:var(--on-surface-variant);font-size:14px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;';
+      if (buyerFields) buyerFields.classList.remove('hidden');
+      if (farmerFields) farmerFields.classList.add('hidden');
     }
   },
 
@@ -404,7 +453,7 @@ window.App = {
           <div style="font-size:28px;">${isFarmer ? (buyer.avatar || '🏪') : (listing.emoji || '🌱')}</div>
           <div>
             <p class="text-label-lg text-on-surface">${isFarmer ? (buyer.name || 'Buyer') : (listing.cropHi || listing.crop || 'Crop')}</p>
-            <p class="text-label-sm text-on-surface-variant">${isFarmer ? (buyer.company || buyer.city || 'Verified Buyer') : (listing.variety || '')}</p>
+            <p class="text-label-sm text-on-surface-variant">${isFarmer ? (buyer.company || buyer.city || 'Buyer') : (listing.variety || '')}</p>
           </div>
         </div>
         <span class="chip ${offer.status === 'pending' ? 'chip-secondary' : offer.status === 'accepted' ? 'chip-success' : 'chip-error'}">${offer.status === 'pending' ? '⏳ PENDING' : offer.status === 'accepted' ? '✅ ACCEPTED' : '❌ REJECTED'}</span>
@@ -429,8 +478,12 @@ window.App = {
       btnEl.innerHTML = `<span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;"></span> Processing...`;
     }
     try {
-      await OfferService.respond(offerId, action);
-      this.showToast(action === 'accepted' ? '🎉 ऑफर स्वीकार किया! ऑर्डर जनरेट हुआ!' : '❌ ऑफर अस्वीकार किया');
+      const res = await OfferService.respond(offerId, action);
+      this.showToast(action === 'accepted' ? '✅ ऑफर स्वीकार किया! ऑर्डर तैयार है!' : '❌ ऑफर अस्वीकार किया');
+      if (action === 'accepted' && res.order?.id) {
+        this.openOrderDetail(res.order.id);
+        return;
+      }
       if (this.currentScreen === 'orders') {
         await this.renderOrders();
       } else {
@@ -760,32 +813,35 @@ window.App = {
     }
 
     try {
-      const [offers, orders] = await Promise.all([
-        OfferService.getBuyerOffers(user.id),
-        OrderService.getBuyerOrders(user.id)
-      ]);
+      // Buyer dashboard strictly loads orders only (no offers)
+      const orders = await OrderService.getBuyerOrders(user.id);
 
-      const statOffers = document.getElementById('buyer-stat-offers');
-      if (statOffers) statOffers.textContent = offers.length;
       const statOrders = document.getElementById('buyer-stat-orders');
       if (statOrders) statOrders.textContent = orders.length;
+
+      const statActive = document.getElementById('buyer-stat-active');
+      if (statActive) {
+        statActive.textContent = orders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled').length;
+      }
+
       const ratingEl = document.getElementById('buyer-rating');
       if (ratingEl) ratingEl.textContent = user.rating || user.buyer_rating || '4.8';
 
       // Marketplace grid in buyer dashboard
       this.renderMarketplace('all', 'buyer-market-grid');
 
-      // Offers preview
-      if (offerPreviewEl) {
-        if (!offers.length) {
-          offerPreviewEl.innerHTML = `
+      // Recent orders preview for buyer
+      const ordersPreviewEl = document.getElementById('buyer-orders-preview');
+      if (ordersPreviewEl) {
+        if (!orders.length) {
+          ordersPreviewEl.innerHTML = `
             <div class="state-empty" style="padding:24px 16px;">
-              <span style="font-size:28px;">💰</span>
-              <p class="text-body-md text-on-surface-variant" style="margin:0;">No offers sent yet</p>
+              <i data-lucide="package" style="width:28px;height:28px;color:var(--primary);"></i>
+              <p class="text-body-md text-on-surface-variant" style="margin:6px 0 0;">अभी कोई ऑर्डर नहीं / No orders yet</p>
               <button class="btn btn-outline" style="min-height:34px;font-size:12px;margin-top:8px;" onclick="App.navigate('marketplace')">Browse Market →</button>
             </div>`;
         } else {
-          offerPreviewEl.innerHTML = offers.slice(0, 3).map(o => this._offerCardHTML(o, false)).join('');
+          ordersPreviewEl.innerHTML = orders.slice(0, 3).map(o => this._orderCardHTML(o, user)).join('');
         }
       }
 
@@ -795,8 +851,9 @@ window.App = {
       }
     } catch (err) {
       console.error('Error in renderBuyerDashboard:', err);
-      if (offerPreviewEl) {
-        offerPreviewEl.innerHTML = `
+      const ordersPreviewEl = document.getElementById('buyer-orders-preview');
+      if (ordersPreviewEl) {
+        ordersPreviewEl.innerHTML = `
           <div class="state-error" style="padding:16px;">
             <p style="font-size:13px;margin:0;">${err.message || 'Failed to load dashboard'}</p>
             <button class="btn btn-outline" style="min-height:32px;font-size:12px;margin-top:6px;" onclick="App.renderBuyerDashboard()">Retry</button>
@@ -927,9 +984,6 @@ window.App = {
               <span class="market-card-volume-highlight">Volume: ${volume}</span>
             </div>
             <div class="market-card-farmer-line">
-              <span class="market-card-verified-icon">
-                <i data-lucide="check-circle-2" style="width:14px;height:14px;"></i>
-              </span>
               <span>${farmerName} · ${location}</span>
             </div>
           </div>
@@ -951,15 +1005,19 @@ window.App = {
           <div>${sparklineSvg}</div>
         </div>
 
-        <!-- Card Actions: Prominent Make Offer Button without AgroGuide AI macro -->
+        <!-- Card Actions: Make Offer, Buy Now, and View Details -->
         <div class="market-card-actions">
           <button class="btn-card-offer" onclick="event.stopPropagation();App.startOffer('${l.id}')">
-            <i data-lucide="handshake" style="width:16px;height:16px;"></i>
-            <span>${this.currentLang === 'en' ? 'Make Offer' : this.currentLang === 'hi' ? 'ऑफर भेजें' : 'ऑफर भेजें / Make Offer'}</span>
+            <i data-lucide="handshake" style="width:14px;height:14px;"></i>
+            <span>${this.currentLang === 'en' ? 'Offer' : 'ऑफर'}</span>
           </button>
-          <button class="btn-card-view" onclick="event.stopPropagation();App.viewProduct('${l.id}')" title="विवरण देखें / View Details">
+          <button class="btn-card-buy" onclick="event.stopPropagation();App.openBuyNow('${l.id}')">
+            <i data-lucide="zap" style="width:14px;height:14px;"></i>
+            <span>${this.currentLang === 'en' ? 'Buy Now' : 'खरीदें'}</span>
+          </button>
+          <button class="btn-card-view" onclick="event.stopPropagation();App.viewProduct('${l.id}')" title="${this.currentLang === 'en' ? 'View Details' : 'विवरण देखें'}">
             <i data-lucide="arrow-up-right" style="width:15px;height:15px;"></i>
-            <span>${this.currentLang === 'en' ? 'Details' : this.currentLang === 'hi' ? 'विवरण' : 'विवरण'}</span>
+            <span class="btn-view-text">${this.currentLang === 'en' ? 'Details' : 'विवरण'}</span>
           </button>
         </div>
       </div>`;
@@ -1060,7 +1118,6 @@ window.App = {
         <div style="display:flex;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap;">
           <span class="chip chip-success">Grade ${listing.grade} ${listing.grade === 'A' ? '🟢' : listing.grade === 'B' ? '🟡' : '🔴'}</span>
           <span class="chip chip-surface">📦 ${listing.quantity} ${listing.unit}</span>
-          ${farmer.verified ? '<span class="chip chip-primary">✅ Verified Farmer</span>' : ''}
         </div>
       </div>
 
@@ -1116,7 +1173,6 @@ window.App = {
               <p class="text-label-lg">${farmer.name || 'किसान'}</p>
               <p class="text-label-sm text-on-surface-variant">📍 ${listing.location}</p>
               <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">
-                ${farmer.verified ? '<span class="chip chip-success">✅ Verified</span>' : '<span class="chip chip-warning">⏳ Pending KYC</span>'}
                 <span class="chip chip-surface">⭐ ${farmer.rating || '4.5'}</span>
               </div>
             </div>
@@ -1126,7 +1182,7 @@ window.App = {
         <!-- Description -->
         <div class="card card-body">
           <h3 class="text-label-lg text-on-surface" style="margin-bottom:8px;">📝 विवरण / Description</h3>
-          <p style="font-size:14px;color:var(--on-surface-variant);line-height:1.7;">${listing.description || 'Verified agricultural listing ready for dispatch.'}</p>
+          <p style="font-size:14px;color:var(--on-surface-variant);line-height:1.7;">${listing.description || 'Agricultural listing ready for dispatch.'}</p>
         </div>
 
         <!-- Location & Mandi -->
@@ -1143,11 +1199,14 @@ window.App = {
       const user = AuthService.getUser();
       if (user && user.role === 'buyer') {
         actionsEl.innerHTML = `
-          <button class="btn btn-outline" style="flex:1;" onclick="App.callFarmer('${farmer.phone}')">
+          <button class="btn btn-outline" style="flex:0.8;" onclick="App.callFarmer('${farmer.phone}')">
             <span class="material-symbols-outlined">call</span> Call
           </button>
-          <button class="btn btn-primary" style="flex:2;" onclick="App.startOffer('${listing.id}')">
-            <span class="material-symbols-outlined">handshake</span> ऑफर करें / Make Offer
+          <button class="btn btn-outline" style="flex:1.2;" onclick="App.startOffer('${listing.id}')">
+            <span class="material-symbols-outlined">handshake</span> Make Offer
+          </button>
+          <button class="btn btn-primary" style="flex:1.5;background:linear-gradient(135deg, #16a34a, #15803d);box-shadow:0 4px 14px rgba(22,163,74,0.35);font-weight:800;" onclick="App.openBuyNow('${listing.id}')">
+            <span class="material-symbols-outlined">bolt</span> ${this.currentLang === 'en' ? 'Buy Now' : 'तुरंत खरीदें'}
           </button>`;
       } else if (user && user.id === listing.farmerId) {
         actionsEl.innerHTML = `
@@ -1159,8 +1218,11 @@ window.App = {
           </button>`;
       } else {
         actionsEl.innerHTML = `
-          <button class="btn btn-primary" style="flex:1;" onclick="App.navigate('login')">
-            लॉगिन करके ऑफर दें / Login to Make Offer
+          <button class="btn btn-outline" style="flex:1;" onclick="App.navigate('login')">
+            लॉगिन / Login
+          </button>
+          <button class="btn btn-primary" style="flex:2;background:linear-gradient(135deg, #16a34a, #15803d);font-weight:800;" onclick="App.openBuyNow('${listing.id}')">
+            <span class="material-symbols-outlined">bolt</span> ${this.currentLang === 'en' ? 'Buy Now' : 'तुरंत खरीदें'}
           </button>`;
       }
     } catch (err) {
@@ -1289,8 +1351,272 @@ window.App = {
     }
   },
 
+  // ── RAZORPAY STANDARD WEB CHECKOUT ─────────────────────────
+  async openBuyNow(listingId) {
+    const user = AuthService.getUser();
+    if (!user) {
+      this.showToast('⚠️ कृपया खरीदारी के लिए लॉगिन करें / Please login to purchase');
+      this.navigate('login');
+      return;
+    }
+    if (user.role === 'farmer') {
+      this.showToast('⚠️ केवल खरीदार सीधे खरीद सकते हैं / Only buyers can make purchases');
+      return;
+    }
+
+    let listing = this.currentListing;
+    if (!listing || listing.id !== listingId) {
+      listing = await ListingService.getById(listingId);
+    }
+    if (!listing) {
+      this.showToast('❌ Listing not found');
+      return;
+    }
+    this._buyNowListing = listing;
+
+    const unit = listing.unit || 'kg';
+    const availQty = listing.quantity || 100;
+    const defaultQty = Math.min(availQty, Math.max(1, Math.round(availQty * 0.2)));
+
+    const itemSummary = document.getElementById('buynow-item-summary');
+    if (itemSummary) {
+      itemSummary.innerHTML = `
+        <div style="display:flex;gap:12px;align-items:center;">
+          <div style="width:52px;height:52px;border-radius:12px;overflow:hidden;background:#e2e8f0;flex-shrink:0;">
+            <img src="${listing.photo || 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=100'}" alt="${listing.crop}" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=100'" />
+          </div>
+          <div style="flex:1;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <h4 style="margin:0;font-size:16px;font-weight:800;color:var(--on-surface);">${listing.cropHi || listing.crop} (${listing.crop})</h4>
+              <span class="chip chip-success" style="font-size:11px;">Grade ${listing.grade || 'A'}</span>
+            </div>
+            <p style="margin:2px 0 0;font-size:12.5px;color:var(--on-surface-variant);">${listing.variety || ''} · 📍 ${listing.location || ''}</p>
+            <p style="margin:2px 0 0;font-size:12px;color:var(--primary);font-weight:700;">Farmer: ${listing.farmer?.name || 'Farmer'}</p>
+          </div>
+        </div>`;
+    }
+
+    const unitEl = document.getElementById('buynow-unit');
+    if (unitEl) unitEl.textContent = unit;
+
+    const availEl = document.getElementById('buynow-avail-qty');
+    if (availEl) availEl.textContent = `उपलब्ध: ${availQty} ${unit}`;
+
+    const qtyInput = document.getElementById('buynow-qty');
+    if (qtyInput) {
+      qtyInput.max = availQty;
+      qtyInput.value = defaultQty;
+    }
+
+    this.updateBuyNowCalc();
+
+    const modal = document.getElementById('buynow-modal');
+    if (modal) modal.classList.remove('hidden');
+    if (window.lucide) {
+      try { lucide.createIcons(); } catch (e) {}
+    }
+  },
+
+  closeBuyNow() {
+    const modal = document.getElementById('buynow-modal');
+    if (modal) modal.classList.add('hidden');
+  },
+
+  changeBuyNowQty(delta) {
+    const input = document.getElementById('buynow-qty');
+    if (!input || !this._buyNowListing) return;
+    const max = this._buyNowListing.quantity || 999999;
+    const current = parseFloat(input.value) || 0;
+    const nextVal = Math.max(1, Math.min(max, current + delta));
+    input.value = nextVal;
+    this.updateBuyNowCalc();
+  },
+
+  updateBuyNowCalc() {
+    if (!this._buyNowListing) return;
+    const input = document.getElementById('buynow-qty');
+    const qty = parseFloat(input ? input.value : 0) || 0;
+    const rate = parseFloat(this._buyNowListing.askingPrice) || 0;
+    const total = Math.round(qty * rate);
+
+    const rateEl = document.getElementById('buynow-rate');
+    if (rateEl) rateEl.textContent = `₹${rate.toLocaleString('en-IN')} / ${this._buyNowListing.unit || 'kg'}`;
+
+    const subQtyEl = document.getElementById('buynow-sub-qty');
+    if (subQtyEl) subQtyEl.textContent = `${qty} ${this._buyNowListing.unit || 'kg'}`;
+
+    const totalEl = document.getElementById('buynow-total');
+    if (totalEl) totalEl.textContent = `₹${total.toLocaleString('en-IN')}`;
+  },
+
+  async proceedRazorpayPayment() {
+    const user = AuthService.getUser();
+    if (!user) {
+      this.closeBuyNow();
+      this.navigate('login');
+      return;
+    }
+
+    const listing = this._buyNowListing;
+    if (!listing) {
+      this.showToast('❌ Listing information missing');
+      return;
+    }
+
+    const qtyInput = document.getElementById('buynow-qty');
+    const qty = parseFloat(qtyInput ? qtyInput.value : 0);
+    const rate = parseFloat(listing.askingPrice) || 0;
+    const totalINR = Math.round(qty * rate);
+    const amountPaise = totalINR * 100; // Razorpay requires amount in paise
+
+    if (isNaN(qty) || qty <= 0) {
+      this.showToast('❌ कृपया मान्य मात्रा दर्ज करें / Enter a valid quantity');
+      return;
+    }
+
+    if (amountPaise < 100) {
+      this.showToast('❌ न्यूनतम भुगतान राशि ₹1 (100 paise) होनी चाहिए');
+      return;
+    }
+
+    // Ensure Razorpay SDK is available
+    if (typeof Razorpay === 'undefined') {
+      this.showToast('❌ Razorpay checkout SDK not loaded. Check internet connection.');
+      return;
+    }
+
+    const submitBtn = document.getElementById('buynow-submit-btn');
+    const originalText = submitBtn ? submitBtn.innerHTML : '';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span class="spinner" style="width:18px;height:18px;border-width:2px;display:inline-block;"></span> <span>ऑर्डर तैयार हो रहा है... / Initializing...</span>`;
+    }
+
+    try {
+      // Step 1: Create Order on Backend
+      const createRes = await PaymentService.createOrder({
+        amount: amountPaise,
+        currency: 'INR',
+        receipt: `rcpt_${Date.now()}_${listing.id.slice(0, 8)}`,
+        notes: {
+          listingId: listing.id,
+          buyerId: user.id,
+          crop: listing.crop,
+          quantity: qty,
+          unit: listing.unit || 'kg'
+        }
+      });
+
+      if (!createRes || !createRes.order_id) {
+        throw new Error(createRes?.error || 'Failed to create Razorpay order');
+      }
+
+      const orderId = createRes.order_id;
+      let keyId = createRes.key_id;
+      if (!keyId) {
+        const cfg = await PaymentService.getConfig();
+        keyId = cfg.keyId;
+      }
+
+      // Close the configuration sheet
+      this.closeBuyNow();
+
+
+      // Step 2: Open Razorpay Standard Web Checkout Modal for active live/test keys
+      const options = {
+        key: keyId,
+        amount: createRes.amount,
+        currency: createRes.currency || 'INR',
+        name: 'KrishiLink',
+        description: `Purchase: ${listing.cropHi || listing.crop} (${qty} ${listing.unit || 'kg'})`,
+        image: 'logo.svg',
+        order_id: orderId,
+        prefill: {
+          name: user.name || '',
+          email: user.email || '',
+          contact: user.phone || ''
+        },
+        notes: {
+          listingId: listing.id,
+          crop: listing.crop,
+          quantity: qty
+        },
+        theme: {
+          color: '#16a34a'
+        },
+        modal: {
+          ondismiss: () => {
+            this.showToast('ℹ️ भुगतान रद्द कर दिया गया / Payment cancelled by user');
+          }
+        },
+        handler: async (response) => {
+          // Response contains razorpay_payment_id, razorpay_order_id, razorpay_signature
+          await this.verifyRazorpayPayment(response, {
+            listingId: listing.id,
+            farmerId: listing.farmerId || listing.farmer_id,
+            buyerId: user.id,
+            crop: listing.crop,
+            quantity: qty,
+            unit: listing.unit || 'kg',
+            agreedPrice: rate,
+            totalAmount: totalINR
+          });
+        }
+      };
+
+      const rzp = new Razorpay(options);
+
+      rzp.on('payment.failed', (failResp) => {
+        console.error('Razorpay payment failed:', failResp);
+        const errDesc = failResp.error?.description || 'Transaction unsuccessful';
+        this.showToast(`❌ Payment Failed: ${errDesc}`);
+      });
+
+      rzp.open();
+    } catch (err) {
+      console.error('Checkout initialization error:', err);
+      this.showToast(`❌ ${err.message || 'Payment initiation failed'}`);
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      }
+    }
+  },
+
+  async verifyRazorpayPayment(response, orderDetails) {
+    this.showToast('⏳ भुगतान सत्यापित हो रहा है... / Verifying signature...');
+    try {
+      // Step 3: Backend Verification
+      const verifyRes = await PaymentService.verifyPayment({
+        razorpay_order_id: response.razorpay_order_id,
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_signature: response.razorpay_signature,
+        ...orderDetails
+      });
+
+      if (!verifyRes || !verifyRes.success) {
+        throw new Error(verifyRes?.error || 'Signature verification failed');
+      }
+
+      this.showToast('🎉 भुगतान सफल और सत्यापित! Payment verified via Razorpay');
+      // Navigate to orders to see confirmed order
+      this.navigate('orders');
+    } catch (err) {
+      console.error('Payment verification error:', err);
+      this.showToast(`❌ Verification failed: ${err.message || 'Invalid signature'}`);
+    }
+  },
+
+
   // ── ADD PRODUCE (SELL CROP WIZARD) ────────────────────────
   initAddProduce() {
+    const user = AuthService.getUser();
+    if (user && user.role === 'buyer') {
+      this.showToast('⚠️ खरीदार फसल नहीं बेच सकते / Buyers cannot sell produce');
+      this.navigate('buyer-dashboard');
+      return;
+    }
     this.currentStep = 1;
     this.addForm = {
       crop: 'Tomato',
@@ -1321,7 +1647,6 @@ window.App = {
     this._showAddStep(1);
     this.renderPhotoPresets('Tomato');
 
-    const user = AuthService.getUser();
     if (user) {
       const loc = [user.village || user.city, user.district, user.state].filter(Boolean).join(', ');
       const locInput = document.getElementById('add-location');
@@ -1512,6 +1837,720 @@ window.App = {
     }
 
     this.updateEarningsCalc();
+  },
+
+  // ============================================================
+  // VOICE-ASSISTED SELL ORDER (Whisper + Produce Parser)
+  // ============================================================
+  // DEMO-GRADE: OpenAI Whisper API + lightweight dictionary parser for SIH prototype.
+  // PRODUCTION ROADMAP: Replace transcription with Bhashini ASR; replace regex parser
+  // with a trained NER model for produce/quantity/price extraction at scale.
+
+  voiceMediaRecorder: null,
+  isVoiceModalOpen: false,
+  showVoiceModal: false,
+  voiceStream: null,
+  voiceAudioChunks: [],
+  voiceTimerInterval: null,
+  voiceRecordingSeconds: 0,
+  isRecordingVoice: false,
+  shouldProcessOnStop: true,
+  voiceSpeechRec: null,
+  voiceRecognizedText: '',
+
+  /**
+   * Open the Voice Assistant Modal
+   */
+  async openVoiceModal() {
+    console.log('[Voice Modal] Opening voice assistant modal...');
+    this.isVoiceModalOpen = true;
+    this.showVoiceModal = true;
+
+    // 1. Check HTTPS / Localhost security
+    const isSecure = window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    console.log(`[Voice Origin Check] Protocol: ${window.location.protocol}, Hostname: ${window.location.hostname}, Secure context: ${window.isSecureContext}, Secure origin: ${isSecure}`);
+    if (!isSecure && !window.isSecureContext) {
+      console.error('[Voice Origin Error] getUserMedia and Web Speech API require HTTPS or localhost. Current origin:', window.location.origin);
+    }
+
+    const modal = document.getElementById('voice-modal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.style.display = 'flex';
+    } else {
+      console.error('[Voice Modal Error] Could not find #voice-modal element in DOM!');
+    }
+
+    // Reset modal UI state
+    this.updateVoiceModalTranscript('');
+    this.setVoiceModalNote('');
+    const processingEl = document.getElementById('voice-modal-processing');
+    if (processingEl) processingEl.style.display = 'none';
+
+    // Automatically start voice recording upon opening modal
+    await this.startVoiceRecording();
+  },
+
+  /**
+   * Close the Voice Assistant Modal
+   */
+  closeVoiceModal() {
+    console.log('[Voice Modal] Closing voice assistant modal...');
+    this.isVoiceModalOpen = false;
+    this.showVoiceModal = false;
+
+    const modal = document.getElementById('voice-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.style.display = 'none';
+    }
+
+    if (this.isRecordingVoice) {
+      this.stopVoiceRecording(false);
+    }
+  },
+
+  closeVoice() {
+    this.closeVoiceModal();
+  },
+
+  openVoice() {
+    this.openVoiceModal();
+  },
+
+  startVoiceFromDashboard() {
+    this.openVoiceModal();
+  },
+
+  showVoiceMsg() {
+    this.openVoiceModal();
+  },
+
+  toggleVoiceModalRecording() {
+    if (this.isRecordingVoice) {
+      this.stopVoiceRecording(true);
+    } else {
+      this.startVoiceRecording();
+    }
+  },
+
+  updateVoiceModalTranscript(text) {
+    const transcriptEl = document.getElementById('voice-modal-transcript');
+    if (transcriptEl) {
+      if (text && text.trim()) {
+        transcriptEl.textContent = `"${text}"`;
+        transcriptEl.classList.add('has-text');
+      } else {
+        transcriptEl.textContent = 'उदा: "दो सौ किलो टमाटर पचास रुपये प्रति किलो"';
+        transcriptEl.classList.remove('has-text');
+      }
+    }
+  },
+
+  setVoiceModalNote(note) {
+    const noteEl = document.getElementById('voice-modal-note');
+    if (noteEl) {
+      if (note) {
+        noteEl.textContent = note;
+        noteEl.style.display = 'block';
+      } else {
+        noteEl.style.display = 'none';
+      }
+    }
+  },
+
+  async finishVoiceModal() {
+    console.log('[Voice Modal] User tapped Finish / Done. Stopping recording and processing audio...');
+
+    // Extract any text from transcript box (even if edited or typed)
+    const transcriptEl = document.getElementById('voice-modal-transcript');
+    const manualText = transcriptEl ? transcriptEl.innerText.trim() : '';
+    if (manualText && !manualText.startsWith('उदा:')) {
+      this.voiceRecognizedText = manualText.replace(/^"|"$/g, '').trim();
+    }
+
+    if (this.isRecordingVoice) {
+      this.stopVoiceRecording(true);
+    } else if (this.voiceRecognizedText) {
+      const processingEl = document.getElementById('voice-modal-processing');
+      if (processingEl) processingEl.style.display = 'flex';
+      try {
+        const res = await VoiceService.processOrder(null, this.voiceRecognizedText);
+        const orderData = res?.data || {};
+        if (processingEl) processingEl.style.display = 'none';
+        this.closeVoiceModal();
+        this.navigate('add-produce');
+        this.applyVoiceParsedData(orderData, this.voiceRecognizedText);
+      } catch (err) {
+        console.error('[Voice Modal Error] Failed to process voice text:', err);
+        if (processingEl) processingEl.style.display = 'none';
+        this.setVoiceModalNote('⚠️ विवरण निकालने में त्रुटि। कृपया नीचे दिए गए उदाहरण पर टैप करें।');
+      }
+    } else {
+      this.setVoiceModalNote('⚠️ कृपया पहले बोलें या नीचे दिए गए त्वरित विकल्पों पर टैप करें।');
+    }
+  },
+
+  simulateVoiceFromModal(text) {
+    console.log('[Voice Modal] User tapped demo quick chip:', text);
+    this.updateVoiceModalTranscript(text);
+    const processingEl = document.getElementById('voice-modal-processing');
+    if (processingEl) processingEl.style.display = 'flex';
+
+    if (this.isRecordingVoice) {
+      this.stopVoiceRecording(false);
+    }
+
+    VoiceService.parseOrder(text).then(res => {
+      this.closeVoiceModal();
+      this.navigate('add-produce');
+      if (res && res.data) {
+        this.applyVoiceParsedData(res.data, text);
+      }
+    }).catch(err => {
+      console.error('[Voice Modal Error] simulateVoiceFromModal error:', err);
+      if (processingEl) processingEl.style.display = 'none';
+      this.showToast('⚠️ त्रुटि: ' + err.message);
+    });
+  },
+
+  setVoiceRecognitionLang(lang) {
+    this.voiceRecognitionLang = lang;
+    console.log('[Voice Lang] User selected speech language:', lang);
+    const btnHi = document.getElementById('voice-lang-btn-hi');
+    const btnEn = document.getElementById('voice-lang-btn-en');
+    if (btnHi) btnHi.classList.toggle('active', lang.startsWith('hi'));
+    if (btnEn) btnEn.classList.toggle('active', lang.startsWith('en'));
+
+    // If currently listening, update recognition language live
+    if (this.voiceSpeechRec && this.isRecordingVoice) {
+      try {
+        this.voiceSpeechRec.stop();
+        setTimeout(() => {
+          if (this.isRecordingVoice && this.voiceSpeechRec) {
+            this.voiceSpeechRec.lang = lang;
+            this.voiceSpeechRec.start();
+            console.log('[Voice Web Speech] Restarted with new lang:', lang);
+          }
+        }, 150);
+      } catch (e) {}
+    }
+  },
+
+  startVoiceAudioVisualizer() {
+    if (!this.voiceStream) return;
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      this.voiceAudioCtx = new AudioCtx();
+      if (this.voiceAudioCtx.state === 'suspended') {
+        this.voiceAudioCtx.resume().catch(() => {});
+      }
+      const source = this.voiceAudioCtx.createMediaStreamSource(this.voiceStream);
+      this.voiceAnalyser = this.voiceAudioCtx.createAnalyser();
+      this.voiceAnalyser.fftSize = 64;
+      source.connect(this.voiceAnalyser);
+
+      const bufferLength = this.voiceAnalyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      const bars = [1, 2, 3, 4, 5].map(i => document.getElementById(`vbar-${i}`));
+
+      let silentFrames = 0;
+      const updateVisualizer = () => {
+        if (!this.isRecordingVoice || !this.voiceAnalyser) return;
+        this.voiceAnalyser.getByteFrequencyData(dataArray);
+        let sum = 0;
+        for (let i = 0; i < bufferLength; i++) {
+          sum += dataArray[i];
+        }
+        const avg = sum / bufferLength; // 0 to 255
+        const scale = Math.min(Math.max(avg / 12, 1), 5);
+
+        if (avg < 2) {
+          silentFrames++;
+          // If completely silent after ~3.5 seconds (200 frames @ 60fps)
+          if (silentFrames === 220 && !this.voiceRecognizedText) {
+            this.setVoiceModalNote('ℹ️ माइक से आवाज़ बहुत धीमी है या म्यूट है। कृपया Windows में माइक वॉल्यूम चेक करें या नीचे दिए गए विकल्पों पर टैप करें।');
+          }
+        } else {
+          silentFrames = 0;
+        }
+
+        bars.forEach((bar, idx) => {
+          if (bar) {
+            const h = Math.min(22, Math.max(4, Math.round(4 * scale * (1 - Math.abs(idx - 2) * 0.15))));
+            bar.style.height = `${h}px`;
+            if (avg > 8) bar.classList.add('active');
+            else bar.classList.remove('active');
+          }
+        });
+
+        this.voiceVisualizerFrame = requestAnimationFrame(updateVisualizer);
+      };
+      this.voiceVisualizerFrame = requestAnimationFrame(updateVisualizer);
+    } catch (e) {
+      console.warn('[Voice Visualizer] AudioContext note:', e.message);
+    }
+  },
+
+  stopVoiceAudioVisualizer() {
+    if (this.voiceVisualizerFrame) {
+      cancelAnimationFrame(this.voiceVisualizerFrame);
+      this.voiceVisualizerFrame = null;
+    }
+    if (this.voiceAudioCtx) {
+      try { this.voiceAudioCtx.close(); } catch (e) {}
+      this.voiceAudioCtx = null;
+    }
+    this.voiceAnalyser = null;
+    [1, 2, 3, 4, 5].forEach(i => {
+      const b = document.getElementById(`vbar-${i}`);
+      if (b) {
+        b.style.height = '4px';
+        b.classList.remove('active');
+      }
+    });
+  },
+
+  toggleVoiceRecording() {
+    if (this.isRecordingVoice) {
+      this.stopVoiceRecording(true);
+    } else {
+      this.startVoiceRecording();
+    }
+  },
+
+  async startVoiceRecording() {
+    // 1. Check MediaDevices support
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      console.error('[Voice Permission Error] navigator.mediaDevices.getUserMedia is undefined in this browser.');
+      this.setVoiceModalNote('⚠️ माइक्रोफ़ोन इस ब्राउज़र में समर्थित नहीं है / Mic not supported in this browser');
+      this.showToast('⚠️ माइक्रोफ़ोन समर्थित नहीं है / Mic not supported');
+      return;
+    }
+
+    // 2. Request mic permission with audio processing enhancements (autoGainControl & noiseSuppression)
+    try {
+      console.log('[Voice Permission] Requesting microphone permission via navigator.mediaDevices.getUserMedia...');
+      this.voiceStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: false,
+          autoGainControl: true,
+        }
+      });
+      const tracks = this.voiceStream.getAudioTracks();
+      console.log('[Voice Permission] Microphone permission granted. Active audio tracks:', tracks.length);
+
+      // Display active mic name to user so they know which input is active
+      const micNameEl = document.getElementById('voice-modal-mic-name');
+      if (micNameEl && tracks[0]) {
+        const label = tracks[0].label || 'Default Microphone';
+        micNameEl.textContent = `🎤 Mic: ${label}`;
+        micNameEl.style.display = 'block';
+        console.log('[Voice Device] Active audio input device:', label);
+      }
+    } catch (permErr) {
+      console.error('[Voice Permission Error] Microphone access rejected or failed:', permErr.name, permErr.message, permErr);
+      this.setVoiceModalNote(`⚠️ माइक्रोफ़ोन अनुमति अस्वीकृत / Mic permission error: ${permErr.name || permErr.message}. Please allow microphone in browser settings.`);
+      this.showToast(`⚠️ Mic error: ${permErr.name || permErr.message}`);
+      return;
+    }
+
+    this.voiceAudioChunks = [];
+    this.voiceRecognizedText = '';
+
+    // 3. Start Live Microphone Audio Visualizer (real-time sound level feedback)
+    this.startVoiceAudioVisualizer();
+
+    // 4. Initialize Browser-Native Web Speech Recognition
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRec) {
+      console.warn('[Voice Web Speech] window.SpeechRecognition and window.webkitSpeechRecognition are NOT supported in this browser (e.g. Safari / Firefox). Live captions disabled; recorded audio will be processed by Gemini.');
+      this.setVoiceModalNote('ℹ️ लाइव कैप्शन इस ब्राउज़र में उपलब्ध नहीं है। रिकॉर्डिंग पूरी होने पर Gemini AI सीधे ऑडियो से विवरण निकालेगा।');
+      this.voiceSpeechRec = null;
+    } else {
+      try {
+        console.log('[Voice Web Speech] Initializing Web Speech Recognition...');
+        const recognition = new SpeechRec();
+        const activeLang = this.voiceRecognitionLang || (this.currentLang === 'en' ? 'en-IN' : 'hi-IN');
+        recognition.lang = activeLang;
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+
+        recognition.onresult = (event) => {
+          let fullText = '';
+          for (let i = 0; i < event.results.length; i++) {
+            fullText += event.results[i][0].transcript + ' ';
+          }
+          const trimmed = fullText.trim();
+          if (trimmed) {
+            console.log(`[Voice Web Speech Live (${recognition.lang})]:`, trimmed);
+            this.voiceRecognizedText = trimmed;
+            this.updateVoiceModalTranscript(trimmed);
+          }
+        };
+
+        recognition.onerror = (e) => {
+          console.warn('[Voice Web Speech Error] Speech recognition error event:', e.error, e);
+          if (e.error === 'not-allowed') {
+            this.setVoiceModalNote('⚠️ स्पीच रिकग्निशन अनुमति अस्वीकृत / Microphone access not allowed.');
+          } else if (e.error === 'network') {
+            this.setVoiceModalNote('ℹ️ Chrome ऑनलाइन स्पीच नेटवर्क धीमा है। रिकॉर्डिंग समाप्त होने पर Gemini AI सीधे ऑडियो से विवरण निकालेगा।');
+          } else if (e.error === 'audio-capture') {
+            this.setVoiceModalNote('⚠️ माइक्रोफ़ोन इनपुट नहीं मिल रहा। कृपया डिवाइस सेटिंग्स में माइक चेक करें।');
+          }
+        };
+
+        recognition.onend = () => {
+          console.log('[Voice Web Speech] Recognition ended.');
+          if (this.isRecordingVoice && this.voiceSpeechRec) {
+            try {
+              recognition.start();
+              console.log('[Voice Web Speech] Recognition auto-restarted to keep listening.');
+            } catch (reErr) {
+              // ignore if already running or stopping
+            }
+          }
+        };
+
+        recognition.start();
+        this.voiceSpeechRec = recognition;
+        console.log(`[Voice Web Speech] Recognition started successfully with lang: ${recognition.lang}`);
+      } catch (recErr) {
+        console.error('[Voice Web Speech Error] Exception starting SpeechRecognition:', recErr);
+        this.voiceSpeechRec = null;
+      }
+    }
+
+    // 4. Initialize MediaRecorder with try-catch and chunk collection
+    let mimeType = 'audio/webm;codecs=opus';
+    if (!MediaRecorder.isTypeSupported(mimeType)) {
+      mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '';
+    }
+
+    try {
+      console.log(`[Voice MediaRecorder] Initializing MediaRecorder with mimeType: "${mimeType || 'default'}"`);
+      this.voiceMediaRecorder = mimeType
+        ? new MediaRecorder(this.voiceStream, { mimeType })
+        : new MediaRecorder(this.voiceStream);
+    } catch (recInitErr) {
+      console.error('[Voice MediaRecorder Error] Failed to initialize with preferred mime, trying default MediaRecorder:', recInitErr);
+      try {
+        this.voiceMediaRecorder = new MediaRecorder(this.voiceStream);
+      } catch (fallbackRecErr) {
+        console.error('[Voice MediaRecorder Fatal Error] Cannot create MediaRecorder:', fallbackRecErr);
+        this.showToast('⚠️ MediaRecorder failed in this browser.');
+        return;
+      }
+    }
+
+    this.voiceMediaRecorder.ondataavailable = (e) => {
+      if (e.data && e.data.size > 0) {
+        this.voiceAudioChunks.push(e.data);
+        console.log(`[Voice Audio Chunk] Received chunk size: ${e.data.size} bytes (Total chunks: ${this.voiceAudioChunks.length})`);
+      }
+    };
+
+    this.voiceMediaRecorder.onstop = async () => {
+      console.log(`[Voice MediaRecorder] onstop fired. Total chunks: ${this.voiceAudioChunks.length}`);
+
+      // Stop audio tracks after recorder has fully finished and flushed
+      if (this.voiceStream) {
+        try {
+          this.voiceStream.getTracks().forEach(track => track.stop());
+        } catch (e) {}
+        this.voiceStream = null;
+      }
+
+      if (this.voiceAudioChunks.length > 0 && this.shouldProcessOnStop) {
+        try {
+          const recordedMime = this.voiceMediaRecorder.mimeType || 'audio/webm';
+          const audioBlob = new Blob(this.voiceAudioChunks, { type: recordedMime });
+          console.log(`[Voice Audio Blob] Created blob size: ${audioBlob.size} bytes, mime: ${audioBlob.type}`);
+          await this.processVoiceAudio(audioBlob);
+        } catch (blobErr) {
+          console.error('[Voice Blob Processing Error] Error creating or processing audio blob:', blobErr);
+        }
+      }
+    };
+
+    this.shouldProcessOnStop = true;
+    try {
+      this.voiceMediaRecorder.start(250); // collect chunks every 250ms
+      this.isRecordingVoice = true;
+      this.voiceRecordingSeconds = 0;
+      console.log('[Voice MediaRecorder] Started successfully.');
+    } catch (startErr) {
+      console.error('[Voice MediaRecorder Error] Failed to start MediaRecorder:', startErr);
+      return;
+    }
+
+    // 5. Update UI (both in inline wizard and modal)
+    const btn = document.getElementById('btn-voice-record');
+    const icon = document.getElementById('voice-record-icon');
+    const label = document.getElementById('voice-record-label');
+    const indicator = document.getElementById('voice-recording-indicator');
+    const timerLabel = document.getElementById('voice-timer-label');
+
+    if (btn) btn.classList.add('recording');
+    if (icon) icon.textContent = 'stop';
+    if (label) label.textContent = 'रोकें / Stop Recording';
+    if (indicator) indicator.style.display = 'flex';
+    if (timerLabel) timerLabel.textContent = '00:00';
+
+    const modalOrb = document.getElementById('voice-modal-orb');
+    const modalIcon = document.getElementById('voice-modal-orb-icon');
+    const modalStatus = document.getElementById('voice-modal-status-text');
+    const modalTimer = document.getElementById('voice-modal-timer');
+
+    if (modalOrb) modalOrb.classList.add('recording');
+    if (modalIcon) modalIcon.textContent = 'stop';
+    if (modalStatus) modalStatus.textContent = 'सुन रहे हैं... बोलिए / Listening... Speak now';
+    if (modalTimer) modalTimer.textContent = '00:00';
+
+    this.dismissVoiceBanner();
+
+    // 30 seconds auto-stop timer
+    if (this.voiceTimerInterval) clearInterval(this.voiceTimerInterval);
+    this.voiceTimerInterval = setInterval(() => {
+      this.voiceRecordingSeconds++;
+      const secs = this.voiceRecordingSeconds;
+      const mm = String(Math.floor(secs / 60)).padStart(2, '0');
+      const ss = String(secs % 60).padStart(2, '0');
+      if (timerLabel) timerLabel.textContent = `${mm}:${ss}`;
+      if (modalTimer) modalTimer.textContent = `${mm}:${ss}`;
+
+      if (secs >= 30) {
+        console.log('[Voice Timer] Reached 30s limit, auto-stopping recording.');
+        this.stopVoiceRecording(true);
+      }
+    }, 1000);
+  },
+
+  stopVoiceRecording(shouldProcess = true) {
+    if (!this.isRecordingVoice) return;
+    console.log(`[Voice Recording] Stopping recording. Process on stop: ${shouldProcess}`);
+    this.isRecordingVoice = false;
+    this.shouldProcessOnStop = shouldProcess;
+
+    if (this.voiceTimerInterval) {
+      clearInterval(this.voiceTimerInterval);
+      this.voiceTimerInterval = null;
+    }
+
+    this.stopVoiceAudioVisualizer();
+
+    if (this.voiceSpeechRec) {
+      try {
+        this.voiceSpeechRec.stop();
+      } catch (e) {
+        console.warn('[Voice Web Speech] stop notice:', e.message);
+      }
+    }
+
+    if (this.voiceMediaRecorder && this.voiceMediaRecorder.state !== 'inactive') {
+      try {
+        if (typeof this.voiceMediaRecorder.requestData === 'function') {
+          this.voiceMediaRecorder.requestData();
+        }
+        this.voiceMediaRecorder.stop();
+      } catch (e) {
+        console.warn('[Voice MediaRecorder] stop notice:', e.message);
+      }
+    }
+
+    // Restore UI
+    const btn = document.getElementById('btn-voice-record');
+    const icon = document.getElementById('voice-record-icon');
+    const label = document.getElementById('voice-record-label');
+    const indicator = document.getElementById('voice-recording-indicator');
+
+    if (btn) btn.classList.remove('recording');
+    if (icon) icon.textContent = 'mic';
+    if (label) label.textContent = 'बोलकर भरें / Fill with Voice';
+    if (indicator) indicator.style.display = 'none';
+
+    const modalOrb = document.getElementById('voice-modal-orb');
+    const modalIcon = document.getElementById('voice-modal-orb-icon');
+    const modalStatus = document.getElementById('voice-modal-status-text');
+
+    if (modalOrb) modalOrb.classList.remove('recording');
+    if (modalIcon) modalIcon.textContent = 'mic';
+    if (modalStatus) modalStatus.textContent = 'आवाज़ रिकॉर्ड हो गई / Audio captured';
+  },
+
+  async processVoiceAudio(audioBlob) {
+    console.log(`[Voice Pipeline] Starting processVoiceAudio | blob size: ${audioBlob ? audioBlob.size : 0} bytes | live transcript: "${this.voiceRecognizedText}"`);
+
+    const processingEl = document.getElementById('voice-processing-state');
+    const processingText = document.getElementById('voice-processing-text');
+    if (processingEl) processingEl.style.display = 'flex';
+    if (processingText) processingText.textContent = 'आवाज़ समझ रहे हैं... / Processing order with Gemini...';
+
+    const modalProcessing = document.getElementById('voice-modal-processing');
+    if (modalProcessing) modalProcessing.style.display = 'flex';
+
+    try {
+      // PRIMARY: Single call directly to Gemini native audio input (/api/voice/process-order)
+      // Server manages the resilient fallback chain (Whisper -> Gemini text -> Regex)
+      const res = await VoiceService.processOrder(audioBlob, this.voiceRecognizedText || '');
+      const orderData = res?.data || {};
+      console.log('[Voice Pipeline] Successfully received processed order data:', orderData);
+
+      if (processingEl) processingEl.style.display = 'none';
+      if (modalProcessing) modalProcessing.style.display = 'none';
+
+      // Check if no speech was detected in the recording
+      if (!orderData.produce && orderData.confidence === 'low' && !orderData.transcribedText) {
+        console.warn('[Voice Pipeline] Audio had no discernible speech.');
+        this.setVoiceModalNote('⚠️ आवाज़ सुनाई नहीं दी। कृपया माइक के पास साफ़ बोलें या नीचे दिए गए विकल्पों पर टैप करें।');
+        return;
+      }
+
+      // Close modal if open, and navigate to sell order screen
+      this.closeVoiceModal();
+      this.navigate('add-produce');
+
+      const transcript = orderData.transcribedText || this.voiceRecognizedText || orderData.rawText || '';
+      this.applyVoiceParsedData(orderData, transcript);
+    } catch (err) {
+      console.error('[Voice Pipeline Error] processVoiceAudio failed:', err);
+      if (processingEl) processingEl.style.display = 'none';
+      if (modalProcessing) modalProcessing.style.display = 'none';
+      this.setVoiceModalNote(`⚠️ प्रसंस्करण त्रुटि / Processing error: ${err.message}`);
+    }
+  },
+
+  applyVoiceParsedData(data, rawTranscript) {
+    const { produce, quantity, unit, pricePerUnit, confidence } = data;
+
+    // 1. Show Review Banner
+    const banner = document.getElementById('voice-transcript-banner');
+    const transcriptDisplay = document.getElementById('voice-transcript-display');
+    const confidenceContainer = document.getElementById('voice-confidence-container');
+
+    const displayedTranscript = rawTranscript || data.transcribedText || data.rawText || '';
+    if (transcriptDisplay) {
+      transcriptDisplay.textContent = `"${displayedTranscript}"`;
+    }
+
+    if (banner) {
+      banner.style.display = 'flex';
+      if (confidence === 'high') {
+        banner.classList.remove('low-confidence');
+      } else {
+        banner.classList.add('low-confidence');
+      }
+    }
+
+    if (confidenceContainer) {
+      if (confidence === 'high') {
+        const sourceLabel = data.source === 'fallback' ? '🎤 Filled by voice (Fallback) — please confirm' : '🎤 Filled by voice (Gemini) — please confirm';
+        confidenceContainer.innerHTML = `
+          <span class="voice-confidence-pill high">
+            <span class="material-symbols-outlined" style="font-size:14px;">check_circle</span>
+            ${sourceLabel} / विवरण भर दिया गया है — कृपया जांच लें
+          </span>`;
+      } else {
+        confidenceContainer.innerHTML = `
+          <span class="voice-confidence-pill low">
+            <span class="material-symbols-outlined" style="font-size:14px;">warning</span>
+            ⚠️ कुछ विवरण समझ नहीं आए — कृपया जांचें व हाथ से भरें / Some details unclear — please check
+          </span>`;
+      }
+    }
+
+    // 2. Populate Produce / Crop
+    if (produce) {
+      const cropSelect = document.getElementById('add-crop');
+      if (cropSelect) {
+        let optionExists = false;
+        for (let i = 0; i < cropSelect.options.length; i++) {
+          if (cropSelect.options[i].value.toLowerCase() === produce.toLowerCase()) {
+            cropSelect.selectedIndex = i;
+            optionExists = true;
+            break;
+          }
+        }
+        if (!optionExists) {
+          const newOpt = document.createElement('option');
+          newOpt.value = produce;
+          newOpt.textContent = `🌱 ${produce}`;
+          cropSelect.appendChild(newOpt);
+          cropSelect.value = produce;
+        }
+
+        this.addForm.crop = cropSelect.value;
+        this.highlightVoiceField(cropSelect);
+        this.onCropChange();
+      }
+    }
+
+    // 3. Populate Quantity
+    if (quantity && quantity > 0) {
+      const qtyInput = document.getElementById('add-qty');
+      if (qtyInput) {
+        qtyInput.value = quantity;
+        this.addForm.qty = quantity;
+        this.highlightVoiceField(qtyInput);
+      }
+    }
+
+    // 4. Populate Unit
+    if (unit) {
+      const unitSelect = document.getElementById('add-unit');
+      if (unitSelect) {
+        unitSelect.value = unit;
+        this.addForm.unit = unit;
+        this.highlightVoiceField(unitSelect);
+      }
+    }
+
+    // 5. Populate Price
+    if (pricePerUnit && pricePerUnit > 0) {
+      const priceInput = document.getElementById('add-price');
+      if (priceInput) {
+        priceInput.value = pricePerUnit;
+        this.highlightVoiceField(priceInput);
+      }
+      this.addForm.price = pricePerUnit;
+    }
+
+    this.updateEarningsCalc();
+
+    // CRITICAL UX RULE: Do NOT auto-submit!
+    this.showToast('✅ आवाज़ से फॉर्म भर दिया गया है। कृपया जांच कर आगे बढ़ें।');
+  },
+
+  highlightVoiceField(element) {
+    if (!element) return;
+    element.classList.remove('field-voice-highlight');
+    // Force reflow
+    void element.offsetWidth;
+    element.classList.add('field-voice-highlight');
+    setTimeout(() => {
+      element.classList.remove('field-voice-highlight');
+    }, 2800);
+  },
+
+  dismissVoiceBanner() {
+    const banner = document.getElementById('voice-transcript-banner');
+    if (banner) banner.style.display = 'none';
+  },
+
+  // Helper to simulate voice input for automated testing / demo without microphone
+  simulateVoiceOrder(text) {
+    if (!text) text = "दो सौ किलो टमाटर पचास रुपये प्रति किलो";
+    const res = VoiceService.parseOrder(text);
+    if (res && res.then) {
+      res.then(r => {
+        if (r && r.data) {
+          this.applyVoiceParsedData(r.data, text);
+        }
+      });
+    }
   },
 
   nudgePrice(delta) {
@@ -2197,12 +3236,27 @@ window.App = {
     const user = AuthService.getUser();
     if (!user) { this.navigate('login'); return; }
     this.updateOrdersBottomNav(user.role);
-    await this.switchOrderTab('offers');
+
+    const tabsBar = document.getElementById('orders-tabs-bar');
+    if (user.role === 'buyer') {
+      // Buyer Dashboard: show ONLY "Orders" tab (no Offers tab at all)
+      if (tabsBar) tabsBar.style.display = 'none';
+      await this.switchOrderTab('orders');
+    } else {
+      // Farmer Dashboard: show BOTH "Orders" and "Offers"
+      if (tabsBar) tabsBar.style.display = 'flex';
+      await this.switchOrderTab('offers');
+    }
   },
 
   async switchOrderTab(tab) {
     const user = AuthService.getUser();
     if (!user) return;
+
+    // Strict role check: Buyers must never access or view offers
+    if (user.role === 'buyer' && tab === 'offers') {
+      tab = 'orders';
+    }
 
     ['offers','orders'].forEach(t => {
       const btn = document.getElementById(`ord-tab-${t}`);
@@ -2213,32 +3267,29 @@ window.App = {
 
     if (offersView) {
       offersView.classList.toggle('hidden', tab !== 'offers');
-      offersView.style.display = '';
+      offersView.style.display = tab === 'offers' ? '' : 'none';
     }
     if (ordersView) {
       ordersView.classList.toggle('hidden', tab !== 'orders');
-      ordersView.style.display = '';
+      ordersView.style.display = tab === 'orders' ? '' : 'none';
     }
 
-    if (tab === 'offers') {
+    if (tab === 'offers' && user.role === 'farmer') {
       if (!offersView) return;
       offersView.innerHTML = `<div class="state-loading"><div class="spinner"></div><p>ऑफर लोड हो रहे हैं... / Loading offers...</p></div>`;
 
       try {
-        const offers = user.role === 'farmer'
-          ? await OfferService.getFarmerOffers(user.id)
-          : await OfferService.getBuyerOffers(user.id);
+        const offers = await OfferService.getFarmerOffers(user.id);
 
         if (!offers.length) {
           offersView.innerHTML = `
             <div class="state-empty">
               <span class="empty-icon">💰</span>
-              <div class="empty-title">अभी कोई ऑफर नहीं / No offers found</div>
-              <div class="empty-sub">${user.role === 'farmer' ? 'जब कोई खरीदार आपकी फसल पर बोली लगाएगा, तो वह यहाँ दिखेगा।' : 'You have not submitted any offers yet.'}</div>
-              ${user.role === 'buyer' ? '<button class="btn btn-primary" style="margin-top:12px;min-height:36px;font-size:13px;" onclick="App.navigate(\'marketplace\')">Browse Market →</button>' : ''}
+              <div class="empty-title">अभी कोई लंबित ऑफर नहीं / No pending offers</div>
+              <div class="empty-sub">जब कोई खरीदार आपकी फसल पर बोली लगाएगा, तो वह यहाँ दिखेगा।</div>
             </div>`;
         } else {
-          offersView.innerHTML = offers.map(o => this._offerCardHTML(o, user.role === 'farmer')).join('');
+          offersView.innerHTML = offers.map(o => this._offerCardHTML(o, true)).join('');
         }
       } catch (err) {
         console.error('Error in switchOrderTab offers:', err);
@@ -2263,7 +3314,7 @@ window.App = {
             <div class="state-empty">
               <span class="empty-icon">📦</span>
               <div class="empty-title">कोई ऑर्डर नहीं / No orders found</div>
-              <div class="empty-sub">${user.role === 'farmer' ? 'ऑफर स्वीकार करने पर यहाँ ऑर्डर बनेगा।' : 'Accepted offers will generate orders here.'}</div>
+              <div class="empty-sub">${user.role === 'farmer' ? 'ऑफर स्वीकार करने पर यहाँ ऑर्डर बनेगा।' : 'खरीदने पर यहाँ आपके ऑर्डर दिखेंगे।'}</div>
             </div>`;
         } else {
           ordersView.innerHTML = orders.map(o => this._orderCardHTML(o, user)).join('');
@@ -2281,66 +3332,318 @@ window.App = {
   },
 
   _orderCardHTML(order, user) {
-    const other = user.role === 'farmer' ? order.buyer : order.farmer;
+    const other = user.role === 'farmer' ? (order.buyer || {}) : (order.seller || order.farmer || {});
     const statusColors = {
-      confirmed: 'chip-primary', delivered: 'chip-success', cancelled: 'chip-error', in_transit: 'chip-warning'
+      confirmed: 'chip-primary', ordered: 'chip-primary', delivered: 'chip-success', cancelled: 'chip-error', in_transit: 'chip-warning', packed: 'chip-warning'
     };
-    let status = order.status || 'confirmed';
-    let timeline = Array.isArray(order.timeline) ? order.timeline : [];
-    if (typeof status === 'string' && status.trim().startsWith('[')) {
-      try {
-        timeline = JSON.parse(status);
-      } catch {
-        timeline = [];
-      }
-      status = 'confirmed';
-    }
-    if (!timeline.length) {
-      const todayStr = order.createdAt || new Date().toISOString().split('T')[0];
-      timeline = [
-        { step: 'Order Created', date: todayStr, done: true },
-        { step: 'Pickup Scheduled', date: '', done: false },
-        { step: 'In Transit', date: '', done: false },
-        { step: 'Delivered', date: '', done: false },
-        { step: 'Payment Released', date: '', done: false }
-      ];
-    }
+    const status = (order.status || 'confirmed').toLowerCase();
+    const dateStr = order.createdAt || (order.timestamps?.orderedAt ? order.timestamps.orderedAt.split('T')[0] : '');
+
     return `
-    <div class="card card-body">
-      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+    <div class="card card-body order-card-tile" onclick="App.openOrderDetail('${order.id}')" style="cursor:pointer;margin-bottom:12px;transition:box-shadow 0.2s ease;">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
         <div>
-          <p class="text-label-sm text-on-surface-variant">Order #${order.id ? order.id.slice(0, 8) : ''}</p>
-          <p class="text-label-lg">${order.crop} · ${order.quantity} ${order.unit}</p>
-          <p class="text-label-sm text-on-surface-variant">${user.role === 'farmer' ? `Buyer: ${other?.name || other?.company || 'Verified'}` : `Farmer: ${other?.name || 'Farmer'}`}</p>
+          <span style="font-size:11px;font-family:monospace;color:var(--on-surface-variant);background:var(--surface-container);padding:2px 6px;border-radius:4px;">
+            Order #${order.id ? order.id.slice(0, 8) : ''}
+          </span>
+          <h3 style="font-size:16px;font-weight:700;color:var(--on-surface);margin:4px 0 2px;">
+            ${order.crop} · ${order.quantity} ${order.unit || 'kg'}
+          </h3>
+          <p style="font-size:12.5px;color:var(--on-surface-variant);margin:0;">
+            ${user.role === 'farmer' ? `Buyer: ${other?.name || other?.company || 'Verified Buyer'}` : `Farmer: ${other?.name || 'Verified Farmer'}`}
+          </p>
         </div>
         <div style="text-align:right;">
-          <span class="chip ${statusColors[status.toLowerCase()] || 'chip-surface'}">${status.toUpperCase()}</span>
-          <div style="font-size:20px;font-weight:800;color:var(--primary);margin-top:4px;">₹${(order.totalAmount || 0).toLocaleString('en-IN')}</div>
-          <div style="font-size:12px;color:var(--on-surface-variant);">@ ₹${order.agreedPrice}/${order.unit || 'kg'}</div>
+          <span class="chip ${statusColors[status] || 'chip-surface'}" style="font-size:11px;font-weight:700;">
+            ${status.toUpperCase()}
+          </span>
+          <div style="font-size:18px;font-weight:800;color:var(--primary);margin-top:4px;">
+            ₹${(order.totalAmount || 0).toLocaleString('en-IN')}
+          </div>
+          ${order.agreedPrice ? `<div style="font-size:11.5px;color:var(--on-surface-variant);">@ ₹${order.agreedPrice}/${order.unit || 'kg'}</div>` : ''}
         </div>
       </div>
-      <!-- Timeline -->
-      <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px;">
-        ${timeline.map((t, idx) => {
-          const isLast = idx === timeline.length - 1;
-          return `
-          <div class="timeline-item">
-            ${!isLast ? `<div class="timeline-line ${t.done ? 'done' : ''}"></div>` : ''}
-            <div class="timeline-dot ${t.done ? '' : idx === timeline.findIndex(x => !x.done) ? 'pending' : 'inactive'}"></div>
-            <div style="flex:1;">
-              <p style="font-size:14px;font-weight:${t.done ? '600' : '400'};color:${t.done ? 'var(--on-surface)' : 'var(--on-surface-variant)'};">${t.step}</p>
-              ${t.date ? `<p style="font-size:12px;color:var(--on-surface-variant);">${t.date}</p>` : ''}
-            </div>
-            ${t.done ? '<span class="material-symbols-outlined" style="color:var(--primary);font-size:18px;font-variation-settings:\'FILL\' 1;">check_circle</span>' : ''}
-          </div>`;
-        }).join('')}
-      </div>
-      <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--outline-variant);display:flex;gap:8px;flex-wrap:wrap;">
-        <span class="chip ${order.paymentStatus === 'paid' ? 'chip-success' : 'chip-warning'}">
-          💳 Payment: ${order.paymentStatus === 'paid' ? '✅ Paid' : '⏳ Escrow Pending'}
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid var(--outline-variant);margin-top:6px;font-size:12px;color:var(--on-surface-variant);">
+        <span>${dateStr ? `Ordered: ${dateStr}` : 'Recent Order'}</span>
+        <span style="display:inline-flex;align-items:center;gap:4px;color:var(--primary);font-weight:600;">
+          View Details <span class="material-symbols-outlined" style="font-size:16px;">chevron_right</span>
         </span>
       </div>
     </div>`;
+  },
+
+  openOrderDetail(orderId) {
+    if (!orderId) return;
+    this.currentOrderId = orderId;
+    this.navigate('order-detail');
+  },
+
+  async renderOrderDetail() {
+    const user = AuthService.getUser();
+    if (!user) { this.navigate('login'); return; }
+
+    const contentEl = document.getElementById('order-detail-content');
+    const badgeContainer = document.getElementById('detail-header-badge-container');
+    const subEl = document.getElementById('detail-header-sub');
+    if (!contentEl) return;
+
+    const orderId = this.currentOrderId;
+    if (!orderId) {
+      this.navigate('orders');
+      return;
+    }
+
+    if (subEl) subEl.textContent = `Order #${orderId.slice(0, 8)}`;
+    if (badgeContainer) badgeContainer.innerHTML = '';
+    contentEl.innerHTML = `
+      <div class="state-loading" style="padding:48px 16px;">
+        <div class="spinner"></div>
+        <p style="font-size:14px;color:var(--on-surface-variant);margin-top:12px;">ऑर्डर विवरण लोड हो रहा है... / Loading Order Details...</p>
+      </div>`;
+
+    try {
+      const order = await OrderService.getById(orderId);
+      if (!order) {
+        throw new Error('Order not found or access denied.');
+      }
+
+      const status = (order.status || 'Ordered').toLowerCase();
+      let badgeClass = 'status-ordered';
+      let statusLabel = 'ORDERED';
+      if (status === 'delivered') {
+        badgeClass = 'status-delivered';
+        statusLabel = 'DELIVERED';
+      } else if (status === 'cancelled') {
+        badgeClass = 'status-cancelled';
+        statusLabel = 'CANCELLED';
+      } else if (status === 'packed' || status === 'in_transit' || status === 'pickup_scheduled') {
+        badgeClass = 'status-packed';
+        statusLabel = 'PACKED / IN TRANSIT';
+      } else if (status === 'paid' || order.paymentStatus === 'paid') {
+        badgeClass = 'status-paid';
+        statusLabel = 'PAID';
+      }
+
+      if (badgeContainer) {
+        badgeContainer.innerHTML = `<span class="order-status-badge ${badgeClass}">${statusLabel}</span>`;
+      }
+
+      const produce = order.produce || {};
+      const payment = order.payment || {};
+      const buyer = order.buyer || {};
+      const seller = order.seller || order.farmer || {};
+      const location = order.locationDetail || order.location || {};
+      const timestamps = order.timestamps || {};
+      const timeline = Array.isArray(order.timeline) && order.timeline.length ? order.timeline : [
+        { step: 'Ordered', date: timestamps.orderedAt ? timestamps.orderedAt.split('T')[0] : (order.createdAt || ''), done: true },
+        { step: 'Paid', date: timestamps.paidAt ? timestamps.paidAt.split('T')[0] : '', done: order.paymentStatus === 'paid' },
+        { step: 'Packed', date: '', done: ['packed', 'in_transit', 'delivered'].includes(status) },
+        { step: 'Delivered', date: timestamps.deliveredAt ? timestamps.deliveredAt.split('T')[0] : '', done: status === 'delivered' }
+      ];
+
+      const totalFormatted = (produce.totalAmount || order.totalAmount || 0).toLocaleString('en-IN');
+      const unitPriceFormatted = (produce.pricePerUnit || order.agreedPrice || 0).toLocaleString('en-IN');
+      const hasCoords = location.lat !== null && location.lat !== undefined && location.lng !== null && location.lng !== undefined && !isNaN(location.lat) && !isNaN(location.lng);
+
+      contentEl.innerHTML = `
+        <!-- Section 1: Produce & Pricing -->
+        <div class="order-detail-card">
+          <div class="order-section-header">
+            <h2 class="order-section-title">
+              <i data-lucide="package" class="order-section-icon"></i>
+              <span>Produce & Pricing</span>
+            </h2>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+            <div>
+              <div style="font-size:18px;font-weight:800;color:var(--on-surface);">${produce.name || order.crop || 'Produce'}</div>
+              <div style="font-size:13px;color:var(--on-surface-variant);margin-top:2px;">
+                ${produce.variety ? `Variety: ${produce.variety} · ` : ''}${produce.grade ? `Grade ${produce.grade}` : 'Standard Grade'}
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:22px;font-weight:800;color:var(--primary);">₹${totalFormatted}</div>
+              <div style="font-size:12px;color:var(--on-surface-variant);">Total Amount</div>
+            </div>
+          </div>
+          <div class="order-grid-2" style="background:var(--surface-container);padding:12px;border-radius:12px;border:1px solid var(--outline-variant);">
+            <div>
+              <div class="order-field-label">Quantity</div>
+              <div class="order-field-value">${produce.quantity || order.quantity} ${produce.unit || order.unit || 'kg'}</div>
+            </div>
+            <div>
+              <div class="order-field-label">Price Per Unit</div>
+              <div class="order-field-value">₹${unitPriceFormatted} / ${produce.unit || order.unit || 'kg'}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Payment -->
+        <div class="order-detail-card">
+          <div class="order-section-header">
+            <h2 class="order-section-title">
+              <i data-lucide="credit-card" class="order-section-icon"></i>
+              <span>Payment Details</span>
+            </h2>
+          </div>
+          <div class="order-grid-2" style="margin-bottom:12px;">
+            <div>
+              <div class="order-field-label">Payment Method</div>
+              <div class="order-field-value">${payment.method || 'Razorpay Standard Checkout'}</div>
+            </div>
+            <div>
+              <div class="order-field-label">Payment Status</div>
+              <div>
+                <span class="order-status-badge ${order.paymentStatus === 'paid' ? 'status-paid' : 'status-ordered'}" style="font-size:11px;padding:3px 8px;">
+                  ${payment.status || (order.paymentStatus === 'paid' ? 'Paid (Test Mode)' : 'Pending (Test Mode)')}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="order-grid-2">
+            <div>
+              <div class="order-field-label">Transaction ID</div>
+              <div class="order-field-value" style="font-family:monospace;font-size:12.5px;">${payment.transactionId || 'Pending Confirmation'}</div>
+            </div>
+            <div>
+              <div class="order-field-label">Paid Timestamp</div>
+              <div class="order-field-value" style="font-size:12.5px;">${payment.paidAt ? new Date(payment.paidAt).toLocaleString('en-IN') : 'Pending Escrow Release'}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Buyer Info -->
+        <div class="order-detail-card">
+          <div class="order-section-header">
+            <h2 class="order-section-title">
+              <i data-lucide="user" class="order-section-icon"></i>
+              <span>Buyer Details</span>
+            </h2>
+          </div>
+          <div class="order-contact-card">
+            <div>
+              <div style="font-size:15px;font-weight:700;color:var(--on-surface);">${buyer.name || 'Verified Buyer'}</div>
+              ${buyer.company ? `<div style="font-size:12px;color:var(--on-surface-variant);">${buyer.company}</div>` : ''}
+              <div style="font-size:12.5px;color:var(--on-surface-variant);margin-top:2px;font-family:monospace;">${buyer.phone || 'Phone upon confirmation'}</div>
+            </div>
+            ${buyer.phone ? `
+              <a href="tel:${buyer.phone}" class="order-call-btn" title="Call Buyer">
+                <i data-lucide="phone" style="width:16px;height:16px;"></i>
+                <span>Call Buyer</span>
+              </a>
+            ` : ''}
+          </div>
+        </div>
+
+        <!-- Section 4: Seller Info -->
+        <div class="order-detail-card">
+          <div class="order-section-header">
+            <h2 class="order-section-title">
+              <i data-lucide="store" class="order-section-icon"></i>
+              <span>Seller (Farmer) Details</span>
+            </h2>
+          </div>
+          <div class="order-contact-card">
+            <div>
+              <div style="font-size:15px;font-weight:700;color:var(--on-surface);">${seller.name || 'Verified Farmer'}</div>
+              <div style="font-size:12.5px;color:var(--on-surface-variant);margin-top:2px;font-family:monospace;">${seller.phone || 'Phone upon confirmation'}</div>
+            </div>
+            ${seller.phone ? `
+              <a href="tel:${seller.phone}" class="order-call-btn" title="Call Farmer">
+                <i data-lucide="phone" style="width:16px;height:16px;"></i>
+                <span>Call Farmer</span>
+              </a>
+            ` : ''}
+          </div>
+        </div>
+
+        <!-- Section 5: Location -->
+        <div class="order-detail-card">
+          <div class="order-section-header">
+            <h2 class="order-section-title">
+              <i data-lucide="map-pin" class="order-section-icon"></i>
+              <span>Location Details</span>
+            </h2>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div>
+              <div class="order-field-label">Pickup Address (Farm Gate / Yard)</div>
+              <div class="order-field-value" style="font-size:13.5px;">${location.pickupAddress || 'Farm Gate Pickup'}</div>
+            </div>
+            ${location.mandiName ? `
+              <div>
+                <div class="order-field-label">Nearest APMC Mandi</div>
+                <div class="order-field-value" style="font-size:13.5px;">${location.mandiName}</div>
+              </div>
+            ` : ''}
+            ${location.deliveryAddress ? `
+              <div>
+                <div class="order-field-label">Delivery Destination</div>
+                <div class="order-field-value" style="font-size:13.5px;">${location.deliveryAddress}</div>
+              </div>
+            ` : ''}
+            ${hasCoords ? `
+              <div style="margin-top:4px;padding-top:8px;border-top:1px solid var(--outline-variant);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                <span style="font-size:12px;font-family:monospace;color:var(--on-surface-variant);">
+                  GPS: ${location.lat.toFixed(4)}°, ${location.lng.toFixed(4)}°
+                </span>
+                <a href="https://www.google.com/maps?q=${location.lat},${location.lng}" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="min-height:30px;padding:3px 12px;font-size:12px;display:inline-flex;align-items:center;gap:4px;">
+                  <i data-lucide="map-pin" style="width:14px;height:14px;"></i>
+                  <span>Open in Google Maps</span>
+                </a>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+
+        <!-- Section 6: Shipment Tracker Timeline -->
+        <div class="order-detail-card">
+          <div class="order-section-header">
+            <h2 class="order-section-title">
+              <i data-lucide="clock" class="order-section-icon"></i>
+              <span>Shipment & Delivery Timeline</span>
+            </h2>
+          </div>
+          <div class="tracker-container">
+            ${timeline.map((step, idx) => {
+              const isLast = idx === timeline.length - 1;
+              const isDone = step.done === true;
+              return `
+                <div class="tracker-node ${isDone ? 'completed' : ''}">
+                  ${!isLast ? '<div class="tracker-line"></div>' : ''}
+                  <div class="tracker-icon-wrap">
+                    <i data-lucide="${isDone ? 'check' : 'circle'}" style="width:16px;height:16px;"></i>
+                  </div>
+                  <div class="tracker-content">
+                    <h3 class="tracker-step-title">${step.step}</h3>
+                    <p class="tracker-step-time">${step.date ? step.date : (isDone ? 'Completed' : 'Pending')}</p>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+
+      if (window.lucide) {
+        try { lucide.createIcons(); } catch (e) {}
+      }
+    } catch (err) {
+      console.error('Error rendering order detail:', err);
+      contentEl.innerHTML = `
+        <div class="state-error" style="padding:32px 16px;text-align:center;">
+          <i data-lucide="alert-circle" style="width:36px;height:36px;color:var(--error);margin-bottom:10px;"></i>
+          <h2 style="font-size:16px;font-weight:700;color:var(--error);margin:0 0 6px;">Unable to Load Order</h2>
+          <p style="font-size:13px;color:var(--on-surface-variant);margin:0 0 16px;">${err.message || 'Access denied or order not found.'}</p>
+          <button class="btn btn-primary" onclick="App.navigate('orders')" style="min-height:36px;padding:6px 18px;font-size:13px;">
+            Back to Orders
+          </button>
+        </div>
+      `;
+      if (window.lucide) {
+        try { lucide.createIcons(); } catch (e) {}
+      }
+    }
   },
 
   // ── NOTIFICATIONS ──────────────────────────────────────────
@@ -2482,7 +3785,7 @@ window.App = {
           listingsTable.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:16px;">No active listings</td></tr>`;
         } else {
           listingsTable.innerHTML = activeListings.map(l => {
-            const farmerName = l.farmer?.name || 'Verified Farmer';
+            const farmerName = l.farmer?.name || 'Farmer';
             return `
             <tr>
               <td>${l.emoji} ${l.cropHi || l.crop}</td>
@@ -2545,8 +3848,7 @@ window.App = {
     if (roleEl) roleEl.textContent = (roleLabels[user.role] && roleLabels[user.role][this.currentLang === 'en' ? 'en' : 'hi']) || user.role;
 
     if (verifiedEl) {
-      verifiedEl.textContent = user.verified ? '✅ सत्यापित / Verified' : '⏳ सत्यापन लंबित / Pending';
-      verifiedEl.className = 'chip ' + (user.verified ? 'chip-primary' : 'chip-warning') + ' profile-verified-chip';
+      verifiedEl.style.display = 'none';
     }
 
     try {
@@ -2561,14 +3863,12 @@ window.App = {
         if (stat2Lbl) stat2Lbl.textContent = 'Orders';
         if (ratingEl) ratingEl.textContent = '⭐ ' + (user.rating || user.farmer_rating || '4.7');
       } else if (user.role === 'buyer') {
-        const [offers, orders] = await Promise.all([
-          OfferService.getBuyerOffers(user.id),
-          OrderService.getBuyerOrders(user.id)
-        ]);
-        if (stat1Val) stat1Val.textContent = offers.length;
-        if (stat1Lbl) stat1Lbl.textContent = 'Offers';
+        const orders = await OrderService.getBuyerOrders(user.id);
+        const activeOrders = orders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled');
+        if (stat1Val) stat1Val.textContent = activeOrders.length;
+        if (stat1Lbl) stat1Lbl.textContent = this.currentLang === 'en' ? 'Active Orders' : 'सक्रिय ऑर्डर';
         if (stat2Val) stat2Val.textContent = orders.length;
-        if (stat2Lbl) stat2Lbl.textContent = 'Orders';
+        if (stat2Lbl) stat2Lbl.textContent = this.currentLang === 'en' ? 'Total Orders' : 'कुल ऑर्डर';
         if (ratingEl) ratingEl.textContent = '⭐ ' + (user.rating || user.buyer_rating || '4.8');
       } else {
         const stats = await AdminService.getStats();
@@ -2624,12 +3924,6 @@ window.App = {
           });
         }
       }
-
-      rows.push({
-        icon: '🏛️',
-        label: isHi ? 'e-NAM स्थिति' : 'e-NAM Status',
-        value: '<span class="chip" style="background:#e8f5e9;color:#166534;border:1px solid #86efac;font-size:11.5px;font-weight:700;padding:3px 10px;">✅ KYC Active</span>'
-      });
 
       infoList.innerHTML = rows.map(r => `
         <div class="profile-info-row">
@@ -2843,6 +4137,7 @@ window.App = {
   logout() {
     AuthService.logout();
     this.history = [];
+    document.body.classList.remove('role-buyer', 'role-farmer');
     this.showToast('लॉगआउट सफल / Logged out');
     this.navigate('splash');
   },
@@ -3283,7 +4578,7 @@ window.App = {
       try { localStorage.setItem('krishilink_user', JSON.stringify(user)); } catch (e) {}
     }
     this.navigate('farmer-dashboard');
-    this.showToast('🎉 Farmer KYC & AI Verification Complete!');
+    this.showToast('🎉 Farmer Profile Setup Complete!');
     if (window.lucide) {
       try { lucide.createIcons(); } catch (e) {}
     }
@@ -3333,6 +4628,8 @@ document.addEventListener('DOMContentLoaded', () => {
   } catch (e) {}
   const user = AuthService.getUser();
   if (user) {
+    document.body.classList.toggle('role-buyer', user.role === 'buyer');
+    document.body.classList.toggle('role-farmer', user.role === 'farmer');
     const route = user.role === 'farmer' ? 'farmer-dashboard'
                 : user.role === 'buyer'  ? 'buyer-dashboard'
                 : 'admin-dashboard';

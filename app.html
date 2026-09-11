@@ -21,7 +21,8 @@
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
     rel="stylesheet" />
   <script src="https://unpkg.com/lucide@latest"></script>
-  <link rel="stylesheet" href="styles.css?v=2.5" />
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <link rel="stylesheet" href="styles.css?v=3.0" />
 </head>
 
 <body>
@@ -274,13 +275,14 @@
           <!-- Role Selection -->
           <div style="margin-bottom:16px;">
             <p class="text-label-lg text-on-surface" style="margin-bottom:12px;">आप कौन हैं? / Select your role:</p>
+            <input type="hidden" id="reg-selected-role" value="farmer" />
             <div style="display:flex;gap:12px;">
-              <button id="reg-role-farmer" onclick="App.setRegRole('farmer')"
+              <button type="button" id="reg-role-farmer" onclick="App.setRegRole('farmer')"
                 style="flex:1;padding:16px 8px;border-radius:16px;border:2.5px solid var(--primary);background:rgba(27,94,32,0.08);color:var(--primary);font-size:14px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;">
                 <span style="font-size:32px;">👨‍🌾</span>किसान<br /><span
                   style="font-size:11px;font-weight:400;">Farmer</span>
               </button>
-              <button id="reg-role-buyer" onclick="App.setRegRole('buyer')"
+              <button type="button" id="reg-role-buyer" onclick="App.setRegRole('buyer')"
                 style="flex:1;padding:16px 8px;border-radius:16px;border:2.5px solid var(--outline-variant);background:var(--surface-container);color:var(--on-surface-variant);font-size:14px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;">
                 <span style="font-size:32px;">🏪</span>खरीदार<br /><span
                   style="font-size:11px;font-weight:400;">Buyer</span>
@@ -470,20 +472,19 @@
           </div>
         </div>
 
-        <!-- Voice Banner -->
-        <button onclick="App.showVoiceMsg()"
-          style="width:100%;background:var(--surface-container-low);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px;text-align:left;">
+        <!-- Voice-Assisted Sell Quick Banner -->
+        <button type="button" onclick="App.openVoiceModal()"
+          style="width:100%;background:linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);border:1.5px solid #86efac;border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px;text-align:left;cursor:pointer;transition:transform 0.2s;"
+          onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='none'">
           <div
-            style="width:44px;height:44px;border-radius:50%;background:var(--secondary-container);display:flex;align-items:center;justify-content:center;animation:pulse 2s infinite;flex-shrink:0;">
-            <span class="material-symbols-outlined"
-              style="font-size:22px;color:var(--on-secondary-container);">mic</span>
+            style="width:44px;height:44px;border-radius:50%;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(22,163,74,0.3);flex-shrink:0;">
+            <span class="material-symbols-outlined" style="font-size:24px;color:#fff;">mic</span>
           </div>
-          <div>
-            <div class="text-label-md" style="color:var(--on-surface);" data-i18n="voice_search_prompt">बोलकर पूछें: "टमाटर का भाव बताओ"</div>
-            <div class="text-label-sm text-on-surface-variant" data-i18n="voice_search_sub">माइक दबाएं · बोलकर खोजें</div>
+          <div style="flex:1;">
+            <div class="text-label-md" style="color:#166534;font-weight:800;font-size:14.5px;">बोलकर फसल बेचें / Voice Sell Order</div>
+            <div class="text-label-sm" style="color:#15803d;font-size:12px;margin-top:2px;">उदा: "दो सौ किलो टमाटर पचास रुपये" · तुरंत भरें</div>
           </div>
-          <span class="material-symbols-outlined text-primary"
-            style="margin-left:auto;font-size:20px;">graphic_eq</span>
+          <span class="material-symbols-outlined" style="font-size:22px;color:#16a34a;">arrow_forward</span>
         </button>
 
         <!-- Stats Row -->
@@ -643,6 +644,11 @@
           <span data-i18n="profile">प्रोफाइल</span>
         </button>
       </nav>
+
+      <!-- Floating Voice Action Button -->
+      <button id="farmer-floating-voice-btn" class="floating-voice-btn" onclick="App.openVoiceModal()" title="बोलकर फसल बेचें / Voice Sell Order" aria-label="Voice Sell">
+        <span class="material-symbols-outlined" style="font-size:28px;">mic</span>
+      </button>
     </div>
 
     <!-- ====================================================
@@ -704,6 +710,64 @@
 
         <!-- Step 1: Crop Info -->
         <div id="add-step1" style="display:flex;flex-direction:column;gap:16px;">
+          <!-- Voice-Assisted Entry Banner -->
+          <div class="voice-entry-banner" id="voice-entry-card">
+            <div class="voice-entry-top">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <button type="button" id="btn-voice-record" class="voice-btn-mic" onclick="App.toggleVoiceRecording()">
+                  <span class="material-symbols-outlined" id="voice-record-icon" style="font-size:20px;">mic</span>
+                  <span id="voice-record-label">बोलकर भरें / Fill with Voice</span>
+                </button>
+                <div id="voice-recording-indicator" style="display:none;" class="voice-recording-status">
+                  <div class="voice-pulsing-dot"></div>
+                  <span id="voice-timer-label">00:00</span>
+                  <span style="font-size:12px;color:#991b1b;font-weight:500;">(बोलिए...)</span>
+                </div>
+              </div>
+              <span style="font-size:11.5px;color:var(--primary);font-weight:600;display:flex;align-items:center;gap:4px;">
+                <span class="material-symbols-outlined" style="font-size:15px;">info</span> हिंदी / English
+              </span>
+            </div>
+            
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <p style="font-size:12.5px;color:#166534;margin:0;line-height:1.4;">
+                💡 बोलकर कहें: <em>"दो सौ किलो टमाटर पचास रुपये प्रति किलो"</em>
+              </p>
+            </div>
+
+            <!-- Processing / Transcription Progress -->
+            <div id="voice-processing-state" style="display:none;align-items:center;gap:8px;padding:8px 0;">
+              <div class="spinner" style="width:20px;height:20px;border-width:2px;"></div>
+              <span style="font-size:13px;font-weight:600;color:var(--primary);" id="voice-processing-text">
+                आवाज़ समझ रहे हैं... / Processing speech...
+              </span>
+            </div>
+
+            <!-- Review & Confidence Banner -->
+            <div id="voice-transcript-banner" style="display:none;" class="voice-review-card">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div>
+                  <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--on-surface-variant);">
+                    हमने सुना (Transcribed Speech):
+                  </span>
+                  <div class="voice-transcript-text" id="voice-transcript-display">"..."</div>
+                </div>
+                <button type="button" onclick="App.dismissVoiceBanner()" style="background:none;border:none;color:#6b7280;cursor:pointer;padding:2px;" title="बंद करें">
+                  <span class="material-symbols-outlined" style="font-size:18px;">close</span>
+                </button>
+              </div>
+
+              <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-top:1px solid #e5e7eb;padding-top:6px;margin-top:2px;">
+                <div id="voice-confidence-container">
+                  <!-- Injected dynamically -->
+                </div>
+                <button type="button" class="btn btn-outline" style="min-height:28px;padding:2px 10px;font-size:12px;display:inline-flex;align-items:center;gap:4px;" onclick="App.toggleVoiceRecording()">
+                  <span class="material-symbols-outlined" style="font-size:14px;">mic</span> दोबारा बोलें / Retry
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div class="card card-body" style="display:flex;flex-direction:column;gap:16px;">
             <div style="display:flex;justify-content:space-between;align-items:center;">
               <h2 class="text-headline-md" style="font-size:18px;">🌾 फसल की जानकारी</h2>
@@ -720,6 +784,18 @@
                 <option value="Wheat">🌾 गेहूं / Wheat</option>
                 <option value="Rice">🌾 चावल / Rice</option>
                 <option value="Maize">🌽 मक्का / Maize</option>
+                <option value="Mustard">🌼 सरसों / Mustard</option>
+                <option value="Soybean">🌱 सोयाबीन / Soybean</option>
+                <option value="Cotton">☁️ कपास / Cotton</option>
+                <option value="Garlic">🧄 लहसुन / Garlic</option>
+                <option value="Ginger">🫚 अदरक / Ginger</option>
+                <option value="Green Chilli">🌶️ हरी मिर्च / Chilli</option>
+                <option value="Mango">🥭 आम / Mango</option>
+                <option value="Apple">🍎 सेब / Apple</option>
+                <option value="Banana">🍌 केला / Banana</option>
+                <option value="Brinjal">🍆 बैंगन / Brinjal</option>
+                <option value="Cauliflower">🥦 फूलगोभी / Cauliflower</option>
+                <option value="Cabbage">🥬 पत्तागोभी / Cabbage</option>
               </select>
             </div>
 
@@ -948,7 +1024,6 @@
                 <span class="material-symbols-outlined" style="font-size:18px;">preview</span>
                 लाइव प्रीव्यू: खरीदारों को ऐसे दिखेगा
               </h3>
-              <span class="chip chip-primary" style="font-size:10.5px;font-weight:700;">Verified Farmer</span>
             </div>
 
             <!-- Injected Dynamic Summary Content -->
@@ -1002,6 +1077,10 @@
             <button class="desktop-nav-link desktop-nav-btn-sell" data-nav-target="sell" onclick="App.navTo('sell')">
               <span class="material-symbols-outlined mat-icon">add_circle</span>
               <span data-i18n="sell">बेचें</span>
+            </button>
+            <button class="desktop-nav-link desktop-nav-btn-prices" data-nav-target="prices" onclick="App.navTo('prices')">
+              <span class="material-symbols-outlined mat-icon">bar_chart</span>
+              <span data-i18n="prices">भाव</span>
             </button>
             <button class="desktop-nav-link" data-nav-target="orders" onclick="App.navTo('orders')">
               <span class="material-symbols-outlined mat-icon">inventory_2</span>
@@ -1062,31 +1141,8 @@
         </div>
       </main>
 
-      <!-- Farmer bottom nav -->
-      <nav class="bottom-nav" id="market-nav">
-        <button class="bottom-nav-item" onclick="App.setActiveNav(this);App.navigate('farmer-dashboard')">
-          <span class="material-symbols-outlined mat-icon">home</span><span data-i18n="home">होम</span>
-        </button>
-        <button class="bottom-nav-item active" onclick="App.setActiveNav(this)">
-          <div class="nav-indicator"></div>
-          <span class="material-symbols-outlined mat-icon">storefront</span><span data-i18n="market">मार्केट</span>
-        </button>
-        <button class="bottom-nav-item" onclick="App.navigate('add-produce')" style="position:relative;">
-          <div
-            style="width:52px;height:52px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;position:absolute;top:-20px;box-shadow:var(--shadow-md);">
-            <span class="material-symbols-outlined"
-              style="font-size:26px;color:#fff;font-variation-settings:'FILL' 1;">add</span>
-          </div>
-          <span style="margin-top:32px;font-size:10px;font-weight:700;color:var(--primary);"
-            data-i18n="sell">बेचें</span>
-        </button>
-        <button class="bottom-nav-item" onclick="App.setActiveNav(this);App.navigate('orders')">
-          <span class="material-symbols-outlined mat-icon">inventory_2</span><span data-i18n="orders">ऑर्डर</span>
-        </button>
-        <button class="bottom-nav-item" onclick="App.setActiveNav(this);App.navigate('profile')">
-          <span class="material-symbols-outlined mat-icon">person</span><span data-i18n="profile">प्रोफाइल</span>
-        </button>
-      </nav>
+      <!-- Dynamic role-based bottom nav for marketplace -->
+      <nav class="bottom-nav" id="market-nav"></nav>
     </div>
 
 
@@ -1204,6 +1260,10 @@
           <button class="desktop-nav-link desktop-nav-btn-sell" data-nav-target="sell" onclick="App.navTo('sell')">
             <span class="material-symbols-outlined mat-icon">add_circle</span>
             <span data-i18n="sell">बेचें</span>
+          </button>
+          <button class="desktop-nav-link desktop-nav-btn-prices active" data-nav-target="prices" onclick="App.navTo('prices')">
+            <span class="material-symbols-outlined mat-icon">bar_chart</span>
+            <span data-i18n="prices">भाव</span>
           </button>
           <button class="desktop-nav-link" data-nav-target="orders" onclick="App.navTo('orders')">
             <span class="material-symbols-outlined mat-icon">inventory_2</span>
@@ -1435,6 +1495,10 @@
               <span class="material-symbols-outlined mat-icon">add_circle</span>
               <span data-i18n="sell">बेचें</span>
             </button>
+            <button class="desktop-nav-link desktop-nav-btn-prices" data-nav-target="prices" onclick="App.navTo('prices')">
+              <span class="material-symbols-outlined mat-icon">bar_chart</span>
+              <span data-i18n="prices">भाव</span>
+            </button>
             <button class="desktop-nav-link active" data-nav-target="orders" onclick="App.navTo('orders')">
               <span class="material-symbols-outlined mat-icon">inventory_2</span>
               <span data-i18n="orders">ऑर्डर</span>
@@ -1456,7 +1520,7 @@
             </button>
           </div>
         </div>
-        <div class="tabs">
+        <div class="tabs" id="orders-tabs-bar">
           <button class="tab-pill active" id="ord-tab-offers" onclick="App.switchOrderTab('offers')"
             data-i18n="offers_tab">💰 ऑफर</button>
           <button class="tab-pill" id="ord-tab-orders" onclick="App.switchOrderTab('orders')" data-i18n="orders_tab">📦
@@ -1471,6 +1535,28 @@
 
       <!-- Orders Bottom Nav -->
       <nav class="bottom-nav" id="orders-bottom-nav"></nav>
+    </div>
+
+    <!-- ====================================================
+       SCREEN 11B: ORDER DETAIL
+       ==================================================== -->
+    <div id="screen-order-detail" class="screen">
+      <header class="app-bar" style="border-bottom: 1px solid var(--outline-variant); background: var(--surface); display:flex; align-items:center; gap:10px;">
+        <button onclick="App.navigate('orders')" class="app-bar-icon" title="Back to Orders" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+          <i data-lucide="arrow-left" style="width:22px;height:22px;color:var(--on-surface);"></i>
+        </button>
+        <div style="flex:1;">
+          <h1 class="app-bar-title" style="font-size:17px;font-weight:700;margin:0;">Order Details</h1>
+          <p id="detail-header-sub" style="font-size:11.5px;color:var(--on-surface-variant);margin:0;font-family:monospace;"></p>
+        </div>
+        <div id="detail-header-badge-container"></div>
+      </header>
+
+      <main class="main-content" style="padding:16px;max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:16px;">
+        <div id="order-detail-content" style="display:flex;flex-direction:column;gap:14px;">
+          <!-- Dynamically populated by App.renderOrderDetail() -->
+        </div>
+      </main>
     </div>
 
 
@@ -1516,6 +1602,10 @@
               <span class="material-symbols-outlined mat-icon">add_circle</span>
               <span data-i18n="sell">बेचें</span>
             </button>
+            <button class="desktop-nav-link desktop-nav-btn-prices" data-nav-target="prices" onclick="App.navTo('prices')">
+              <span class="material-symbols-outlined mat-icon">bar_chart</span>
+              <span data-i18n="prices">भाव</span>
+            </button>
             <button class="desktop-nav-link" data-nav-target="orders" onclick="App.navTo('orders')">
               <span class="material-symbols-outlined mat-icon">inventory_2</span>
               <span data-i18n="orders">ऑर्डर</span>
@@ -1554,20 +1644,15 @@
             <div class="profile-identity-group">
               <div class="profile-avatar-container">
                 <div id="profile-avatar" class="profile-avatar-circle">👨‍🌾</div>
-                <div class="profile-verified-badge-icon" title="e-NAM KYC Verified">
-                  <span class="material-symbols-outlined" style="font-size:15px;color:#fff;">verified</span>
-                </div>
               </div>
 
               <div class="profile-user-details">
                 <div class="profile-name-row">
                   <h1 id="profile-name" class="profile-user-name"></h1>
-                  <span id="profile-verified" class="chip chip-primary profile-verified-chip">✅ सत्यापित / Verified</span>
                 </div>
                 <p id="profile-role-tag" class="profile-role-text"></p>
                 <div class="profile-badge-row">
                   <span class="profile-sub-pill">🌱 KrishiLink Member</span>
-                  <span class="profile-sub-pill">🏛️ e-NAM APMC Connected</span>
                 </div>
               </div>
             </div>
@@ -1792,9 +1877,9 @@
               <span class="material-symbols-outlined mat-icon">storefront</span>
               <span data-i18n="market">मार्केट</span>
             </button>
-            <button class="desktop-nav-link desktop-nav-btn-sell" data-nav-target="sell" onclick="App.navTo('sell')">
-              <span class="material-symbols-outlined mat-icon">add_circle</span>
-              <span data-i18n="sell">बेचें</span>
+            <button class="desktop-nav-link" data-nav-target="prices" onclick="App.navTo('prices')">
+              <span class="material-symbols-outlined mat-icon">bar_chart</span>
+              <span data-i18n="prices">भाव</span>
             </button>
             <button class="desktop-nav-link" data-nav-target="orders" onclick="App.navTo('orders')">
               <span class="material-symbols-outlined mat-icon">inventory_2</span>
@@ -1830,18 +1915,18 @@
         <!-- Buyer Stats -->
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
           <div class="stat-card">
-            <div class="stat-card-icon icon-amber">
-              <i data-lucide="tag"></i>
-            </div>
-            <span class="stat-value" id="buyer-stat-offers">0</span>
-            <span class="stat-label" data-i18n="stat_offers_label">ऑफर</span>
-          </div>
-          <div class="stat-card">
             <div class="stat-card-icon icon-green">
               <i data-lucide="package"></i>
             </div>
             <span class="stat-value" id="buyer-stat-orders">0</span>
-            <span class="stat-label" data-i18n="stat_orders_label">ऑर्डर</span>
+            <span class="stat-label" data-i18n="stat_orders_label">कुल ऑर्डर</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon icon-amber">
+              <i data-lucide="truck"></i>
+            </div>
+            <span class="stat-value" id="buyer-stat-active">0</span>
+            <span class="stat-label">सक्रिय ऑर्डर</span>
           </div>
           <div class="stat-card">
             <div class="stat-card-icon icon-amber">
@@ -1882,13 +1967,19 @@
           </div>
         </div>
 
-        <!-- My Offers -->
-        <div>
+        <!-- Recent Orders (Buyer only sees Orders) -->
+        <div style="margin-top:16px;">
           <div class="section-header">
-            <h2 class="section-title">💰 My Offers</h2>
-            <button class="section-link" onclick="App.switchOrderTab('offers');App.navigate('orders')">View All</button>
+            <h2 class="section-title" style="display:flex;align-items:center;gap:6px;">
+              <i data-lucide="package" style="width:20px;height:20px;color:var(--primary);"></i>
+              <span>हालिया ऑर्डर / Recent Orders</span>
+            </h2>
+            <button class="section-link" onclick="App.navigate('orders')" style="display:flex;align-items:center;gap:4px;">
+              <span>सभी देखें</span>
+              <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span>
+            </button>
           </div>
-          <div id="buyer-offers-preview" style="display:flex;flex-direction:column;gap:10px;"></div>
+          <div id="buyer-orders-preview" style="display:flex;flex-direction:column;gap:10px;"></div>
         </div>
       </main>
 
@@ -2143,20 +2234,20 @@
             <div style="width:72px;height:72px;border-radius:50%;background:#dcfce7;color:#15803d;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 0 0 10px rgba(21, 128, 61, 0.1);">
               <i data-lucide="award" style="width:40px;height:40px;"></i>
             </div>
-            <h2 class="onboarding-hero-title">बधाई! AI सत्यापन सफल</h2>
-            <p class="onboarding-hero-desc">Your KrishiLink Verified Producer Pass has been generated with Multi-Spectral Computer Vision certification.</p>
+            <h2 class="onboarding-hero-title">बधाई! प्रोफाइल सेटअप पूर्ण</h2>
+            <p class="onboarding-hero-desc">Your KrishiLink Producer Pass has been generated with direct marketplace access.</p>
 
             <div style="margin:20px 0;background:#f0fdf4;border:1.5px solid #86efac;border-radius:16px;padding:16px;text-align:left;display:flex;flex-direction:column;gap:8px;">
               <div style="display:flex;justify-content:space-between;align-items:center;">
                 <span style="font-weight:800;color:#166534;font-size:13px;display:flex;align-items:center;gap:6px;">
-                  <i data-lucide="check-circle" style="width:16px;height:16px;"></i> AI-VERIFIED PRODUCER
+                  <i data-lucide="award" style="width:16px;height:16px;"></i> REGISTERED PRODUCER
                 </span>
                 <span class="badge" style="background:#d1fae5;color:#065f46;font-size:10.5px;">ACTIVE</span>
               </div>
               <div style="font-size:12px;color:#334155;">
-                • Premium <strong>Grade A+ / A</strong> priority listing in Marketplace<br/>
-                • Direct bidding access to 1,200+ verified buyers<br/>
-                • AGMARKNET live price parity guarantee
+                • Direct bidding access in Marketplace<br/>
+                • Real-time mandi price comparisons<br/>
+                • AGMARKNET live price parity updates
               </div>
             </div>
 
@@ -2293,13 +2384,13 @@
             <div style="width:72px;height:72px;border-radius:50%;background:#e0f2fe;color:#0284c7;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 0 0 10px rgba(2, 132, 199, 0.1);">
               <i data-lucide="shield-check" style="width:40px;height:40px;"></i>
             </div>
-            <h2 class="onboarding-hero-title">सत्यापित खरीदार खाता सक्रिय</h2>
+            <h2 class="onboarding-hero-title">खरीदार खाता सक्रिय</h2>
             <p class="onboarding-hero-desc">Your KrishiLink Institutional Buyer Account has been initialized with instant escrow capabilities.</p>
 
             <div style="margin:20px 0;background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:16px;padding:16px;text-align:left;display:flex;flex-direction:column;gap:8px;">
               <div style="display:flex;justify-content:space-between;align-items:center;">
                 <span style="font-weight:800;color:#0f172a;font-size:13px;display:flex;align-items:center;gap:6px;">
-                  <i data-lucide="check-circle" style="width:16px;height:16px;color:#0284c7;"></i> VERIFIED INSTITUTIONAL BUYER
+                  <i data-lucide="award" style="width:16px;height:16px;color:#0284c7;"></i> INSTITUTIONAL BUYER
                 </span>
                 <span class="badge" style="background:#e0f2fe;color:#0369a1;font-size:10.5px;">APPROVED</span>
               </div>
@@ -2324,37 +2415,73 @@
        ==================================================== -->
 
     <!-- Voice Modal -->
-    <div class="modal-backdrop hidden" id="voice-modal" onclick="App.closeVoice()">
-      <div class="bottom-sheet" onclick="e=>e.stopPropagation()" style="text-align:center;">
+    <div class="modal-backdrop hidden" id="voice-modal" onclick="App.closeVoiceModal()">
+      <div class="bottom-sheet" onclick="event.stopPropagation()" style="text-align:center;max-width:480px;margin:0 auto;padding-bottom:calc(24px + env(safe-area-inset-bottom, 0px));">
         <div class="sheet-handle"></div>
-        <div
-          style="width:80px;height:80px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;animation:pulse 1.5s ease infinite;box-shadow:0 0 0 16px rgba(27,94,32,0.1);">
-          <span class="material-symbols-outlined"
-            style="font-size:38px;color:#fff;font-variation-settings:'FILL' 1;">mic</span>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <h2 class="text-headline-md" style="font-size:18px;font-weight:800;color:var(--on-surface);margin:0;display:flex;align-items:center;gap:6px;">
+            <span>🎙️</span>
+            <span>बोलकर फसल बेचें / Voice Sell Order</span>
+          </h2>
+          <button type="button" onclick="App.closeVoiceModal()" style="background:none;border:none;color:#6b7280;cursor:pointer;padding:4px;font-size:20px;line-height:1;" title="बंद करें / Close">✕</button>
         </div>
-        <h2 class="text-headline-md">सुन रहे हैं... 👂</h2>
-        <p class="text-body-md text-on-surface-variant" style="margin-top:8px;">Listening...</p>
-        <div style="margin:24px 0;display:flex;justify-content:center;gap:4px;" id="voice-wave">
-          <div
-            style="width:4px;border-radius:4px;background:var(--primary);animation:wave 1s ease infinite;animation-delay:0s;height:24px;">
-          </div>
-          <div
-            style="width:4px;border-radius:4px;background:var(--secondary);animation:wave 1s ease infinite;animation-delay:0.1s;height:24px;">
-          </div>
-          <div
-            style="width:4px;border-radius:4px;background:var(--primary);animation:wave 1s ease infinite;animation-delay:0.2s;height:24px;">
-          </div>
-          <div
-            style="width:4px;border-radius:4px;background:var(--secondary);animation:wave 1s ease infinite;animation-delay:0.3s;height:24px;">
-          </div>
-          <div
-            style="width:4px;border-radius:4px;background:var(--primary);animation:wave 1s ease infinite;animation-delay:0.4s;height:24px;">
-          </div>
+
+        <!-- Speech Language Selector (Direct 1-tap toggle) -->
+        <div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:12px;">
+          <button type="button" id="voice-lang-btn-hi" class="voice-lang-pill active" onclick="App.setVoiceRecognitionLang('hi-IN')" title="हिंदी में बोलें">
+            🇮🇳 हिंदी (Hindi)
+          </button>
+          <button type="button" id="voice-lang-btn-en" class="voice-lang-pill" onclick="App.setVoiceRecognitionLang('en-IN')" title="Speak in English">
+            🇬🇧 English
+          </button>
         </div>
-        <p style="font-size:13px;color:var(--on-surface-variant);">🎤 Voice feature – Demo mode. Real voice integration
-          via Web Speech API / AI available in full version.</p>
-        <button class="btn btn-outline" style="margin-top:16px;width:auto;padding:0 32px;"
-          onclick="App.closeVoice()">रद्द करें / Cancel</button>
+
+        <!-- Interactive Mic Orb -->
+        <div class="voice-mic-orb" id="voice-modal-orb" onclick="App.toggleVoiceModalRecording()" style="cursor:pointer;" title="टैप करके शुरू या रोकें / Tap to start or stop mic">
+          <span class="material-symbols-outlined" id="voice-modal-orb-icon" style="font-size:38px;">mic</span>
+        </div>
+
+        <!-- Real-Time Audio Level Sound Wave -->
+        <div class="voice-wave-container" id="voice-wave-container">
+          <div class="voice-wave-bar" id="vbar-1"></div>
+          <div class="voice-wave-bar" id="vbar-2"></div>
+          <div class="voice-wave-bar" id="vbar-3"></div>
+          <div class="voice-wave-bar" id="vbar-4"></div>
+          <div class="voice-wave-bar" id="vbar-5"></div>
+        </div>
+
+        <!-- Live Status and Timer -->
+        <div class="voice-modal-status">
+          <span id="voice-modal-status-text">सुन रहे हैं... बोलिए / Listening... Speak now</span>
+          <span class="voice-modal-timer" id="voice-modal-timer">00:00</span>
+        </div>
+        <div id="voice-modal-mic-name" style="font-size:11px;color:#6b7280;margin:2px 0 6px 0;display:none;"></div>
+
+        <!-- Real-Time Live Transcript Display (Editable on tap) -->
+        <div class="voice-modal-transcript-box" id="voice-modal-transcript" contenteditable="true" role="textbox" spellcheck="false" title="टैप करके संपादित करें / Tap to edit">
+          उदा: "दो सौ किलो टमाटर पचास रुपये प्रति किलो"
+        </div>
+
+        <!-- Fallback Note (shown if Web Speech API unsupported or error) -->
+        <div id="voice-modal-note" style="display:none;font-size:12px;color:#92400e;background:#fef3c7;padding:6px 10px;border-radius:8px;margin-bottom:10px;text-align:left;"></div>
+
+        <!-- Processing State -->
+        <div id="voice-modal-processing" style="display:none;margin:10px 0;padding:10px;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;align-items:center;justify-content:center;gap:8px;">
+          <span class="material-symbols-outlined" style="font-size:20px;color:#16a34a;animation:spin 1s linear infinite;">progress_activity</span>
+          <span style="font-size:13.5px;font-weight:700;color:#166534;" id="voice-modal-processing-text">⚡ Gemini AI विवरण निकाल रहा है... / Processing order...</span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display:flex;gap:10px;margin-top:14px;">
+          <button id="btn-voice-modal-finish" type="button" class="btn btn-primary" style="flex:1;min-height:44px;font-weight:700;" onclick="App.finishVoiceModal()">
+            <span class="material-symbols-outlined" style="font-size:18px;">check</span>
+            <span>पूर्ण करें / Done & Process</span>
+          </button>
+          <button type="button" class="btn btn-outline" style="flex:1;min-height:44px;" onclick="App.closeVoiceModal()">
+            <span>रद्द करें / Cancel</span>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -2428,6 +2555,71 @@
       </div>
     </div>
 
+    <!-- ============ RAZORPAY BUY NOW CHECKOUT MODAL ============ -->
+    <div class="modal-backdrop hidden" id="buynow-modal" onclick="App.closeBuyNow()">
+      <div class="bottom-sheet" onclick="event.stopPropagation()"
+        style="padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));">
+        <div class="sheet-handle"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:42px;height:42px;border-radius:12px;background:#e8f5e9;color:#166534;display:flex;align-items:center;justify-content:center;">
+              <span class="material-symbols-outlined" style="font-size:24px;">bolt</span>
+            </div>
+            <div>
+              <h2 style="font-size:18px;font-weight:800;color:var(--on-surface);margin:0;">⚡ तत्काल खरीद / Buy Now</h2>
+              <span style="font-size:12px;color:var(--on-surface-variant);">Razorpay Standard Secure Checkout</span>
+            </div>
+          </div>
+          <button type="button" onclick="App.closeBuyNow()" class="profile-icon-btn" style="background:#f1f5f9;border:none;">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <div id="buynow-item-summary" class="card card-body" style="background:#f8fafc;border:1px solid #e2e8f0;margin-bottom:16px;">
+          <!-- Injected item summary -->
+        </div>
+
+        <div class="input-wrap" style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <label class="input-label" style="margin:0;font-weight:700;">खरीद मात्रा / Purchase Quantity (<span id="buynow-unit">kg</span>) *</label>
+            <span id="buynow-avail-qty" style="font-size:12px;color:var(--on-surface-variant);font-weight:600;">उपलब्ध: 500 kg</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <button type="button" class="btn btn-outline" style="min-width:44px;min-height:44px;padding:0;font-size:20px;font-weight:800;" onclick="App.changeBuyNowQty(-50)">−</button>
+            <input id="buynow-qty" class="input" type="number" min="1" step="1" value="100" style="text-align:center;font-weight:700;font-size:18px;" oninput="App.updateBuyNowCalc()" />
+            <button type="button" class="btn btn-outline" style="min-width:44px;min-height:44px;padding:0;font-size:20px;font-weight:800;" onclick="App.changeBuyNowQty(50)">+</button>
+          </div>
+        </div>
+
+        <!-- Price Breakdown -->
+        <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:14px;padding:14px;margin-bottom:18px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;color:#334155;">
+            <span>कीमत दर / Asking Rate:</span>
+            <span id="buynow-rate" style="font-weight:700;">₹0 / kg</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;color:#334155;">
+            <span>खरीद मात्रा / Subtotal Qty:</span>
+            <span id="buynow-sub-qty" style="font-weight:700;">0 kg</span>
+          </div>
+          <div style="height:1px;background:#bbf7d0;margin:8px 0;"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:14px;font-weight:800;color:#166534;">कुल देय राशि / Total Payable:</span>
+            <span id="buynow-total" style="font-size:22px;font-weight:800;color:#15803d;">₹0</span>
+          </div>
+        </div>
+
+        <button id="buynow-submit-btn" type="button" class="btn btn-primary" style="width:100%;min-height:50px;font-size:16px;font-weight:800;background:linear-gradient(135deg, #16a34a, #15803d);box-shadow:0 4px 14px rgba(22,163,74,0.35);display:flex;align-items:center;justify-content:center;gap:8px;" onclick="App.proceedRazorpayPayment()">
+          <span class="material-symbols-outlined">lock</span>
+          <span>Pay Securely with Razorpay</span>
+        </button>
+
+        <div style="text-align:center;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:11.5px;color:var(--on-surface-variant);">
+          <span class="material-symbols-outlined" style="font-size:14px;color:#16a34a;">security</span>
+          <span>100% Encrypted & Protected Escrow Payment · Razorpay</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Success Toast -->
     <div id="toast"
       style="position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0px) + 12px);left:50%;transform:translateX(-50%) translateY(20px);background:var(--primary);color:#fff;padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;z-index:200;opacity:0;transition:all 0.3s;white-space:nowrap;box-shadow:var(--shadow-lg);pointer-events:none;display:flex;align-items:center;gap:8px;">
@@ -2472,8 +2664,8 @@
     }
   </script>
 
-  <script src="data.js?v=2.5"></script>
-  <script src="app.js?v=2.5"></script>
+  <script src="data.js?v=3.3"></script>
+  <script src="app.js?v=4.4"></script>
 </body>
 
 </html>

@@ -685,13 +685,8 @@ const OfferService = {
   },
 
   async getBuyerOffers(buyerId) {
-    try {
-      const res = await apiRequest(`/offers?buyerId=${encodeURIComponent(buyerId)}`);
-      return (res.data || []).map(this._mapOffer);
-    } catch (err) {
-      console.error(`Error getting buyer offers:`, err);
-      return [];
-    }
+    // Buyers do not have access to the offers list endpoint (enforced by backend 403)
+    return [];
   },
 
   async getFarmerOffers(farmerId) {
@@ -717,7 +712,7 @@ const OfferService = {
           message: data.message || '',
         },
       });
-      return this._mapOffer(res.data);
+      return { success: true, data: res.data };
     } catch (err) {
       console.error('Error creating offer:', err);
       throw err;
@@ -728,9 +723,9 @@ const OfferService = {
     try {
       const res = await apiRequest(`/offers/${offerId}`, {
         method: 'PUT',
-        body: { status: action }, // 'accepted' | 'rejected'
+        body: { status: action },
       });
-      return res;
+      return { success: true, data: res.data, order: res.order };
     } catch (err) {
       console.error(`Error responding to offer ${offerId}:`, err);
       throw err;
@@ -743,6 +738,7 @@ const OfferService = {
 // ============================================================
 const OrderService = {
   _mapOrder(o) {
+    if (!o) return null;
     let status = o.status || 'confirmed';
     let timeline = o.timeline;
     if (typeof status === 'string' && status.trim().startsWith('[')) {
@@ -770,33 +766,77 @@ const OrderService = {
         { step: 'Payment Released', date: '', done: false }
       ];
     }
+
+    const orderId = o.orderId || o.id;
+    const cropName = o.produce?.name || o.crop || 'Produce';
+    const quantity = o.produce?.quantity !== undefined ? parseFloat(o.produce.quantity) : parseFloat(o.quantity || 0);
+    const unit = o.produce?.unit || o.unit || 'kg';
+    const agreedPrice = o.produce?.pricePerUnit !== undefined ? parseFloat(o.produce.pricePerUnit) : parseFloat(o.agreed_price || o.agreedPrice || 0);
+    const totalAmount = o.produce?.totalAmount !== undefined ? parseFloat(o.produce.totalAmount) : parseFloat(o.total_amount || o.totalAmount || 0);
+
     return {
-      id: o.id,
-      listingId: o.listing_id,
-      offerId: o.offer_id,
-      farmerId: o.farmer_id,
-      buyerId: o.buyer_id,
-      crop: o.crop,
-      quantity: parseFloat(o.quantity),
-      unit: o.unit || 'kg',
-      agreedPrice: parseFloat(o.agreed_price),
-      totalAmount: parseFloat(o.total_amount),
+      id: orderId,
+      orderId: orderId,
+      listingId: o.listing_id || o.listingId,
+      offerId: o.offer_id || o.offerId,
+      farmerId: o.farmer_id || o.farmerId,
+      buyerId: o.buyer_id || o.buyerId,
+      crop: cropName,
+      quantity,
+      unit,
+      agreedPrice,
+      totalAmount,
       status: status,
-      paymentStatus: o.payment_status,
+      rawStatus: o.rawStatus || o.status,
+      paymentStatus: o.payment?.status || o.payment_status || o.paymentStatus || 'pending',
       timeline: timeline,
-      createdAt: o.created_at ? o.created_at.split('T')[0] : '',
-      variety: o.variety || '',
-      grade: o.grade || 'A',
-      location: o.location_address || '',
-      farmer: {
-        name: o.farmer_name || 'Farmer',
-        phone: o.farmer_phone || '',
+      createdAt: o.timestamps?.orderedAt ? o.timestamps.orderedAt.split('T')[0] : (o.created_at ? o.created_at.split('T')[0] : ''),
+      variety: o.variety || o.produce?.variety || '',
+      grade: o.grade || o.produce?.grade || 'A',
+      location: o.location?.pickupAddress || o.location_address || '',
+      produce: o.produce || {
+        name: cropName,
+        quantity,
+        unit,
+        pricePerUnit: agreedPrice,
+        totalAmount,
+        variety: o.variety || '',
+        grade: o.grade || 'A',
       },
-      buyer: {
+      payment: o.payment || {
+        status: (o.payment_status === 'paid' ? 'Paid (Test Mode)' : 'Pending (Test Mode)'),
+        method: o.payment_method || 'Razorpay Standard Checkout',
+        transactionId: o.payment_id || null,
+        paidAt: o.paid_at || null,
+      },
+      buyer: o.buyer || {
+        id: o.buyer_id || o.buyerId,
         name: o.buyer_name || 'Buyer',
         phone: o.buyer_phone || '',
         company: o.buyer_company || '',
       },
+      seller: o.seller || {
+        id: o.farmer_id || o.farmerId,
+        name: o.farmer_name || 'Farmer',
+        phone: o.farmer_phone || '',
+      },
+      farmer: o.seller || {
+        id: o.farmer_id || o.farmerId,
+        name: o.farmer_name || 'Farmer',
+        phone: o.farmer_phone || '',
+      },
+      locationDetail: o.location || {
+        pickupAddress: o.location_address || 'Farm Gate Pickup',
+        deliveryAddress: o.buyer_company || '',
+        mandiName: null,
+        lat: null,
+        lng: null,
+      },
+      timestamps: o.timestamps || {
+        orderedAt: o.created_at,
+        paidAt: o.paid_at || null,
+        deliveredAt: null,
+      }
     };
   },
 
@@ -836,7 +876,7 @@ const OrderService = {
       return res.data ? this._mapOrder(res.data) : null;
     } catch (err) {
       console.error(`Error getting order ${id}:`, err);
-      return null;
+      throw err;
     }
   }
 };
@@ -1011,6 +1051,107 @@ const UserService = {
   }
 };
 
+// ============================================================
+// PAYMENT SERVICE (Razorpay Standard Web Checkout API)
+// ============================================================
+const PaymentService = {
+  async getConfig() {
+    try {
+      const res = await apiRequest('/payment/config');
+      return res.data || res;
+    } catch (err) {
+      console.error('Error getting payment config:', err);
+      return { keyId: '' };
+    }
+  },
+
+  async createOrder(payload) {
+    return await apiRequest('/create-order', {
+      method: 'POST',
+      body: payload
+    });
+  },
+
+  async verifyPayment(payload) {
+    return await apiRequest('/verify-payment', {
+      method: 'POST',
+      body: payload
+    });
+  }
+};
+
+// ============================================================
+// VOICE ASSISTANT SERVICE (Whisper Transcription & Order Parser)
+// ============================================================
+// DEMO-GRADE: OpenAI Whisper API + lightweight dictionary parser for SIH prototype.
+// PRODUCTION ROADMAP: Replace transcription with Bhashini ASR; replace regex parser
+// with a trained NER model for produce/quantity/price extraction at scale.
+const VoiceService = {
+  /**
+   * PRIMARY: Single-call speech audio -> transcription + structured order fields
+   * Uses Gemini native audio as primary; Whisper -> Gemini text -> Regex as fallback chain
+   * @param {Blob} audioBlob 
+   * @param {string} [mockText] Optional mock transcript
+   * @returns {Promise<{success: boolean, data: {transcribedText: string, detectedLanguage: string, produce: string, quantity: number, unit: string, pricePerUnit: number, confidence: string, notes: string, source: string}}>}
+   */
+  async processOrder(audioBlob, mockText) {
+    const payloadSize = audioBlob ? audioBlob.size : 0;
+    const mimeType = audioBlob ? audioBlob.type : 'none';
+    console.log(`[Voice Frontend] Sending audio to /api/voice/process-order | payload size: ${payloadSize} bytes | mime: ${mimeType} | mockText: ${mockText ? `"${mockText}"` : 'none'}`);
+
+    const formData = new FormData();
+    if (audioBlob) {
+      formData.append('audio', audioBlob, 'recording.webm');
+    }
+    if (mockText) {
+      formData.append('mockText', mockText);
+    }
+
+    try {
+      const res = await apiRequest('/voice/process-order', {
+        method: 'POST',
+        body: formData,
+      });
+      console.log('[Voice Frontend] /api/voice/process-order response:', res);
+      return res;
+    } catch (apiErr) {
+      console.error('[Voice Frontend Error] /api/voice/process-order failed:', apiErr);
+      throw apiErr;
+    }
+  },
+
+  /**
+   * Transcribe an audio blob
+   * @param {Blob} audioBlob 
+   * @param {string} [mockText] Optional mock transcript for dev/testing
+   * @returns {Promise<{success: boolean, transcribedText: string, detectedLanguage: string}>}
+   */
+  async transcribe(audioBlob, mockText) {
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'recording.webm');
+    if (mockText) {
+      formData.append('mockText', mockText);
+    }
+
+    return await apiRequest('/voice/transcribe', {
+      method: 'POST',
+      body: formData,
+    });
+  },
+
+  /**
+   * Parse transcribed order text into structured sell fields
+   * @param {string} transcribedText 
+   * @returns {Promise<{success: boolean, data: {produce: string, quantity: number, unit: string, pricePerUnit: number, confidence: string, rawText: string}}>}
+   */
+  async parseOrder(transcribedText) {
+    return await apiRequest('/voice/parse-order', {
+      method: 'POST',
+      body: { transcribedText },
+    });
+  }
+};
+
 // Expose globally to window for inline HTML onclick handlers
 window.apiRequest = apiRequest;
 window.AuthService = AuthService;
@@ -1022,3 +1163,7 @@ window.AIService = AIService;
 window.NotificationService = NotificationService;
 window.AdminService = AdminService;
 window.UserService = UserService;
+window.PaymentService = PaymentService;
+window.VoiceService = VoiceService;
+
+

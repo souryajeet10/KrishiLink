@@ -11,14 +11,25 @@ const listOrders = async (req, res, next) => {
     let whereClauses = [];
     let params = [];
 
-    if (farmerId) {
-      params.push(farmerId);
-      whereClauses.push(`o.farmer_id = $${params.length}`);
-    }
-    if (buyerId) {
-      params.push(buyerId);
+    // Role-aware scoping: Buyers see only their purchases; Farmers see only their sales
+    if (req.user && req.user.role === 'buyer') {
+      params.push(req.user.id);
       whereClauses.push(`o.buyer_id = $${params.length}`);
+    } else if (req.user && req.user.role === 'farmer') {
+      params.push(req.user.id);
+      whereClauses.push(`o.farmer_id = $${params.length}`);
+    } else {
+      // Admin or optional filter override
+      if (farmerId) {
+        params.push(farmerId);
+        whereClauses.push(`o.farmer_id = $${params.length}`);
+      }
+      if (buyerId) {
+        params.push(buyerId);
+        whereClauses.push(`o.buyer_id = $${params.length}`);
+      }
     }
+
     if (status) {
       params.push(status);
       whereClauses.push(`o.status = $${params.length}`);
@@ -65,9 +76,12 @@ const getOrderById = async (req, res, next) => {
       SELECT o.*,
              farmer.name AS farmer_name, farmer.phone AS farmer_phone, farmer.email AS farmer_email,
              fp.village AS farmer_village, fp.district AS farmer_district, fp.state AS farmer_state,
+             fp.latitude AS farmer_lat, fp.longitude AS farmer_lng,
              buyer.name AS buyer_name, buyer.phone AS buyer_phone, buyer.email AS buyer_email,
-             bp.company AS buyer_company, bp.city AS buyer_city,
-             l.variety, l.grade, l.location_address
+             bp.company AS buyer_company, bp.city AS buyer_city, bp.state AS buyer_state,
+             bp.latitude AS buyer_lat, bp.longitude AS buyer_lng,
+             l.variety, l.grade, l.location_address,
+             l.latitude AS listing_lat, l.longitude AS listing_lng
       FROM orders o
       JOIN users farmer ON o.farmer_id = farmer.id
       LEFT JOIN farmer_profiles fp ON farmer.id = fp.user_id
@@ -81,7 +95,105 @@ const getOrderById = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
-    res.json({ success: true, data: orderRes.rows[0] });
+    const row = orderRes.rows[0];
+
+    // Access control: only the buyer or seller on that specific order (or admin) can fetch detail
+    if (req.user && req.user.role !== 'admin' && req.user.id !== row.buyer_id && req.user.id !== row.farmer_id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden: You do not have permission to view this order.',
+      });
+    }
+
+    // Determine normalized status: Ordered/Paid/Packed/Delivered/Cancelled
+    let normalizedStatus = 'Ordered';
+    const rawStatus = (row.status || '').toLowerCase();
+    const rawPayment = (row.payment_status || '').toLowerCase();
+
+    if (rawStatus === 'delivered') {
+      normalizedStatus = 'Delivered';
+    } else if (rawStatus === 'cancelled') {
+      normalizedStatus = 'Cancelled';
+    } else if (rawStatus === 'in_transit' || rawStatus === 'pickup_scheduled') {
+      normalizedStatus = 'Packed';
+    } else if (rawPayment === 'paid') {
+      normalizedStatus = 'Paid';
+    } else if (rawStatus === 'confirmed') {
+      normalizedStatus = 'Ordered';
+    }
+
+    // Parse timeline safely
+    let timeline = [];
+    if (Array.isArray(row.timeline)) {
+      timeline = row.timeline;
+    } else if (typeof row.timeline === 'string') {
+      try {
+        timeline = JSON.parse(row.timeline);
+      } catch {
+        timeline = [];
+      }
+    }
+
+    const detail = {
+      ...row,
+      orderId: row.id,
+      id: row.id,
+      status: normalizedStatus,
+      rawStatus: row.status,
+      paymentStatus: row.payment_status,
+      produce: {
+        name: row.crop,
+        quantity: parseFloat(row.quantity),
+        unit: row.unit || 'kg',
+        pricePerUnit: parseFloat(row.agreed_price),
+        totalAmount: parseFloat(row.total_amount),
+        variety: row.variety || null,
+        grade: row.grade || null,
+      },
+      payment: {
+        status: rawPayment === 'paid' ? 'Paid (Test Mode)' : (rawPayment === 'escrowed' ? 'Escrowed (Test Mode)' : 'Pending (Test Mode)'),
+        method: row.payment_method || (rawPayment === 'paid' ? 'Razorpay Standard Checkout' : 'Escrow on Delivery'),
+        transactionId: row.payment_id || (rawPayment === 'paid' ? `pay_rzp_${row.id.replace(/-/g, '').slice(0, 14)}` : null),
+        paidAt: row.paid_at || (rawPayment === 'paid' ? row.updated_at || row.created_at : null),
+      },
+      buyer: {
+        id: row.buyer_id,
+        name: row.buyer_name || 'Buyer',
+        phone: row.buyer_phone || '',
+        company: row.buyer_company || null,
+      },
+      seller: {
+        id: row.farmer_id,
+        name: row.farmer_name || 'Farmer',
+        phone: row.farmer_phone || '',
+      },
+      location: {
+        pickupAddress: row.location_address || [row.farmer_village, row.farmer_district, row.farmer_state].filter(Boolean).join(', ') || 'Farm Gate Pickup',
+        deliveryAddress: [row.buyer_company, row.buyer_city, row.buyer_state].filter(Boolean).join(', ') || null,
+        mandiName: row.location_address?.includes('Mandi') ? row.location_address : (row.farmer_district ? `${row.farmer_district} APMC Mandi` : null),
+        lat: row.listing_lat !== null && row.listing_lat !== undefined ? parseFloat(row.listing_lat) : (row.farmer_lat !== null && row.farmer_lat !== undefined ? parseFloat(row.farmer_lat) : null),
+        lng: row.listing_lng !== null && row.listing_lng !== undefined ? parseFloat(row.listing_lng) : (row.farmer_lng !== null && row.farmer_lng !== undefined ? parseFloat(row.farmer_lng) : null),
+      },
+      timestamps: {
+        orderedAt: row.created_at,
+        paidAt: row.paid_at || (rawPayment === 'paid' ? row.updated_at || row.created_at : null),
+        deliveredAt: rawStatus === 'delivered' ? row.updated_at : null,
+      },
+      timeline,
+    };
+
+    res.json({
+      success: true,
+      data: detail,
+      orderId: detail.orderId,
+      status: detail.status,
+      produce: detail.produce,
+      payment: detail.payment,
+      buyer: detail.buyer,
+      seller: detail.seller,
+      location: detail.location,
+      timestamps: detail.timestamps,
+    });
   } catch (err) {
     next(err);
   }
