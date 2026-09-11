@@ -487,7 +487,7 @@ const ListingService = {
     if (typeof window !== 'undefined') window.cropPhotos = cropPhotos;
 
     const resolvedPhoto = l.photo_url || 
-      (Array.isArray(l.images) && l.images[0] && l.images[0].startsWith('http') ? l.images[0] : null) || 
+      (Array.isArray(l.images) && l.images[0] && (l.images[0].startsWith('http') || l.images[0].startsWith('data:')) ? l.images[0] : null) || 
       cropPhotos[l.crop] || 
       cropPhotos.Onion;
 
@@ -588,7 +588,7 @@ const ListingService = {
           locationAddress: data.location,
           latitude: data.latitude,
           longitude: data.longitude,
-          images: data.images || ['🌱'],
+          images: data.images || (data.photo ? [data.photo] : ['🌱']),
         },
       });
       return this._mapListing(res.data);

@@ -2837,6 +2837,146 @@ window.App = {
     }
   },
 
+  async publishListing() {
+    let user = AuthService.getUser();
+    if (!user) {
+      this.showToast('⚠️ कृपया फसल लिस्ट करने के लिए लॉगिन करें / Please login first');
+      this.navigate('login');
+      return;
+    }
+    if (user.role === 'buyer') {
+      this.showToast('⚠️ खरीदार फसल नहीं बेच सकते / Buyers cannot sell produce');
+      this.navigate('buyer-dashboard');
+      return;
+    }
+
+    const errEl = document.getElementById('add-error');
+    if (errEl) {
+      errEl.classList.add('hidden');
+      errEl.textContent = '';
+    }
+
+    // 1. Collect form data from inputs & state
+    const crop = document.getElementById('add-crop')?.value || this.addForm.crop || 'Tomato';
+    const variety = (document.getElementById('add-variety')?.value || this.addForm.variety || 'Standard').trim();
+    const qty = parseFloat(document.getElementById('add-qty')?.value || this.addForm.qty || 0);
+    const unit = document.getElementById('add-unit')?.value || this.addForm.unit || 'kg';
+    const grade = document.getElementById('add-grade')?.value || this.addForm.grade || 'A';
+    const price = parseFloat(document.getElementById('add-price')?.value || this.addForm.price || 0);
+    const location = (document.getElementById('add-location')?.value || this.addForm.location || '').trim();
+    const desc = (document.getElementById('add-desc')?.value || this.addForm.desc || '').trim();
+    const photo = this.addForm.photo || (window.cropPhotos && window.cropPhotos[crop]) || 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&auto=format&fit=crop&q=80';
+
+    // 2. Validate
+    if (!crop) {
+      const msg = '⚠️ कृपया फसल चुनें / Please select a crop';
+      if (errEl) { errEl.textContent = msg; errEl.classList.remove('hidden'); }
+      this.showToast(msg);
+      this.addStep(1);
+      return;
+    }
+    if (!qty || isNaN(qty) || qty <= 0) {
+      const msg = '⚠️ कृपया मान्य मात्रा दर्ज करें / Enter valid quantity';
+      if (errEl) { errEl.textContent = msg; errEl.classList.remove('hidden'); }
+      this.showToast(msg);
+      this.addStep(1);
+      return;
+    }
+    if (!price || isNaN(price) || price <= 0) {
+      const msg = '⚠️ कृपया अपेक्षित भाव भरें / Enter valid asking price';
+      if (errEl) { errEl.textContent = msg; errEl.classList.remove('hidden'); }
+      this.showToast(msg);
+      this.addStep(2);
+      return;
+    }
+    if (!location) {
+      const msg = '⚠️ कृपया खेत/उठान का स्थान भरें / Enter pickup location';
+      if (errEl) { errEl.textContent = msg; errEl.classList.remove('hidden'); }
+      this.showToast(msg);
+      this.addStep(2);
+      return;
+    }
+
+    // 3. Button visual loading state
+    const submitBtn = document.querySelector('#add-step3 button.btn-primary') || document.querySelector('button[onclick*="publishListing"]');
+    const origBtnHTML = submitBtn ? submitBtn.innerHTML : '';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span class="spinner" style="width:18px;height:18px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:6px;"></span> <span>फसल लिस्ट हो रही है... / Publishing...</span>`;
+    }
+
+    try {
+      const cropHiMap = {
+        Tomato: 'टमाटर', Potato: 'आलू', Onion: 'प्याज', Wheat: 'गेहूं', Rice: 'चावल',
+        Maize: 'मक्का', Mustard: 'सरसों', Soybean: 'सोयाबीन', Cotton: 'कपास',
+        Garlic: 'लहसुन', Ginger: 'अदरक', 'Green Chilli': 'हरी मिर्च',
+        Mango: 'आम', Apple: 'सेब', Banana: 'केला', Brinjal: 'बैंगन',
+        Cauliflower: 'फूलगोभी', Cabbage: 'पत्तागोभी'
+      };
+      const emojiMap = {
+        Tomato: '🍅', Potato: '🥔', Onion: '🧅', Wheat: '🌾', Rice: '🌾',
+        Maize: '🌽', Mustard: '🌼', Soybean: '🌱', Cotton: '☁️',
+        Garlic: '🧄', Ginger: '🫚', 'Green Chilli': '🌶️',
+        Mango: '🥭', Apple: '🍎', Banana: '🍌', Brinjal: '🍆',
+        Cauliflower: '🥦', Cabbage: '🥬'
+      };
+
+      const listingData = {
+        farmerId: user.id,
+        crop,
+        cropHi: cropHiMap[crop] || crop,
+        emoji: emojiMap[crop] || '🌱',
+        variety,
+        quantity: qty,
+        unit,
+        grade,
+        askingPrice: price,
+        aiSuggestedPrice: this.addForm.aiSuggestedPrice || price,
+        description: desc,
+        location,
+        photo,
+        images: [photo],
+      };
+
+      await ListingService.create(listingData);
+
+      this.showToast('🎉 फसल सफलतापूर्वक लिस्ट हो गई! Produce listed successfully!');
+
+      // Reset wizard form
+      this.addForm = {
+        crop: 'Tomato',
+        variety: 'Hybrid Red',
+        qty: 500,
+        unit: 'kg',
+        grade: 'A',
+        price: 28,
+        location: '',
+        desc: '',
+        photo: null,
+        photoName: '',
+        readiness: 'immediate',
+        transport: 'farmgate',
+        aiSuggestedPrice: 28,
+      };
+
+      // Navigate to farmer-dashboard or marketplace
+      this.navigate('farmer-dashboard');
+    } catch (err) {
+      console.error('Error publishing listing:', err);
+      const errMsg = err.message || 'फसल लिस्ट करने में त्रुटि / Failed to publish listing';
+      if (errEl) {
+        errEl.textContent = `❌ ${errMsg}`;
+        errEl.classList.remove('hidden');
+      }
+      this.showToast(`❌ ${errMsg}`);
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origBtnHTML || `<span class="material-symbols-outlined">publish</span> 🌱 फसल लिस्ट करें / Publish`;
+      }
+    }
+  },
+
 
 
   // ── PRODUCE PHOTOS & COMMODITY RESOLVER ────────────────────

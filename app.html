@@ -1353,26 +1353,6 @@
           </div>
         </div>
 
-        <!-- AI Market Insights Card -->
-        <div id="mandi-ai-insights" class="mandi-ai-card">
-          <div class="mandi-ai-header">
-            <div class="mandi-ai-title-wrap">
-              <div class="mandi-ai-icon-bubble">
-                <i data-lucide="sparkles" style="width:16px;height:16px;color:#b45309;"></i>
-              </div>
-              <div>
-                <h3 class="mandi-ai-title">कृषि AI बाजार विश्लेषण / Market Intelligence</h3>
-                <p class="mandi-ai-subtitle">Real-time modal price advisory & opportunity detection</p>
-              </div>
-            </div>
-            <span class="mandi-ai-sim-badge">
-              <i data-lucide="zap" style="width:12px;height:12px;"></i> AI OPTIMIZED
-            </span>
-          </div>
-          <div id="mandi-ai-content" class="mandi-ai-grid">
-            <!-- Dynamically populated -->
-          </div>
-        </div>
 
         <!-- Mandi Price Table Card -->
         <div class="mandi-table-card">
@@ -2608,6 +2588,18 @@
           </div>
         </div>
 
+        <!-- Razorpay Test Mode Credentials Helper -->
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#1e40af;">
+          <div style="display:flex;align-items:center;gap:6px;font-weight:700;margin-bottom:4px;">
+            <span class="material-symbols-outlined" style="font-size:16px;color:#2563eb;">info</span>
+            <span>Razorpay Test Mode Helper:</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px;font-size:11.5px;color:#1e3a8a;">
+            <div>• <strong>Card:</strong> <code>4111 1111 1111 1111</code> · Expiry: <code>12/28</code> · CVV: <code>123</code> · OTP: <code>123456</code> (or click "Success")</div>
+            <div>• <strong>Netbanking (Instant):</strong> Select any bank (SBI / HDFC) & click <strong>"Success"</strong></div>
+          </div>
+        </div>
+
         <button id="buynow-submit-btn" type="button" class="btn btn-primary" style="width:100%;min-height:50px;font-size:16px;font-weight:800;background:linear-gradient(135deg, #16a34a, #15803d);box-shadow:0 4px 14px rgba(22,163,74,0.35);display:flex;align-items:center;justify-content:center;gap:8px;" onclick="App.proceedRazorpayPayment()">
           <span class="material-symbols-outlined">lock</span>
           <span>Pay Securely with Razorpay</span>
@@ -2664,8 +2656,8 @@
     }
   </script>
 
-  <script src="data.js?v=3.3"></script>
-  <script src="app.js?v=4.4"></script>
+  <script src="data.js?v=3.5"></script>
+  <script src="app.js?v=4.6"></script>
 </body>
 
 </html>
