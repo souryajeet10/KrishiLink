@@ -10,7 +10,7 @@ const {
 // GET /api/v1/market-prices
 const listMarketPrices = async (req, res, next) => {
   try {
-    const { page, limit, offset } = getPaginationParams(req);
+    const { page, limit, offset } = getPaginationParams(req, 100, 1000);
     const { commodity, state, district, lat, lng } = req.query;
 
     // Use multi-tier service (Redis Cache -> data.gov.in AGMARKNET -> PostgreSQL -> Demo)

@@ -22,7 +22,7 @@
     rel="stylesheet" />
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-  <link rel="stylesheet" href="styles.css?v=3.0" />
+  <link rel="stylesheet" href="styles.css?v=3.1" />
 </head>
 
 <body>
@@ -545,35 +545,6 @@
               <button class="btn btn-outline desktop-view-all-mandis-btn" onclick="App.navigate('mandi-prices')">
                 <span data-i18n="view_all_mandis">सभी 100 मंडियों के भाव देखें →</span>
               </button>
-            </div>
-          </div>
-
-          <!-- Column 2: KrishiLink AI Advisor -->
-          <div class="farmer-intel-col-ai">
-            <div class="section-header desktop-ai-header">
-              <h2 class="section-title" style="display:flex;align-items:center;gap:6px;">
-                <i data-lucide="sparkles" class="lucide-header-icon" style="color:#d97706;width:20px;height:20px;"></i>
-                <span data-i18n="ai_advisor">KrishiLink AI सलाहकार</span>
-              </h2>
-              <span class="demo-badge">SIMULATED</span>
-            </div>
-            <div class="ai-card" id="farmer-ai-card">
-              <div class="ai-card-inner-head" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-                <div class="ai-badge"><span class="material-symbols-outlined"
-                    style="font-size:14px;">auto_awesome</span><span data-i18n="ai_advisor">KrishiLink AI सलाहकार</span>
-                </div>
-                <span class="demo-badge">SIMULATED</span>
-              </div>
-              <div id="ai-insights-farmer" style="display:flex;flex-direction:column;gap:8px;">
-                <div
-                  style="background:rgba(255,255,255,0.6);border-radius:10px;padding:10px 12px;font-size:14px;color:var(--on-surface);display:flex;align-items:center;gap:8px;">
-                  <span style="color:#16a34a;display:inline-flex;"><i data-lucide="trending-up" style="width:18px;height:18px;"></i></span>टमाटर का भाव बढ़ रहा है – बेचने का सही समय!
-                </div>
-                <div
-                  style="background:rgba(255,255,255,0.6);border-radius:10px;padding:10px 12px;font-size:14px;color:var(--on-surface);display:flex;align-items:center;gap:8px;">
-                  <span style="color:#d97706;display:inline-flex;"><i data-lucide="lightbulb" style="width:18px;height:18px;"></i></span>आजादपुर मंडी में सबसे अधिक भाव – ₹2,250/क्विंटल
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -1372,7 +1343,7 @@
                 <i data-lucide="search" class="mandi-search-icon"></i>
                 <input type="text" id="mandi-search-input" placeholder="फसल या मंडी खोजें / Search..." oninput="App.filterMandiTable()" />
               </div>
-              <select id="mandi-state-filter" class="mandi-filter-select" onchange="App.filterMandiTable()">
+              <select id="mandi-state-filter" class="mandi-filter-select" onchange="App.onMandiStateChange(this.value)">
                 <option value="">सभी राज्य (All States)</option>
               </select>
               <div class="mandi-unit-pill">
@@ -2656,8 +2627,8 @@
     }
   </script>
 
-  <script src="data.js?v=3.5"></script>
-  <script src="app.js?v=4.6"></script>
+  <script src="data.js?v=3.6"></script>
+  <script src="app.js?v=4.9"></script>
 </body>
 
 </html>

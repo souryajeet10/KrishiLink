@@ -260,11 +260,11 @@ const AuthService = {
 const MarketService = {
   lastStatus: null,
 
-  async getMandiPrices(commodity = null, state = null) {
+  async getMandiPrices(commodity = null, state = null, limit = 300) {
     try {
-      const params = new URLSearchParams({ limit: '100' });
+      const params = new URLSearchParams({ limit: limit.toString() });
       if (commodity && commodity !== 'all') params.append('commodity', commodity);
-      if (state) params.append('state', state);
+      if (state && state !== 'all' && state !== '') params.append('state', state);
 
       const res = await apiRequest(`/market-prices?${params.toString()}`);
       const data = (res.data || []).map(p => ({

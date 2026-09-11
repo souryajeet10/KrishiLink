@@ -3006,9 +3006,15 @@ window.App = {
 
   // ── MANDI PRICES ───────────────────────────────────────────
   allMandiPrices: [],
+  mandiFilter: '',
+  mandiStateFilter: '',
 
-  async renderMandiPrices(filter = '') {
+  async renderMandiPrices(filter = '', state = '') {
     this.mandiFilter = filter;
+    if (state !== undefined && state !== null) {
+      this.mandiStateFilter = state;
+    }
+    const currentState = this.mandiStateFilter || '';
     const tbody = document.getElementById('mandi-table-body');
     const sourceBadge = document.getElementById('mandi-source-badge');
     const countBadge = document.getElementById('mandi-count-badge');
@@ -3018,12 +3024,12 @@ window.App = {
     this.updateMandiNav(user?.role || 'farmer');
 
     if (tbody) {
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:48px 16px;"><div class="spinner" style="margin:0 auto 10px;"></div><span style="font-size:13px;font-weight:600;color:var(--on-surface-variant);">भारत सरकार AGMARKNET सर्वर से मंडी भाव लोड हो रहे हैं... / Connecting to live APMC feed...</span></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:48px 16px;"><div class="spinner" style="margin:0 auto 10px;"></div><span style="font-size:13px;font-weight:600;color:var(--on-surface-variant);">${currentState ? currentState + ' ' : ''}भारत सरकार AGMARKNET सर्वर से मंडी भाव लोड हो रहे हैं... / Connecting to live APMC feed...</span></td></tr>`;
     }
     if (countBadge) countBadge.textContent = 'डेटा लोड हो रहा है...';
 
     try {
-      const res = await MarketService.getMandiPrices(filter || null);
+      const res = await MarketService.getMandiPrices(filter || null, currentState || null, 300);
       this.allMandiPrices = res.data || [];
       this.lastMandiFetchedAt = res.updatedAt || new Date().toISOString();
       const timeStr = this.formatFetchTime(this.lastMandiFetchedAt);
@@ -3055,13 +3061,21 @@ window.App = {
         badgeText.textContent = res.source === 'REDIS_CACHE' ? `CACHE SYNCED (${timeStr})` : `LIVE APMC (${timeStr})`;
       }
 
-      // Populate State filter dropdown dynamically from available records
+      // Populate State filter dropdown with complete nationwide APMC state list
       const stateSelect = document.getElementById('mandi-state-filter');
       if (stateSelect) {
-        const states = Array.from(new Set(this.allMandiPrices.map(p => p.state).filter(Boolean))).sort();
-        const currentSelected = stateSelect.value;
-        stateSelect.innerHTML = `<option value="">सभी राज्य (${states.length} States)</option>` +
-          states.map(s => `<option value="${s}" ${s === currentSelected ? 'selected' : ''}>${s}</option>`).join('');
+        const ALL_INDIAN_STATES = [
+          "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh",
+          "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand",
+          "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya",
+          "Mizoram", "Nagaland", "Odisha", "Pondicherry", "Punjab", "Rajasthan", "Sikkim",
+          "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
+          "NCT of Delhi"
+        ];
+        const returnedStates = Array.from(new Set(this.allMandiPrices.map(p => p.state).filter(Boolean)));
+        const combinedStates = Array.from(new Set([...ALL_INDIAN_STATES, ...returnedStates])).sort();
+        stateSelect.innerHTML = `<option value="">सभी राज्य (All India · ${combinedStates.length} States)</option>` +
+          combinedStates.map(s => `<option value="${s}" ${s === currentState ? 'selected' : ''}>${s}</option>`).join('');
       }
 
       // Render table rows using the filter function
@@ -3080,7 +3094,7 @@ window.App = {
         tbody.innerHTML = `
           <tr><td colspan="7" style="text-align:center;padding:32px 16px;">
             <p style="color:var(--error);font-size:13px;font-weight:700;margin-bottom:8px;">${err.message || 'भाव लोड करने में असमर्थ'}</p>
-            <button class="btn btn-outline" style="min-height:32px;font-size:12px;" onclick="App.renderMandiPrices('${filter}')">
+            <button class="btn btn-outline" style="min-height:32px;font-size:12px;" onclick="App.renderMandiPrices('${filter}', '${currentState}')">
               <i data-lucide="refresh-cw" style="width:14px;height:14px;"></i> पुनः प्रयास करें / Retry
             </button>
           </td></tr>`;
@@ -3091,18 +3105,27 @@ window.App = {
     }
   },
 
+  async onMandiStateChange(selectedState) {
+    this.mandiStateFilter = selectedState;
+    const tbody = document.getElementById('mandi-table-body');
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:48px 16px;"><div class="spinner" style="margin:0 auto 10px;"></div><span style="font-size:13px;font-weight:600;color:var(--on-surface-variant);">${selectedState ? selectedState + ' ' : ''}मंडी भाव लोड हो रहे हैं... / Connecting to live APMC feed...</span></td></tr>`;
+    }
+    await this.renderMandiPrices(this.mandiFilter || '', selectedState || '');
+  },
+
   filterMandiTable() {
     const tbody = document.getElementById('mandi-table-body');
     const countBadge = document.getElementById('mandi-count-badge');
     if (!tbody) return;
 
     const query = (document.getElementById('mandi-search-input')?.value || '').toLowerCase().trim();
-    const stateFilter = (document.getElementById('mandi-state-filter')?.value || '').trim();
+    const stateFilter = (document.getElementById('mandi-state-filter')?.value || '').trim().toLowerCase();
 
     let list = this.allMandiPrices || [];
 
     if (stateFilter) {
-      list = list.filter(p => p.state === stateFilter);
+      list = list.filter(p => p.state && (p.state.toLowerCase() === stateFilter || p.state.toLowerCase().includes(stateFilter)));
     }
     if (query) {
       list = list.filter(p =>
