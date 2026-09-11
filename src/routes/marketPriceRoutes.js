@@ -19,7 +19,7 @@ router.get(
   '/',
   validate([
     queryValidator('page').optional().isInt({ min: 1 }),
-    queryValidator('limit').optional().isInt({ min: 1, max: 200 }),
+    queryValidator('limit').optional().isInt({ min: 1, max: 1000 }),
     queryValidator('lat').optional().isFloat({ min: -90, max: 90 }),
     queryValidator('lng').optional().isFloat({ min: -180, max: 180 }),
   ]),
