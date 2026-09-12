@@ -6,6 +6,17 @@
 
 Built for the **Smart India Hackathon 2026** problem statement **PS 26132**.
 
+## 🚀 Live Demo
+
+> **[https://krishilink-production.up.railway.app/app.html](https://krishilink-production.up.railway.app/app.html)**
+
+Try the live demo with these test accounts:
+| Role | Phone | Password |
+|------|-------|----------|
+| 👨‍🌾 Farmer | `9876543210` | `farmer123` |
+| 🏪 Buyer | `9123456789` | `buyer123` |
+| ⚙️ Admin | `9000000001` | `admin123` |
+
 ---
 
 ## 🚜 The Problem
@@ -312,7 +323,7 @@ The current version focuses on demonstrating the core KrishiLink experience and 
 * [ ] Offline/low-connectivity support
 * [ ] Location-based market discovery
 * [ ] Secure transaction workflow
-* [ ] Production deployment
+* [x] Production deployment — **Live on Railway** 🚀
 
 ---
 
@@ -351,3 +362,5 @@ Add an appropriate open-source license before public production release.
 **From Information → To Action → To Better Decisions**
 
 </p>
+.
+
