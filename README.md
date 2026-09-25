@@ -1,366 +1,202 @@
 # 🌾 KrishiLink
 
-### Empowering Farmers with Better Market Access, Better Information & Better Decisions
+### Agricultural market information, produce discovery, and voice-assisted selling.
 
-**KrishiLink** is a farmer-first digital agriculture platform designed to simplify the process of **finding market prices, discovering buyers, comparing markets, and accessing agricultural information** through one easy-to-use interface.
+KrishiLink is a farmer-focused web application built by **Team Astra X** for **Smart India Hackathon 2026 · PS 26132**. It brings mandi prices, produce listings, offers, and order workflows into one multilingual interface.
 
-Built for the **Smart India Hackathon 2026** problem statement **PS 26132**.
+**[Open the live demo](https://krishilink-production.up.railway.app/app.html)**
 
-## 🚀 Live Demo
+> **Current status:** MVP / public demo. This README describes the checked-in HTML/CSS/JavaScript and Node.js implementation. Earlier Flutter/Dart and Python descriptions do not represent the current codebase.
 
-> **[https://krishilink-production.up.railway.app/app.html](https://krishilink-production.up.railway.app/app.html)**
+## Try the demo
 
-Try the live demo with these test accounts:
+Select a demo account on the login screen, or use these published test credentials:
+
 | Role | Phone | Password |
-|------|-------|----------|
-| 👨‍🌾 Farmer | `9876543210` | `farmer123` |
-| 🏪 Buyer | `9123456789` | `buyer123` |
-| ⚙️ Admin | `9000000001` | `admin123` |
+| --- | --- | --- |
+| Farmer | `9876543210` | `farmer123` |
+| Buyer | `9123456789` | `buyer123` |
+| Admin | `9000000001` | `admin123` |
 
----
+The public demo includes sample accounts, listings, and transactions. Its displayed values are demonstration data, not evidence of adoption or completed commercial activity.
 
-## 🚜 The Problem
+## App screenshots
 
-Farmers often face challenges such as:
+Captured from the live public farmer demo on **26 September 2026**. These are actual interface captures, not generated mockups. Market prices are snapshots; the captured feed reports cached data. Open an image to inspect it at full size.
 
-* 📉 Lack of clear and timely market-price information
-* 🤝 Difficulty finding suitable buyers
-* 🏪 Dependence on intermediaries and limited market visibility
-* 📱 Multiple disconnected agricultural platforms
-* 🗣️ Complex interfaces and language barriers
-* 📊 Difficulty converting available agricultural data into useful decisions
+### Farmer dashboard
 
-The problem is not simply the **absence of information** — it is the **fragmentation of information**.
+Quick actions for selling produce, comparing mandi rates, and managing orders, with a voice-selling entry point.
 
----
+![KrishiLink farmer dashboard](docs/screenshots/farmer-dashboard.jpg)
 
-## 💡 Our Solution
+### Mandi-price comparison
 
-KrishiLink brings essential agricultural information into **one simple, farmer-friendly platform**.
+Crop and state filters with minimum, maximum, and modal wholesale prices, plus source/freshness indicators.
 
-### With KrishiLink, farmers can:
+![KrishiLink mandi-price comparison](docs/screenshots/mandi-rates.jpg)
 
-| Feature                        | Description                                            |
-| ------------------------------ | ------------------------------------------------------ |
-| 💰 **Market Prices**           | View relevant agricultural commodity prices            |
-| 🤝 **Find Buyers**             | Discover potential buyers for produce                  |
-| 📍 **Market Discovery**        | Explore nearby and relevant markets                    |
-| 📊 **Price Comparison**        | Compare prices across markets                          |
-| 🎙️ **Voice-First UI**         | Interact using voice instead of relying only on typing |
-| 🌐 **Multilingual Support**    | Make information easier to understand                  |
-| 🏛️ **Government Information** | Access relevant agricultural schemes and resources     |
-| 🔎 **Smart Search**            | Find agricultural information quickly                  |
+### Produce marketplace
 
----
+Search and filter produce by crop and grade, inspect listing details, and access offer and purchase flows.
 
-## ⭐ What Makes KrishiLink Different?
+![KrishiLink produce marketplace](docs/screenshots/marketplace.jpg)
 
-KrishiLink is **not another standalone marketplace**.
+### Guided selling
 
-Existing agricultural platforms such as **e-NAM, MSAMB and Agmarknet** provide valuable data and services, but farmers may still need to navigate multiple systems.
+The crop form captures variety, quantity, units, and quality grade, with voice-assisted input available.
 
-KrishiLink focuses on the **farmer's journey**:
+![KrishiLink crop listing form](docs/screenshots/sell-produce.jpg)
 
-```text
-          FARMER
-             │
-             ▼
-     What should I sell?
-             │
-             ▼
-       What is the price?
-             │
-             ▼
-       Who can buy it?
-             │
-             ▼
-      Which market is better?
-             │
-             ▼
-       ┌─────────────┐
-       │  KRISHILINK  │
-       └─────────────┘
-             │
-             ▼
-     BETTER SELLING DECISION
-```
+## What the current application includes
 
-### Our approach
+- **Role-specific experiences:** farmer, buyer, and admin screens backed by profile and marketplace API routes.
+- **Market information:** AGMARKNET/data.gov.in price retrieval, commodity/state filtering, and cached or fallback responses.
+- **Produce workflows:** listings, incoming offers, order tracking, and notifications.
+- **Guided selling:** a three-step listing form with crop, quantity, quality, and pricing fields.
+- **Voice integration:** Gemini audio extraction, Whisper transcription fallback, Gemini text parsing, and a deterministic dictionary/regex fallback.
+- **Language choices:** Hindi, English, Hinglish, Marathi, Punjabi, and Gujarati, using client-side translations. Some screens retain bilingual labels.
+- **Payment integration code:** Razorpay order creation and signature verification, requiring configured credentials.
 
-**Existing ecosystem → KrishiLink → Simple farmer experience**
+## Technology stack
 
-Instead of replacing existing agricultural infrastructure, KrishiLink aims to make useful information **more accessible and actionable for farmers**.
+| Layer | Current implementation |
+| --- | --- |
+| Frontend | HTML, CSS, vanilla JavaScript (`app.html`, `app.js`, `styles.css`, `data.js`) |
+| Server | Node.js, Express 4, REST endpoints, `express-validator`, Multer |
+| Database | PostgreSQL through `pg`, SQL migrations; optional PostGIS support |
+| Cache | Redis through `ioredis`, with an in-memory cache fallback |
+| Authentication / notifications | Firebase Admin token-verification and FCM integration, plus prototype login and development-mode paths |
+| Market data | AGMARKNET via the data.gov.in Open Government Data API |
+| Voice processing | Gemini audio/text APIs, OpenAI Whisper transcription, dictionary/regex fallback |
+| Payments | Razorpay SDK and signature-verification endpoints |
+| Deployment | Railway; Node 20 Dockerfile also included |
 
----
+The repository does **not** currently contain a Flutter application, Dart frontend, or Python backend. Firebase is used for authentication/FCM integration, not as the marketplace database.
 
-## 🏗️ Technology Stack
-
-### Frontend
-
-* **Flutter**
-* Dart
-* Responsive farmer-friendly UI
-* Voice interaction
-
-### Backend
-
-* **REST API**
-* Python / backend services
-* Authentication & business logic
-
-### Database
-
-* **PostgreSQL**
-* Structured agricultural and marketplace data
-
-### Data & APIs
-
-KrishiLink is designed to integrate relevant agricultural information from sources such as:
-
-* e-NAM
-* MSAMB
-* Agmarknet
-* Government agricultural datasets
-* Data.gov.in
-* Other relevant agricultural APIs
-
----
-
-## 🔄 System Flow
+## Architecture
 
 ```text
-┌─────────────────────┐
-│       FARMER        │
-│   Mobile Application│
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│   Flutter Frontend  │
-│                     │
-│ Price | Buyer |     │
-│ Market | Voice      │
-└──────────┬──────────┘
-           │
-           │ REST API
-           ▼
-┌─────────────────────┐
-│       Backend       │
-│ Authentication      │
-│ Business Logic      │
-│ Data Processing     │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│     PostgreSQL      │
-│                     │
-│ Farmers             │
-│ Products            │
-│ Markets             │
-│ Buyers              │
-│ Price Data          │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│ External Data APIs  │
-│                     │
-│ e-NAM | MSAMB       │
-│ Agmarknet | Govt.   │
-└─────────────────────┘
+Browser: app.html + app.js + styles.css
+                 |
+                 v
+       Node.js / Express REST API
+       /api/v1 (also /api alias)
+                 |
+       +---------+-----------+
+       |                     |
+ PostgreSQL / pg        Redis / ioredis
+ profiles, listings,    cached market data
+ offers, orders
+       |
+       +-- AGMARKNET / data.gov.in
+       +-- Firebase Admin / FCM
+       +-- Gemini / Whisper
+       +-- Razorpay
 ```
 
----
+The server serves the web frontend and API together. Market data uses cache, upstream API, database, and demo fallback paths. Database connectivity failures can activate an in-memory demo store; Redis failures use a process-local cache. These fallback stores are not durable persistence.
 
-## 🎨 Design Philosophy
+## Run locally
 
-KrishiLink follows a **farmer-first UX approach**.
+Use **Node.js 20** (matching the Dockerfile) and npm. For persistent data, provision PostgreSQL; Redis is optional because the cache has an in-memory fallback.
 
-### Principles
+```sh
+git clone https://github.com/souryajeet10/KrishiLink.git
+cd KrishiLink
+npm ci
+```
 
-* 🟢 **Simple** — minimal steps to complete a task
-* 🎙️ **Voice-first** — reduce dependency on typing
-* 🌐 **Accessible** — designed for multilingual users
-* 👆 **Touch-friendly** — large buttons and clear actions
-* 📱 **Mobile-first** — optimized for smartphones
-* 🧑‍🌾 **Familiar** — agricultural terminology and recognizable icons
+Copy `.env.example` to `.env` using your editor or file manager. Set `DATABASE_URL` for your local database, and replace or omit placeholder integration credentials as appropriate. Do not commit `.env` or service-account keys.
 
----
+For a configured local PostgreSQL database:
 
-## 📱 Core Screens
+```sh
+npm run migrate
+npm run seed
+npm start
+```
 
-The application includes:
+Open **http://localhost:5173/app.html**. There is no separate frontend compilation step. `npm run dev` currently runs the same Node server as `npm start`; it does not enable hot reload.
 
-1. **Farmer Home**
-2. **Market Prices**
-3. **Commodity Search**
-4. **Buyer Discovery**
-5. **Market Comparison**
-6. **Nearby Markets**
-7. **Voice Assistant**
-8. **Government Schemes**
-9. **Farmer Profile**
-10. **Marketplace**
+Seeding populates demo data. Use a development database for these commands. The server also attempts migrations and demo seeding when a connected database has no produce listings.
 
----
+### Configuration
 
-## 📂 Project Structure
+See [`.env.example`](.env.example) for the template. Variables used by the current code include:
+
+| Variables | Purpose |
+| --- | --- |
+| `PORT`, `NODE_ENV` | Server port and runtime environment; default port is 5173 |
+| `DATABASE_URL` or `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` | PostgreSQL connection |
+| `PGSSL`, `PG_POOL_MAX` | Database TLS setting and pool sizing |
+| `REDIS_URL`, `REDIS_CACHE_TTL` | Redis connection and cache lifetime |
+| `GOOGLE_APPLICATION_CREDENTIALS` or `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` | Firebase Admin service-account configuration |
+| `FIREBASE_DEV_MODE` | Development/test token and messaging behavior |
+| `DATA_GOV_IN_API_KEY`, `AGMARKNET_RESOURCE_ID` | Government mandi-price feed |
+| `GEMINI_API_KEY`, `OPENAI_API_KEY` | Voice/audio parsing and transcription services |
+| `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` | Razorpay integration; set both when enabling payments |
+
+Not every integration is required to explore the prototype. Missing services may use documented fallbacks or leave their corresponding features unavailable. The example environment file includes placeholders, not usable credentials.
+
+## Repository structure
 
 ```text
 KrishiLink/
-│
-├── frontend/
-│   ├── lib/
-│   │   ├── screens/
-│   │   ├── widgets/
-│   │   ├── services/
-│   │   ├── models/
-│   │   └── main.dart
-│   └── pubspec.yaml
-│
-├── backend/
-│   ├── routes/
-│   ├── models/
-│   ├── services/
-│   ├── controllers/
-│   └── main.py
-│
-├── database/
-│   ├── schema/
-│   └── seed/
-│
-├── docs/
-│   ├── architecture/
-│   └── api/
-│
-├── assets/
-│   ├── images/
-│   └── icons/
-│
-└── README.md
+├── index.html                 # Landing page
+├── app.html                   # Application screens
+├── app.js                     # Browser interactions and API calls
+├── styles.css                 # Interface styles
+├── data.js                    # Client-side data and helpers
+├── server.js                  # Express entry point and static hosting
+├── src/
+│   ├── config/                # PostgreSQL, Redis, Firebase, mock database
+│   ├── controllers/           # Profiles, listings, offers, orders, etc.
+│   ├── middlewares/           # Authentication, validation, error handling
+│   ├── migrations/            # SQL migrations and demo seed
+│   ├── routes/                # REST routes
+│   ├── services/              # AGMARKNET, voice parsing, notifications
+│   └── utils/                 # Pagination helpers
+├── docs/screenshots/          # Captures of the public demo
+├── test_*.js                  # API and workflow checks
+├── .env.example
+├── Dockerfile
+├── railway.json
+└── package.json
 ```
 
----
+## Available checks
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-Make sure you have installed:
-
-* Flutter SDK
-* Dart SDK
-* Python 3.x
-* PostgreSQL
-* Git
-
-### Clone the repository
-
-```bash
-git clone https://github.com/YOUR-USERNAME/KrishiLink.git
-cd KrishiLink
+```sh
+npm test
+npm run test:api
+npm run test:e2e
+npm run test:razorpay
+npm run test:voice
+npm run migrate:status
 ```
 
-### Frontend
+Run workflow tests with development/test configuration and a disposable database: they exercise mutations such as creating listings, offers, and orders. Test commands are defined in `package.json`; their presence does not imply every external service has been verified on the public deployment.
 
-```bash
-cd frontend
-flutter pub get
-flutter run
-```
+## Deployment
 
-### Backend
+The current public demo runs on Railway. [`railway.json`](railway.json) starts the application with `npm run migrate && npm start` and checks `/api/health`. The [`Dockerfile`](Dockerfile) uses Node 20 and serves the frontend and backend from the same process.
 
-```bash
-cd backend
-pip install -r requirements.txt
-python main.py
-```
+## Current limits and next steps
 
-### Database
+- The dashboard labels its advisor **SIMULATED**. It should not be presented as a validated predictive pricing model.
+- Market responses can be live, cached, database-backed, or demo fallbacks. Check the source and timestamp shown in the UI.
+- Direct **e-NAM transaction gateway** integration is described in the app as upcoming; it is not a completed integration.
+- Authentication includes prototype password handling and development token fallbacks. Production authentication and authorization hardening remain necessary.
+- Payment and voice integrations are implemented in source, but require service credentials and end-to-end validation. Real settlement was not tested for these screenshots.
+- Further work includes durable behavior under service outages, broader regional-language testing, and low-connectivity support.
 
-Create a PostgreSQL database and configure the required environment variables.
+## Team and project context
 
-Example:
+**Team Astra X · Smart India Hackathon 2026 · Problem Statement 26132**
 
-```env
-DATABASE_URL=your_postgresql_connection_string
-API_BASE_URL=your_backend_url
-```
+KrishiLink focuses on turning fragmented agricultural information into a more accessible farmer workflow.
 
----
+## License
 
-## 🔐 Environment Variables
-
-Do not commit API keys, passwords, tokens, or other secrets.
-
-Create a `.env` file locally:
-
-```env
-DATABASE_URL=
-API_KEY=
-API_BASE_URL=
-```
-
-Add `.env` to `.gitignore`.
-
----
-
-## 🧪 Project Status
-
-**Current Stage:** MVP / Prototype
-
-The current version focuses on demonstrating the core KrishiLink experience and validating the farmer-first workflow.
-
-### Roadmap
-
-* [ ] Production-grade authentication
-* [ ] Real-time market-price integration
-* [ ] Buyer verification
-* [ ] Advanced farmer recommendations
-* [ ] More regional languages
-* [ ] Offline/low-connectivity support
-* [ ] Location-based market discovery
-* [ ] Secure transaction workflow
-* [x] Production deployment — **Live on Railway** 🚀
-
----
-
-## 🏆 Smart India Hackathon 2026
-
-**Problem Statement:** PS 26132
-
-**Team:** Team Astra X
-
-**Project:** KrishiLink
-
-KrishiLink aims to bridge the gap between **agricultural data and practical farmer decisions** by creating a simple, accessible and farmer-first digital experience.
-
----
-
-## 👥 Team
-
-### Team Astra X
-
-Building technology for a more connected agricultural ecosystem. 🌱
-
----
-
-## 📜 License
-
-This project is currently developed as part of **Smart India Hackathon 2026**.
-
-Add an appropriate open-source license before public production release.
-
----
-
-<p align="center">
-
-### 🌾 KrishiLink
-
-**From Information → To Action → To Better Decisions**
-
-</p>
-.
-
+`package.json` declares ISC. A standalone license file has not yet been added to this repository.
